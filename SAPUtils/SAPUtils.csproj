@@ -1,0 +1,258 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6D2772EF-3B90-4E54-AA48-7290815047CD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SAPUtils</RootNamespace>
+    <AssemblyName>SAPUtils</AssemblyName>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\SAPUtils.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Azure.Core, Version=1.35.0.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>..\packages\Azure.Core.1.35.0\lib\net472\Azure.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Azure.Identity, Version=1.10.3.0, Culture=neutral, PublicKeyToken=92742159e12e44c8, processorArchitecture=MSIL">
+      <HintPath>..\packages\Azure.Identity.1.10.3\lib\netstandard2.0\Azure.Identity.dll</HintPath>
+    </Reference>
+    <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.2.0.123\lib\net461\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Humanizer, Version=2.8.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Humanizer.Core.2.8.26\lib\netstandard2.0\Humanizer.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Data.SqlClient, Version=5.0.0.0, Culture=neutral, PublicKeyToken=23ec7fc2d6eaa4a5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.SqlClient.5.1.4\lib\net462\Microsoft.Data.SqlClient.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Identity.Client, Version=4.56.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Identity.Client.4.56.0\lib\net461\Microsoft.Identity.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Identity.Client.Extensions.Msal, Version=4.56.0.0, Culture=neutral, PublicKeyToken=0a613f4dd989e8ae, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Identity.Client.Extensions.Msal.4.56.0\lib\netstandard2.0\Microsoft.Identity.Client.Extensions.Msal.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Abstractions, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Abstractions.6.24.0\lib\net472\Microsoft.IdentityModel.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.6.24.0\lib\net472\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Logging.6.24.0\lib\net472\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocols, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Protocols.6.24.0\lib\net472\Microsoft.IdentityModel.Protocols.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Protocols.OpenIdConnect.6.24.0\lib\net472\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.6.24.0\lib\net472\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
+    <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SAPBusinessOneSDK">
+      <HintPath>..\..\..\..\..\Program Files (x86)\SAP\SAP Business One SDK\Lib\SAPBusinessOneSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.ConfigurationManager, Version=6.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Configuration.ConfigurationManager.6.0.1\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=6.24.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.6.24.0\lib\net472\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.FileSystem.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.FileSystem.AccessControl.5.0.0\lib\net461\System.IO.FileSystem.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory.Data, Version=1.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.Data.1.0.2\lib\net461\System.Memory.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.AccessControl.6.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.ProtectedData, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.ProtectedData.4.7.0\lib\net461\System.Security.Cryptography.ProtectedData.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Permissions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Permissions.6.0.0\lib\net461\System.Security.Permissions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="PublicFiles\Attributes\UserTables\UserTableFieldUserAttribute.cs" />
+    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.DataHandling.cs">
+      <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.ContextMenu.cs">
+      <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.cs" />
+    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.Events.cs">
+      <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.Initialize.cs">
+      <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Models\UserTables\IAuditableDate.cs" />
+    <Compile Include="PublicFiles\Models\UserTables\IAuditableUser.cs" />
+    <Compile Include="PublicFiles\Models\UserTables\ISoftDeletable.cs" />
+    <Compile Include="PublicFiles\Models\UserTables\IUserFieldValidValue.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\AddressUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\AlphaUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\BooleanUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\DateTimeUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\DateUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\MeasurementUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\MemoUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\NumericUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\PercentageUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\PhoneUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\PriceUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\PrimaryKeyStrategy.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\QuantityUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\RateUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\TimeUserTableFieldAttribute.cs" />
+    <Compile Include="PublicFiles\Attributes\UserTables\UserTableAttribute.cs" />
+    <Compile Include="PublicFiles\Exceptions\AddontNotInitializedException.cs" />
+    <Compile Include="PublicFiles\Exceptions\CodeNotSetException.cs" />
+    <Compile Include="PublicFiles\Exceptions\ItemAlreadyExistException.cs" />
+    <Compile Include="PublicFiles\Exceptions\ItemDoNotExistException.cs" />
+    <Compile Include="PublicFiles\Exceptions\UserTableAttributeNotFound.cs" />
+    <Compile Include="PublicFiles\Forms\UserForm.cs" />
+    <Compile Include="PublicFiles\Forms\UserForm.IForm.cs">
+      <DependentUpon>UserForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Forms\UserForm.Reflections.cs">
+      <DependentUpon>UserForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Models\Menu\MenuItem.cs" />
+    <Compile Include="PublicFiles\Models\UserTables\IAuditable.cs" />
+    <Compile Include="PublicFiles\Models\UserTables\IUserTableObjectModel.cs" />
+    <Compile Include="PublicFiles\Models\UserTables\UserTableObjectModel.cs">
+      <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PublicFiles\Utils\FormUtils.cs" />
+    <Compile Include="PublicFiles\Utils\ILogger.cs" />
+    <Compile Include="PublicFiles\Utils\SapColors.cs" />
+    <Compile Include="PublicFiles\Utils\TopMostDialog.cs" />
+    <Compile Include="SapAddon.cs" />
+    <Compile Include="SapAddon.FileGenerator.cs">
+      <DependentUpon>SapAddon.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SapAddon.Menu.cs">
+      <DependentUpon>SapAddon.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SapAddon.UserDefinedTables.cs">
+      <DependentUpon>SapAddon.cs</DependentUpon>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\Attributes\UserTables\IUserTable.cs" />
+    <Compile Include="_internalFiles\Internal\Attributes\UserTables\IUserTableField.cs" />
+    <Compile Include="_internalFiles\Internal\Attributes\UserTables\UserTableFieldTyped.cs">
+      <DependentUpon>IUserTableField.cs</DependentUpon>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\Enums\LogLevel.cs" />
+    <Compile Include="_internalFiles\Internal\Enums\Status.cs" />
+    <Compile Include="_internalFiles\Internal\Models\AuditableField.cs" />
+    <Compile Include="_internalFiles\Internal\Models\UserFieldValidValue.cs" />
+    <Compile Include="_internalFiles\Internal\Models\UserTableMetadataCache.cs" />
+    <Compile Include="_internalFiles\Internal\Repository\Repository.cs" />
+    <Compile Include="_internalFiles\Internal\SQL\CommonQueries.cs">
+      <DependentUpon>IQueries.cs</DependentUpon>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\SQL\CommonQueries.Abstract.cs">
+      <DependentUpon>CommonQueries.cs</DependentUpon>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\SQL\HanaQueries.cs">
+      <DependentUpon>IQueries.cs</DependentUpon>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\SQL\IQueries.cs" />
+    <Compile Include="_internalFiles\Internal\SQL\MSSQLQueries.cs">
+      <DependentUpon>IQueries.cs</DependentUpon>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\Utils\ConsoleLogger.cs" />
+    <Compile Include="_internalFiles\Internal\Utils\DummyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="_internalFiles\Internal\Utils\HitchIconClass.cs" />
+    <Compile Include="_internalFiles\Internal\Utils\Logger.cs" />
+    <Compile Include="_internalFiles\Internal\Utils\LoggerImpl.cs" />
+    <Compile Include="_internalFiles\Internal\Utils\LogSettings.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="PublicFiles\Enums\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105.The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Data.SqlClient.SNI.5.1.1\build\net462\Microsoft.Data.SqlClient.SNI.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+</Project>
