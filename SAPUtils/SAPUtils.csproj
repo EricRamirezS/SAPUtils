@@ -48,62 +48,92 @@
   </ItemGroup>  
   
   <ItemGroup>
-    <Compile Include="PublicFiles\Attributes\UserTables\UserTableFieldUserAttribute.cs" />
-    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.DataHandling.cs">
+      <Compile Include="Attributes\UserTables\AddressUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\AlphaUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\BooleanUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\DateTimeUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\DateUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\MeasurementUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\MemoUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\NumericUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\PercentageUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\PhoneUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\PriceUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\PrimaryKeyStrategy.cs"/>
+      <Compile Include="Attributes\UserTables\QuantityUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\RateUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\TimeUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\UserTableAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs"/>
+      <Compile Include="Exceptions\AddontNotInitializedException.cs"/>
+      <Compile Include="Exceptions\CodeNotSetException.cs"/>
+      <Compile Include="Exceptions\ItemAlreadyExistException.cs"/>
+      <Compile Include="Exceptions\ItemDoNotExistException.cs"/>
+      <Compile Include="Exceptions\UserTableAttributeNotFound.cs"/>
+      <Compile Include="Forms\ChangeTrackerMatrixForm.ContextMenu.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.ContextMenu.cs">
+      <Compile Include="Forms\ChangeTrackerMatrixForm.cs"/>
+      <Compile Include="Forms\ChangeTrackerMatrixForm.DataHandling.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.cs" />
-    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.Events.cs">
+      <Compile Include="Forms\ChangeTrackerMatrixForm.Events.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Forms\ChangeTrackerMatrixForm.Initialize.cs">
+      <Compile Include="Forms\ChangeTrackerMatrixForm.Initialize.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Models\UserTables\IAuditableDate.cs" />
-    <Compile Include="PublicFiles\Models\UserTables\IAuditableUser.cs" />
-    <Compile Include="PublicFiles\Models\UserTables\ISoftDeletable.cs" />
-    <Compile Include="PublicFiles\Models\UserTables\IUserFieldValidValue.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\AddressUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\AlphaUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\BooleanUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\DateTimeUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\DateUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\MeasurementUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\MemoUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\NumericUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\PercentageUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\PhoneUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\PriceUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\PrimaryKeyStrategy.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\QuantityUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\RateUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\TimeUserTableFieldAttribute.cs" />
-    <Compile Include="PublicFiles\Attributes\UserTables\UserTableAttribute.cs" />
-    <Compile Include="PublicFiles\Exceptions\AddontNotInitializedException.cs" />
-    <Compile Include="PublicFiles\Exceptions\CodeNotSetException.cs" />
-    <Compile Include="PublicFiles\Exceptions\ItemAlreadyExistException.cs" />
-    <Compile Include="PublicFiles\Exceptions\ItemDoNotExistException.cs" />
-    <Compile Include="PublicFiles\Exceptions\UserTableAttributeNotFound.cs" />
-    <Compile Include="PublicFiles\Forms\UserForm.cs" />
-    <Compile Include="PublicFiles\Forms\UserForm.IForm.cs">
+      <Compile Include="Forms\UserForm.cs"/>
+      <Compile Include="Forms\UserForm.IForm.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Forms\UserForm.Reflections.cs">
+      <Compile Include="Forms\UserForm.Reflections.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Models\Menu\MenuItem.cs" />
-    <Compile Include="PublicFiles\Models\UserTables\IAuditable.cs" />
-    <Compile Include="PublicFiles\Models\UserTables\IUserTableObjectModel.cs" />
-    <Compile Include="PublicFiles\Models\UserTables\UserTableObjectModel.cs">
+      <Compile Include="Models\Menu\MenuItem.cs"/>
+      <Compile Include="Models\UserTables\IAuditable.cs"/>
+      <Compile Include="Models\UserTables\IAuditableDate.cs"/>
+      <Compile Include="Models\UserTables\IAuditableUser.cs"/>
+      <Compile Include="Models\UserTables\ISoftDeletable.cs"/>
+      <Compile Include="Models\UserTables\IUserFieldValidValue.cs"/>
+      <Compile Include="Models\UserTables\IUserTableObjectModel.cs"/>
+      <Compile Include="Models\UserTables\UserTableObjectModel.cs">
       <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
     </Compile>
-    <Compile Include="PublicFiles\Utils\FormUtils.cs" />
-    <Compile Include="PublicFiles\Utils\ILogger.cs" />
-    <Compile Include="PublicFiles\Utils\SapColors.cs" />
-    <Compile Include="PublicFiles\Utils\TopMostDialog.cs" />
+      <Compile Include="Utils\FormUtils.cs"/>
+      <Compile Include="Utils\ILogger.cs"/>
+      <Compile Include="Utils\SapColors.cs"/>
+      <Compile Include="Utils\TopMostDialog.cs"/>
+      <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs"/>
+      <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs"/>
+      <Compile Include="__Internal\Attributes\UserTables\UserTableFieldTyped.cs">
+          <DependentUpon>IUserTableField.cs</DependentUpon>
+      </Compile>
+      <Compile Include="__Internal\Enums\LogLevel.cs"/>
+      <Compile Include="__Internal\Enums\Status.cs"/>
+      <Compile Include="__Internal\Models\AuditableField.cs"/>
+      <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
+      <Compile Include="__Internal\Models\UserTableMetadataCache.cs"/>
+      <Compile Include="__Internal\Repository\Repository.cs"/>
+      <Compile Include="__Internal\SQL\CommonQueries.Abstract.cs">
+          <DependentUpon>CommonQueries.cs</DependentUpon>
+      </Compile>
+      <Compile Include="__Internal\SQL\CommonQueries.cs">
+          <DependentUpon>IQueries.cs</DependentUpon>
+      </Compile>
+      <Compile Include="__Internal\SQL\HanaQueries.cs">
+          <DependentUpon>IQueries.cs</DependentUpon>
+      </Compile>
+      <Compile Include="__Internal\SQL\IQueries.cs"/>
+      <Compile Include="__Internal\SQL\MSSQLQueries.cs">
+          <DependentUpon>IQueries.cs</DependentUpon>
+      </Compile>
+      <Compile Include="__Internal\Utils\ConsoleLogger.cs"/>
+      <Compile Include="__Internal\Utils\DummyForm.cs"/>
+      <Compile Include="__Internal\Utils\HitchIconClass.cs"/>
+      <Compile Include="__Internal\Utils\Logger.cs"/>
+      <Compile Include="__Internal\Utils\LoggerImpl.cs"/>
+      <Compile Include="__Internal\Utils\LogSettings.cs"/>
     <Compile Include="SapAddon.cs" />
     <Compile Include="SapAddon.FileGenerator.cs">
       <DependentUpon>SapAddon.cs</DependentUpon>
@@ -115,41 +145,9 @@
     <Compile Include="SapAddon.UserDefinedTables.cs">
       <DependentUpon>SapAddon.cs</DependentUpon>
     </Compile>
-    <Compile Include="_internalFiles\Internal\Attributes\UserTables\IUserTable.cs" />
-    <Compile Include="_internalFiles\Internal\Attributes\UserTables\IUserTableField.cs" />
-    <Compile Include="_internalFiles\Internal\Attributes\UserTables\UserTableFieldTyped.cs">
-      <DependentUpon>IUserTableField.cs</DependentUpon>
-    </Compile>
-    <Compile Include="_internalFiles\Internal\Enums\LogLevel.cs" />
-    <Compile Include="_internalFiles\Internal\Enums\Status.cs" />
-    <Compile Include="_internalFiles\Internal\Models\AuditableField.cs" />
-    <Compile Include="_internalFiles\Internal\Models\UserFieldValidValue.cs" />
-    <Compile Include="_internalFiles\Internal\Models\UserTableMetadataCache.cs" />
-    <Compile Include="_internalFiles\Internal\Repository\Repository.cs" />
-    <Compile Include="_internalFiles\Internal\SQL\CommonQueries.cs">
-      <DependentUpon>IQueries.cs</DependentUpon>
-    </Compile>
-    <Compile Include="_internalFiles\Internal\SQL\CommonQueries.Abstract.cs">
-      <DependentUpon>CommonQueries.cs</DependentUpon>
-    </Compile>
-    <Compile Include="_internalFiles\Internal\SQL\HanaQueries.cs">
-      <DependentUpon>IQueries.cs</DependentUpon>
-    </Compile>
-    <Compile Include="_internalFiles\Internal\SQL\IQueries.cs" />
-    <Compile Include="_internalFiles\Internal\SQL\MSSQLQueries.cs">
-      <DependentUpon>IQueries.cs</DependentUpon>
-    </Compile>
-    <Compile Include="_internalFiles\Internal\Utils\ConsoleLogger.cs" />
-    <Compile Include="_internalFiles\Internal\Utils\DummyForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="_internalFiles\Internal\Utils\HitchIconClass.cs" />
-    <Compile Include="_internalFiles\Internal\Utils\Logger.cs" />
-    <Compile Include="_internalFiles\Internal\Utils\LoggerImpl.cs" />
-    <Compile Include="_internalFiles\Internal\Utils\LogSettings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="PublicFiles\Enums\" />
+      <Folder Include="Enums\"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.35.0" />

@@ -1,0 +1,23 @@
+using System;
+
+// ReSharper disable UnusedType.Global
+
+namespace SAPUtils.Exceptions {
+    /// <summary>
+    /// Represents an exception that is thrown when an attempt is made to use an add-on
+    /// that has not been properly initialized.
+    /// </summary>
+    /// <remarks>
+    /// This exception is specifically used to indicate that the required initialization process
+    /// for an add-on has not been completed before attempting to execute its functionality.
+    /// </remarks>
+    /// <seealso cref="System.Exception"/>
+    public class AddontNotInitializedException : Exception {
+        /// <summary>
+        /// Represents an exception that is thrown when an attempt is made to use an add-on
+        /// that has not been properly initialized.
+        /// </summary>
+        public AddontNotInitializedException() : base(
+            "El add-on no ha sido inicializado, ") { }
+    }
+}

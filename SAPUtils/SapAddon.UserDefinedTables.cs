@@ -5,15 +5,30 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using SAPbobsCOM;
+using SAPUtils.__Internal.Attributes.UserTables;
+using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
-using SAPUtils.Internal.Attributes.UserTables;
-using SAPUtils.Internal.Models;
 using SAPUtils.Models.UserTables;
+using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 
 namespace SAPUtils {
+    /// <summary>
+    /// Represents the main SAP AddOn class used for initializing and managing the connection
+    /// and interactions with SAP Business One's COM objects.
+    /// </summary>
     public partial class SapAddon {
+
+        private static readonly Type UserTableObjectModelType = typeof(IUserTableObjectModel);
         internal bool IsHana => Company.DbServerType == BoDataServerTypes.dst_HANADB;
 
+        /// <summary>
+        /// Initializes user-defined table data within SAP Business One by processing the provided table types,
+        /// creating user tables and their associated fields as defined by attributes.
+        /// </summary>
+        /// <param name="tables">An array of <see cref="Type"/> objects representing user-defined table classes to be initialized.</param>
+        /// <remarks>
+        /// Types must implement <see cref="IUserTableObjectModel"/> interface and be decorated with <see cref="UserTableAttribute"/>.
+        /// </remarks>
         public void InitializeUserData(Type[] tables) {
             foreach (Type table in tables) {
                 Logger.Trace("Processing table: {0}", table.Name);
@@ -21,8 +36,7 @@ namespace SAPUtils {
 
                 if (!ValidateFields(table)) continue;
 
-                UserTableAttribute userTable =
-                    (UserTableAttribute)table.GetCustomAttributes(typeof(UserTableAttribute), true).First();
+                IUserTable userTable = (IUserTable)table.GetCustomAttributes(typeof(UserTableAttribute), true).First();
 
                 Logger.Trace("Creating user table: {0}", userTable.Name);
                 CreateUserTable(userTable.Name, userTable.Description);
@@ -168,7 +182,7 @@ namespace SAPUtils {
                 }
 
                 if (validValues != null && validValues.Count > 0) {
-                    foreach (UserFieldValidValue validValue in validValues) {
+                    foreach (IUserFieldValidValue validValue in validValues) {
                         userFieldsMd.ValidValues.Value = validValue.Value;
                         userFieldsMd.ValidValues.Description = validValue.Description;
                         userFieldsMd.ValidValues.Add();
@@ -201,23 +215,24 @@ namespace SAPUtils {
             Logger.Trace("Verifying if field {0}.{1} already exist", tableName, fieldName);
             try {
                 recordset = Company.GetBusinessObject(BoObjectTypes.BoRecordset) as Recordset;
-                recordset.DoQuery(string.Format(IsHana
-                        ? @"SELECT '0' AS ""IGNORE"" FROM CUFD WHERE ""TableID"" = '@{0}' AND ""AliasID"" = '{1}'"
-                        : "SELECT NULL FROM CUFD WHERE TableId = '@{0}' AND AliasId = '{1}'",
-                    tableName, fieldName));
-                return recordset.RecordCount > 0;
+                if (recordset != null) {
+                    recordset.DoQuery(string.Format(IsHana
+                            ? @"SELECT '0' AS ""IGNORE"" FROM CUFD WHERE ""TableID"" = '@{0}' AND ""AliasID"" = '{1}'"
+                            : "SELECT NULL FROM CUFD WHERE TableId = '@{0}' AND AliasId = '{1}'",
+                        tableName, fieldName));
+                    return recordset.RecordCount > 0;
+                }
             }
             finally {
                 if (recordset != null) Marshal.ReleaseComObject(recordset);
                 GC.Collect();
             }
+            return false;
         }
-
-        private static readonly Type userTableObjectModelType = typeof(IUserTableObjectModel);
 
         private bool ValidateTable(Type table) {
             Logger.Trace("Verifying table {0} implements UserTableObjectModel", table.Name);
-            if (!userTableObjectModelType.IsAssignableFrom(table)) {
+            if (!UserTableObjectModelType.IsAssignableFrom(table)) {
                 Logger.Error("{0} is not assignable From IUserTableObjectModel", table.Name);
                 return false;
             }

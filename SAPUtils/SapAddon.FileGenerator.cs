@@ -7,6 +7,10 @@ using System.Xml.Linq;
 
 namespace SAPUtils {
     public partial class SapAddon {
+        /// <summary>
+        /// Generates the necessary setup files for the specified SAP addon based on the provided addon information.
+        /// </summary>
+        /// <param name="addonInformation">An object containing details about the SAP addon for which the setup files need to be generated.</param>
         public static void GenerateSetupFiles(AddonInformation addonInformation) {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string csprojPath = Directory.GetFiles(baseDir, "*.csproj", SearchOption.AllDirectories)
@@ -28,8 +32,8 @@ namespace SAPUtils {
             string platformFlag = addonInformation.X64 ? "X" : "N";
             string batFileName = addonInformation.X64 ? "Buildx64.bat" : "Buildx86.bat";
 
-            string batPath = Path.Combine(projectDir, batFileName);
-            string issPath = Path.Combine(projectDir, $"{addonInformation.AddonName}.iss");
+            string batPath = Path.Combine(projectDir ?? string.Empty, batFileName);
+            string issPath = Path.Combine(projectDir ?? string.Empty, $"{addonInformation.AddonName}.iss");
 
             string batContent = $@"
 chcp 65001 >nul
@@ -100,7 +104,7 @@ EXIT /b 1
 ";
 
             File.WriteAllText(batPath, batContent.Trim(), Encoding.UTF8);
-            
+
             string filesSection = string.Join("\n", addonInformation.Files.Select(f => $"Source: {f.Source}; DestDir: {{app}}{f.DestinationDir}"));
             string dirsSection = string.Join("\n", addonInformation.Dirs.Select(d => $"Name: \"{{app}}\\{d}\""));
 
@@ -117,9 +121,9 @@ AppName={addonInformation.AddonName}
 VersionInfoVersion={addonInformation.Version}
 AppPublisher={addonInformation.PartnerNamespace}
 AppVerName={addonInformation.AddonName} {addonInformation.Version}
-AppPublisherURL={addonInformation.AppPublisherURL}
-AppSupportURL={addonInformation.AppSupportURL}
-AppUpdatesURL={addonInformation.AppUpdatesURL}
+AppPublisherURL={addonInformation.AppPublisherUrl}
+AppSupportURL={addonInformation.AppSupportUrl}
+AppUpdatesURL={addonInformation.AppUpdatesUrl}
 DefaultDirName={{code:GetDefaultAddOnDir}}
 OutputBaseFileName=Setup
 DisableDirPage=true
@@ -346,12 +350,10 @@ end;
 
             Console.WriteLine($"Archivos generados:\n{batPath}\n{issPath}");
         }
-        
-        private static string SearchCsprojUpwards(string startDir)
-        {
+
+        private static string SearchCsprojUpwards(string startDir) {
             DirectoryInfo dir = new DirectoryInfo(startDir);
-            while (dir != null)
-            {
+            while (dir != null) {
                 FileInfo csproj = dir.GetFiles("*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
                 if (csproj != null)
                     return csproj.FullName;
@@ -362,19 +364,102 @@ end;
         }
     }
 
+    /// <summary>
+    /// Represents metadata and configuration information required for an SAP add-on setup process.
+    /// </summary>
     public class AddonInformation {
+        /// <summary>
+        /// Gets or sets the name of the partner associated with the add-on.
+        /// </summary>
         public string PartnerName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the partner namespace associated with the addon.
+        /// This property is intended to represent the namespace
+        /// under which the partner's functionality is encapsulated.
+        /// </summary>
         public string PartnerNamespace { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the add-on.
+        /// </summary>
         public string AddonName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the version information related to the SAP Addon.
+        /// </summary>
+        /// <remarks>
+        /// The property represents the versioning details of the SAP Addon,
+        /// providing a way to identify its current version.
+        /// It can be utilized to track changes or updates within the addon functionality.
+        /// </remarks>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Represents a property indicating whether the add-on is built for a 64-bit architecture.
+        /// </summary>
         public bool X64 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the contact information associated with an add-on.
+        /// </summary>
+        /// <remarks>
+        /// The ContactData property is intended to store details regarding the contact
+        /// for the SAP add-on, which could include relevant communication information
+        /// related to the add-on's support or development team.
+        /// </remarks>
         public string ContactData { get; set; }
+
+        /// <summary>
+        /// Gets or sets a collection of file mappings where each entry consists of a source file path and its corresponding destination directory.
+        /// </summary>
+        /// <remarks>
+        /// This property is intended to manage and store pairs of source file locations and their respective target directories,
+        /// facilitating file copying or organization operations.
+        /// </remarks>
         public List<(string Source, string DestinationDir)> Files { get; set; }
+
+        /// <summary>
+        /// Gets or sets an array of directory paths.
+        /// </summary>
         public string[] Dirs { get; set; } = Array.Empty<string>();
-        public string AppPublisherURL { get; set; }
-        public string AppSupportURL { get; set; }
-        public string AppUpdatesURL { get; set; }
-        public string BeveledLabel {get; set;}
+
+        /// <summary>
+        /// Gets or sets the URL of the application publisher.
+        /// </summary>
+        public string AppPublisherUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL for application support.
+        /// This property provides the link to access resources or support materials
+        /// related to the application.
+        /// </summary>
+        public string AppSupportUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL for application updates.
+        /// </summary>
+        /// <remarks>
+        /// This property represents the location from which updates for the application can be retrieved.
+        /// The value should be a valid URL pointing to the update source, such as a web server or cloud-hosted update repository.
+        /// </remarks>
+        public string AppUpdatesUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the value of the BeveledLabel property.
+        /// </summary>
+        /// <remarks>
+        /// The BeveledLabel property is designed to hold a string value that represents a specific label
+        /// with a beveled appearance. This property can be used to assign or retrieve relevant label
+        /// information within the context of the SAPUtils namespace.
+        /// </remarks>
+        public string BeveledLabel { get; set; }
+
+        /// <summary>
+        /// Represents the registry information used for storing and retrieving settings
+        /// related to the SAP Addon. This property provides access to registry-specific details
+        /// essential for managing configuration and integration.
+        /// </summary>
         public string Registry { get; set; }
     }
 }
