@@ -17,7 +17,6 @@ namespace SAPUtils.Attributes.UserTables {
     public abstract class UserTableFieldAttributeBase : Attribute, IUserTableField {
 
         private string _linkedTable;
-        private Type _linkedTableType;
 
         private string[] _validValuePairs;
 
@@ -35,10 +34,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// The type of the linked table, which corresponds to the target user table.
         /// </value>
         /// <seealso cref="UserTableFieldAttributeBase" />
-        public Type LinkedTableType
-        {
-            set => _linkedTableType = value;
-        }
+        public Type LinkedTableType { get; set; }
 
         /// <inheritdoc />
         public virtual string Name { get; set; }
@@ -95,8 +91,8 @@ namespace SAPUtils.Attributes.UserTables {
             get
             {
                 if (_linkedTable != null) return _linkedTable;
-                if (_linkedTableType == null) return null;
-                IUserTable attr = UserTableMetadataCache.GetUserTableAttribute(_linkedTableType);
+                if (LinkedTableType == null) return null;
+                IUserTable attr = UserTableMetadataCache.GetUserTableAttribute(LinkedTableType);
                 return attr?.Name;
             }
             set => _linkedTable = value;
