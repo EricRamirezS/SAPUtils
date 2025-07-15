@@ -27,8 +27,6 @@ namespace SAPUtils.Models.UserTables {
         internal DateTime OriginalCreatedAt { get; private set; }
         internal int OriginalCreatedBy { get; private set; }
 
-        private static ILogger Log => Logger.Instance;
-
         /// <inheritdoc />
         public abstract string Code { get; set; }
 
@@ -56,15 +54,16 @@ namespace SAPUtils.Models.UserTables {
         public static List<T> GetAll<T>() where T : IUserTableObjectModel, new() {
             List<T> data = new List<T>();
             Type type = typeof(T);
-            Log.Debug("Fetching All {0} with Code: {1}", type.FullName);
+            ILogger log = Logger.Instance;
+            log.Debug("Fetching All {0} with Code: {1}", type.FullName);
 
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
             if (userTable == null) {
-                Log.Error("UserTableAttribute not found in {0}", type.FullName);
+                log.Error("UserTableAttribute not found in {0}", type.FullName);
                 return data;
             }
 
-            Log.Debug("Fetching all {0} from table {1}", type.FullName, userTable.Name);
+            log.Debug("Fetching all {0} from table {1}", type.FullName, userTable.Name);
 
             string tableName = userTable.Name;
             Recordset rs = null;
@@ -94,11 +93,12 @@ namespace SAPUtils.Models.UserTables {
             return data;
         }
         private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T item) where T : IUserTableObjectModel, new() {
+            ILogger log = Logger.Instance;
             foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(type)) {
                 string fieldName = string.IsNullOrWhiteSpace(userTableField.Name)
                     ? propertyInfo.Name
                     : userTableField.Name;
-                Log.Trace("Processing field: {0}.{1}", tableName, fieldName);
+                log.Trace("Processing field: {0}.{1}", tableName, fieldName);
                 if (userTableField is DateTimeUserTableFieldAttribute dtUserTableField) {
                     Field date = fields.Item($"U_{fieldName}Date");
                     Field time = fields.Item($"U_{fieldName}Time");
@@ -111,7 +111,7 @@ namespace SAPUtils.Models.UserTables {
                 }
                 else {
                     Field field = fields.Item($"U_{fieldName}");
-                    Log.Trace("Processing field: {0}.{1} = {2}", tableName, fieldName, field.Value);
+                    log.Trace("Processing field: {0}.{1} = {2}", tableName, fieldName, field.Value);
                     if (field.IsNull() == BoYesNoEnum.tNO) {
                         propertyInfo.SetValue(item, userTableField.ParseValue(field.Value));
                     }
@@ -148,24 +148,25 @@ namespace SAPUtils.Models.UserTables {
         /// </returns>
         public static bool Get<T>(string code, out T item) where T : IUserTableObjectModel, new() {
             Type type = typeof(T);
-            Log.Debug("Fetching {0} with Code: {1}", type.FullName, code);
+            ILogger log = Logger.Instance;
+            log.Debug("Fetching {0} with Code: {1}", type.FullName, code);
             item = default;
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
             if (userTable == null) {
-                Log.Error("UserTableAttribute not found in {0}", type.FullName);
+                log.Error("UserTableAttribute not found in {0}", type.FullName);
                 return false;
             }
 
-            Log.Debug("Fetching {0} from table {1} with Code: {2}", type.FullName, userTable.Name, code);
+            log.Debug("Fetching {0} from table {1} with Code: {2}", type.FullName, userTable.Name, code);
 
             string tableName = userTable.Name;
             UserTable table = SapAddon.Instance().Company.UserTables.Item(tableName);
             if (!table.GetByKey(code)) {
-                Log.Info("{0} from table {1} not found with Code: {2}", type.FullName, tableName, code);
+                log.Info("{0} from table {1} not found with Code: {2}", type.FullName, tableName, code);
                 return false;
             }
 
-            Log.Debug("{0} from table {1} found in {0}, populating properties...", type.FullName, tableName, code);
+            log.Debug("{0} from table {1} found in {0}, populating properties...", type.FullName, tableName, code);
             item = new T {
                 Code = table.Code,
                 Name = table.Name,
@@ -173,7 +174,7 @@ namespace SAPUtils.Models.UserTables {
 
             PopulateFields(table.UserFields.Fields, type, tableName, ref item);
 
-            Log.Trace("{0} successfully populated for Code: {1}", type.FullName, code);
+            log.Trace("{0} successfully populated for Code: {1}", type.FullName, code);
             return true;
         }
     }

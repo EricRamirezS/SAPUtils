@@ -46,7 +46,7 @@ namespace SAPUtils.Forms {
                 Application.SetStatusBarMessage("Error al agregar menú contextual: " + ex.Message, BoMessageTime.bmt_Short);
             }
         }
-        private static void RemoveContextMenuItems() {
+        private void RemoveContextMenuItems() {
             Menus menus = Application.Menus;
 
             if (menus.Exists("My_AddRow")) {

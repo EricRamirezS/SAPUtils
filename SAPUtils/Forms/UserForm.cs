@@ -52,12 +52,14 @@ namespace SAPUtils.Forms {
         /// <summary>
         /// Gets the current SAP Business One Application instance.
         /// </summary>
-        static protected Application Application => SapAddon.Instance().Application;
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        protected Application Application => SapAddon.Instance().Application;
 
         /// <summary>
         /// Logger instance for recording form-related events and errors.
         /// </summary>
-        static protected ILogger Logger => SapAddon.Instance().Logger;
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        protected ILogger Logger => SapAddon.Instance().Logger;
 
         /// <summary>
         /// Loads an XML-based form definition into the SAP Business One application environment.

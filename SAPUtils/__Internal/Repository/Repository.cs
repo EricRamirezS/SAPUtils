@@ -62,7 +62,8 @@ namespace SAPUtils.__Internal.Repository {
         /// of the SAP Business One application. It is typically used to handle company-level
         /// configurations and data operations.
         /// </remarks>
-        private static Company Company => SapAddon.Instance().Company;
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private Company Company => SapAddon.Instance().Company;
 
         /// <summary>
         /// Retrieves the next available integer code for a specified user-defined table in the database.
