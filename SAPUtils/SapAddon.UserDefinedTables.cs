@@ -131,7 +131,7 @@ namespace SAPUtils {
                 fieldInfo.SubType,
                 fieldInfo.Mandatory,
                 fieldInfo.Size,
-                fieldInfo.DefaultValue.ToString(),
+                fieldInfo.DefaultValue?.ToString(),
                 fieldInfo.ValidValues,
                 fieldInfo.LinkedSystemObject,
                 fieldInfo.LinkedTable,
