@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using SAPbobsCOM;
 using SAPUtils.Attributes.UserTables;
 
@@ -5,6 +6,7 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
     /// <summary>
     /// Defines the contract for a SAP Business One user-defined table.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     internal interface IUserTable {
         /// <summary>
         /// Gets the name of the user-defined table in SAP Business One.

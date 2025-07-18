@@ -28,6 +28,8 @@ namespace SAPUtils.Attributes.UserTables {
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class DateTimeFieldAttribute : UserTableFieldAttributeBase, IUserTableField<DateTime?> {
 
         private string _dateDescription;

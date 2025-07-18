@@ -21,6 +21,7 @@ namespace SAPUtils.Forms {
                         popupMenu.SubMenus.AddEx(creationParams);
                     }
                 }
+                // ReSharper disable once InvertIf, Kept for Readability
                 if (_userDeleteContextButton) {
                     if (menus.Exists("My_DeleteRow")) {
                         menus.RemoveEx("My_DeleteRow");

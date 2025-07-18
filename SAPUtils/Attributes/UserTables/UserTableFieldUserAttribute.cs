@@ -36,10 +36,10 @@ namespace SAPUtils.Attributes.UserTables {
         /// <seealso cref="UserTableFieldAttributeBase" />
         public Type LinkedTableType { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IUserTableField.Name" />
         public virtual string Name { get; set; }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="IUserTableField.Description" />
         public virtual string Description { get; set; }
 
         /// <inheritdoc />

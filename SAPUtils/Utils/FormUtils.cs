@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -325,8 +326,41 @@ namespace SAPUtils.Utils {
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_COMBO_BOX);
             column.DataBind.SetBound(true, "", $"_DS{uid}");
 
-            IList<IUserFieldValidValue> vv = Repository.Get().GetValidValues(field.LinkedTable);
+            string fieldLinkedTable = field.LinkedTable;
+            Type type = UserTableMetadataCache.GetTableType(fieldLinkedTable);
 
+            IList<IUserFieldValidValue> vv = null;
+            if (type != null) {
+                MethodInfo method = typeof(UserTableObjectModel)
+                    .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
+                    ?.MakeGenericMethod(type);
+                if (method != null) {
+                    object result = method.Invoke(null, null);
+                    // Si quieres convertirlo a IEnumerable
+                    IEnumerable enumerable = result as IEnumerable;
+                    List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
+
+                    if (enumerable != null) {
+                        foreach (object item in enumerable) {
+                            if (!(item is IUserTableObjectModel userTableObjectModel)) continue;
+                            if (userTableObjectModel is ISoftDeletable sd) {
+                                if (!sd.Active) continue;
+                            }
+                            data.Add(userTableObjectModel);
+                        }
+                    }
+
+                    if (data.Any()) {
+                        vv = new List<IUserFieldValidValue>();
+                        data.ForEach(e => vv.Add(new UserFieldValidValue(
+                            e.Code, e.DisplayName
+                        )));
+                    }
+                }
+            }
+            if (vv == null) {
+                vv = Repository.Get().GetValidValues(field.LinkedTable);
+            }
             foreach (IUserFieldValidValue userFieldValidValue in vv) {
                 bool add = true;
                 for (int i = 0; i < column.ValidValues.Count; i++)

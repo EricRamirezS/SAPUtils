@@ -201,6 +201,7 @@ namespace SAPUtils.Forms {
                 if (ColumnInfo.TryGetValue("CreatedAtTime", out value)) value.MatrixColumn.Visible = false;
                 if (ColumnInfo.TryGetValue("UpdatedAtTime", out value)) value.MatrixColumn.Visible = false;
             }
+            // ReSharper disable once InvertIf, Kept for Readability
             if (typeof(IAuditableUser).IsAssignableFrom(typeof(T))) {
                 if (ColumnInfo.TryGetValue("CreatedBy", out value)) value.MatrixColumn.Visible = false;
                 if (ColumnInfo.TryGetValue("UpdatedBy", out value)) value.MatrixColumn.Visible = false;

@@ -41,8 +41,9 @@ namespace SAPUtils {
                 Logger.Trace("Creating user table: {0}", userTable.Name);
                 CreateUserTable(userTable);
 
-                foreach (PropertyInfo propertyInfo in table.GetProperties()) {
+                foreach (PropertyInfo propertyInfo in table.GetProperties().Where(p => !IsIgnoredField(p))) {
                     if (propertyInfo.Name == "Code" || propertyInfo.Name == "Name") continue;
+                    if (IsIgnoredField(propertyInfo)) continue;
                     Logger.Trace("Processing field: {0}.{1}", userTable.Name, propertyInfo.Name);
                     IUserTableField userTableField;
                     if (!AuditableField.IsAuditableField(table, propertyInfo)) {
@@ -280,14 +281,19 @@ namespace SAPUtils {
                 if (AuditableField.IsAuditableField(table, propertyInfo))
                     continue;
 
+                if (IsIgnoredField(propertyInfo)) {
+                    Logger.Trace("{0} property `{1}` markes as Ignored", table.Name, propertyInfo.Name);
+                    continue;
+                }
+
                 if (!(propertyInfo.GetCustomAttributes(typeof(IUserTableField), true)
                         .FirstOrDefault() is IUserTableField userTableField)) {
-                    Logger.Error("UserTableFieldAttribute not found in {0}.{1}", table.Name, propertyInfo.Name);
+                    Logger.Error("IUserTableField not found in {0}.{1}", table.Name, propertyInfo.Name);
                     valid = false;
                 }
                 else if (NormalizeType(userTableField.Type) != NormalizeType(propertyInfo.PropertyType)) {
                     Logger.Error(
-                        "UserTableFieldAttribute {0}.{1} is not valid. " +
+                        "IUserTableField {0}.{1} is not valid. " +
                         "Expected property type: {2}, but got: {3}",
                         table.Name, propertyInfo.Name, userTableField.Type, propertyInfo.PropertyType);
                     valid = false;
@@ -307,6 +313,9 @@ namespace SAPUtils {
             Type NormalizeType(Type type) =>
                 Nullable.GetUnderlyingType(type) ?? type;
 
+        }
+        private static bool IsIgnoredField(PropertyInfo propertyInfo) {
+            return propertyInfo.IsDefined(typeof(IgnoreFieldAttribute), true);
         }
     }
 }

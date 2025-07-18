@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -22,6 +23,18 @@ namespace SAPUtils.Models.UserTables {
     /// <inheritdoc />
     public abstract class UserTableObjectModel : IUserTableObjectModel {
 
+        /// <summary>
+        /// Represents a thread-safe cache for storing and retrieving instances of <see cref="UserTableObjectModel"/>
+        /// objects based on their type and a unique code identifier.
+        /// </summary>
+        /// <remarks>
+        /// This cache utilizes a <see cref="System.Collections.Concurrent.ConcurrentDictionary{TKey, TValue}"/>
+        /// to ensure thread-safety when accessing or modifying the stored instances.
+        /// </remarks>
+        /// <seealso cref="System.Collections.Concurrent.ConcurrentDictionary{TKey, TValue}"/>
+        private static readonly ConcurrentDictionary<(Type, string), UserTableObjectModel> Cache =
+            new ConcurrentDictionary<(Type, string), UserTableObjectModel>();
+
         internal string OriginalCode { get; private set; }
         internal bool? OriginalActive { get; set; }
         internal DateTime OriginalCreatedAt { get; private set; }
@@ -32,6 +45,10 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public abstract string Name { get; set; }
+
+        /// <inheritdoc />
+        [IgnoreField]
+        public virtual string DisplayName => Name;
 
         /// <inheritdoc />
         public abstract bool Add();
@@ -187,7 +204,100 @@ namespace SAPUtils.Models.UserTables {
             log.Trace("{0} successfully populated for Code: {1}", type.FullName, code);
             return true;
         }
+
+        /// <summary>
+        /// Retrieves a cached instance of the specified <typeparamref name="T"/> type using the provided code.
+        /// If the object is not found in the cache, retrieves it using the <see cref="Get{T}(string, out T)"/> method and caches the result.
+        /// </summary>
+        /// <typeparam name="T">The type derived from <see cref="UserTableObjectModel"/> to fetch from the cache or database.</typeparam>
+        /// <param name="code">The unique identifier (code) of the object to retrieve. Cannot be null or whitespace.</param>
+        /// <returns>
+        /// The cached or freshly retrieved instance of <typeparamref name="T"/> if found; otherwise, <c>null</c>.
+        /// </returns>
+        /// <seealso cref="Get{T}(string, out T)"/>
+        static protected T GetCached<T>(string code) where T : UserTableObjectModel, new() {
+            if (string.IsNullOrWhiteSpace(code))
+                return null;
+
+            (Type, string code) key = (typeof(T), code);
+
+            if (Cache.TryGetValue(key, out UserTableObjectModel existing) && existing is T typed)
+                return typed;
+
+            if (!Get(code, out T result))
+                return null;
+
+            Cache[key] = result;
+            return result;
+        }
+
+        /// <summary>
+        /// Clears the entire cache of user table objects. This method removes all cached entries
+        /// regardless of their type or code, ensuring a fresh state for future operations.
+        /// </summary>
+        public static void ClearCache() {
+            Cache.Clear();
+        }
+
+        /// <summary>
+        /// Clears the cache entries for all instances of the specified type <typeparamref name="T"/> from the internal cache.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the user table object model to be cleared from the cache. This type must be a subclass of <see cref="UserTableObjectModel"/>.
+        /// </typeparam>
+        /// <remarks>
+        /// This method iterates through the cache and removes all entries that match the specified type <typeparamref name="T"/>.
+        /// </remarks>
+        /// <seealso cref="UserTableObjectModel"/>
+        public static void ClearCache<T>() where T : UserTableObjectModel {
+            Type type = typeof(T);
+            foreach ((Type, string) key in Cache.Keys.Where(k => k.Item1 == type).ToList()) {
+                Cache.TryRemove(key, out _);
+            }
+        }
+
+        /// <summary>
+        /// Clears all cached instances of user table object models.
+        /// </summary>
+        public static void ClearCache<T>(string code) where T : UserTableObjectModel {
+            (Type, string code) key = (typeof(T), code);
+            Cache.TryRemove(key, out _);
+        }
+
+        /// <summary>
+        /// Retrieves a business object of the specified type and key from the SAP Business One company database.
+        /// </summary>
+        /// <typeparam name="T">The type of the business object to retrieve, which must be a class.</typeparam>
+        /// <param name="objectType">The type of the business object, specified as a value of the <see cref="SAPbobsCOM.BoObjectTypes"/> enumeration.</param>
+        /// <param name="key">The unique key used to identify the business object in the database.</param>
+        /// <returns>
+        /// The retrieved business object of type <typeparamref name="T"/> if found; otherwise, <c>null</c>.
+        /// </returns>
+        /// <seealso cref="SAPUtils.SapAddon"/>
+        public static T GetBusinessObjectByKey<T>(BoObjectTypes objectType, object key) where T : class {
+            Company company = SapAddon.Instance().Company;
+            object obj = company.GetBusinessObject(objectType);
+
+            //All SAP BO Business Objects should have GetByKey method
+            MethodInfo getByKeyMethod = obj.GetType().GetMethod("GetByKey");
+            if (getByKeyMethod == null) return null;
+            bool found = (bool)getByKeyMethod.Invoke(obj, new[] { key });
+            return found ? obj as T : null;
+        }
     }
+
+    /// <summary>
+    /// An attribute used to mark a property to be ignored by specific operations,
+    /// such as mapping, reflection, or metadata generation.
+    /// </summary>
+    /// <remarks>
+    /// This attribute is commonly utilized in scenarios where properties should not
+    /// be included in certain processes, for example, serialization or field mapping.
+    /// </remarks>
+    /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel" />
+    /// <seealso cref="SAPUtils.__Internal.Models.UserTableMetadataCache" />
+    [AttributeUsage(AttributeTargets.Property)]
+    public class IgnoreFieldAttribute : Attribute { }
 
     /// <summary>
     /// Represents a generic base class for interacting with SAP B1 User Tables, providing CRUD operations and mapping logic.

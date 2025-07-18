@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.Models.UserTables;
 
 namespace SAPUtils.__Internal.Models {
     internal static class UserTableMetadataCache {
@@ -19,6 +20,7 @@ namespace SAPUtils.__Internal.Models {
             {
                 List<(PropertyInfo Property, IUserTableField Field)> props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Name != "Code" && p.Name != "Name")
+                    .Where(p => p.IsDefined(typeof(IgnoreFieldAttribute), true))
                     .Select(p =>
                     {
                         IUserTableField field = AuditableField.IsAuditableField(t, p)
@@ -45,6 +47,7 @@ namespace SAPUtils.__Internal.Models {
             {
                 List<(PropertyInfo Property, IUserTableField Field)> props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Name != "Code" && p.Name != "Name")
+                    .Where(p => p.IsDefined(typeof(IgnoreFieldAttribute), true))
                     .Select(p =>
                     {
                         IUserTableField field = AuditableField.IsAuditableField(t, p)
@@ -69,8 +72,13 @@ namespace SAPUtils.__Internal.Models {
                     .FirstOrDefault()
             );
         }
+
         public static IUserTable GetUserTableAttribute(string tableName) {
             return UserTableAttributeCache.FirstOrDefault(e => e.Value.Name == tableName).Value;
+        }
+
+        public static Type GetTableType(string tableName) {
+            return UserTableAttributeCache.FirstOrDefault(e => e.Value.Name == tableName).Key;
         }
     }
 }

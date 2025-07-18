@@ -12,6 +12,7 @@ namespace SAPUtils.Extensions {
     /// </remarks>
     /// <seealso cref="UDFLinkedSystemObjectTypesEnum"/>
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class UDFLinkedSystemObjectTypesEnumExtension {
         /// <summary>
         /// A static readonly dictionary that maps <see cref="UDFLinkedSystemObjectTypesEnum"/> enum values

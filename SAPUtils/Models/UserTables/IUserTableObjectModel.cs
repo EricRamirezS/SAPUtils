@@ -19,6 +19,18 @@ namespace SAPUtils.Models.UserTables {
         string Name { get; set; }
 
         /// <summary>
+        /// Gets the display-friendly name for the object.
+        /// Typically backed by the <see cref="Name"/> property or defined by derived classes.
+        /// </summary>
+        /// <remarks>
+        /// This property is often used for UI representation or when describing the object externally.
+        /// Fields with this property may not be persisted, as indicated by the <see cref="IgnoreFieldAttribute"/>.
+        /// </remarks>
+        /// <seealso cref="SAPUtils.Models.UserTables.IUserTableObjectModel"/>
+        /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel"/>
+        string DisplayName { get; }
+
+        /// <summary>
         /// Adds a new record to the SAP user table.  
         /// </summary>
         /// <returns>True if the operation is successful, otherwise false.</returns>
