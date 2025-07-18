@@ -21,7 +21,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [MeasurementUserTableField(Name = "ItemWeight", Description = "Weight of the item in kg", Required = true)]
+    /// [MeasurementUserTableField(Name = "ItemWeight", Description = "Weight of the item in kg", Mandatory = true)]
     /// public double? ItemWeight { get; set; }
     /// </code>
     /// </summary>

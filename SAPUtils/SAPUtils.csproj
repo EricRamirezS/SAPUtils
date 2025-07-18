@@ -110,6 +110,7 @@
     <Compile Include="Utils\SapColors.cs"/>
     <Compile Include="Utils\SapUtils.cs"/>
     <Compile Include="Utils\TopMostDialog.cs"/>
+      <Compile Include="__Internal\Attributes\UserTables\IUserField.cs"/>
     <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs"/>
     <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs"/>
       <Compile Include="__Internal\Attributes\UserTables\UserTableFieldTyped.cs">

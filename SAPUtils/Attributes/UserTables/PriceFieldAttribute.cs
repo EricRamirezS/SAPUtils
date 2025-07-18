@@ -20,7 +20,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [PriceUserTableField(Name = "ProductPrice", Description = "Product sale price", Required = true)]
+    /// [PriceUserTableField(Name = "ProductPrice", Description = "Product sale price", Mandatory = true)]
     /// public double? ProductPrice { get; set; }
     /// </code>
     /// </summary>

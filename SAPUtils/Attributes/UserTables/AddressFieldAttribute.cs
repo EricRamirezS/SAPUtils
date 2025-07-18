@@ -20,7 +20,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [AddressUserTableField(Name = "BillingAddress", Description = "Customer Billing Address", Required = true)]
+    /// [AddressUserTableField(Name = "BillingAddress", Description = "Customer Billing Address", Mandatory = true)]
     /// public string BillingAddress { get; set; }
     /// </code>
     /// </summary>

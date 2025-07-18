@@ -35,7 +35,7 @@ namespace SAPUtils.__Internal.Models {
                     return new BooleanFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = true,
-                        Required = true,
+                        Mandatory = true,
                         ValidValues = new List<IUserFieldValidValue> {
                             new UserFieldValidValue("Y", "Activo"),
                             new UserFieldValidValue("N", "Inactivo"),
@@ -46,7 +46,7 @@ namespace SAPUtils.__Internal.Models {
                     return new DateTimeFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = DateTime.Now,
-                        Required = true,
+                        Mandatory = true,
                         DateDescription = "Fecha de creación",
                         TimeDescription = "Hora de creación",
                     };
@@ -54,7 +54,7 @@ namespace SAPUtils.__Internal.Models {
                     return new DateTimeFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = DateTime.Now,
-                        Required = true,
+                        Mandatory = true,
                         DateDescription = "Fecha de actualización",
                         TimeDescription = "Hora de actualización",
                     };
@@ -62,14 +62,14 @@ namespace SAPUtils.__Internal.Models {
                     return new NumericFieldAttribute {
                         Name = propertyInfo.Name,
                         Description = "Creado por",
-                        Required = true,
+                        Mandatory = true,
                         LinkedSystemObject = UDFLinkedSystemObjectTypesEnum.ulUsers,
                     };
                 case "UpdatedBy" when Implements<IAuditableUser>():
                     return new NumericFieldAttribute {
                         Name = propertyInfo.Name,
                         Description = "Actualizado por",
-                        Required = true,
+                        Mandatory = true,
                         LinkedSystemObject = UDFLinkedSystemObjectTypesEnum.ulUsers,
                     };
                 default:

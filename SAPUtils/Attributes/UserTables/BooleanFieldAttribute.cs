@@ -20,7 +20,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [BooleanUserTableField(Name = "IsActive", Description = "Indicates if the customer is active", Required = true)]
+    /// [BooleanUserTableField(Name = "IsActive", Description = "Indicates if the customer is active", Mandatory = true)]
     /// public bool? IsActive { get; set; }
     /// </code>
     /// </summary>

@@ -20,7 +20,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [PercentageUserTableField(Name = "DiscountRate", Description = "Customer discount percentage", Required = true)]
+    /// [PercentageUserTableField(Name = "DiscountRate", Description = "Customer discount percentage", Mandatory = true)]
     /// public double? DiscountRate { get; set; }
     /// </code>
     /// </summary>

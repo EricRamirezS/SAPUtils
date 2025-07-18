@@ -20,7 +20,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [RateUserTableField(Name = "ExchangeRate", Description = "Exchange rate for currency conversion", Required = true)]
+    /// [RateUserTableField(Name = "ExchangeRate", Description = "Exchange rate for currency conversion", Mandatory = true)]
     /// public double? ExchangeRate { get; set; }
     /// </code>
     /// </summary>

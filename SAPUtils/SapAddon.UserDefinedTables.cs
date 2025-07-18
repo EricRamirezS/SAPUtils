@@ -68,7 +68,7 @@ namespace SAPUtils {
                             dtUserTableField.DateDescription,
                             dtUserTableField.FieldType,
                             dtUserTableField.SubType,
-                            dtUserTableField.Required,
+                            dtUserTableField.Mandatory,
                             dtUserTableField.Size,
                             null,
                             dtUserTableField.ValidValues,
@@ -82,7 +82,7 @@ namespace SAPUtils {
                             dtUserTableField.TimeDescription,
                             dtUserTableField.FieldType,
                             BoFldSubTypes.st_Time,
-                            dtUserTableField.Required,
+                            dtUserTableField.Mandatory,
                             dtUserTableField.Size,
                             null,
                             dtUserTableField.ValidValues,
@@ -97,7 +97,7 @@ namespace SAPUtils {
                             userTableField.Description,
                             userTableField.FieldType,
                             userTableField.SubType,
-                            userTableField.Required,
+                            userTableField.Mandatory,
                             userTableField.Size,
                             userTableField.DefaultValue == null
                                 ? null
@@ -111,7 +111,20 @@ namespace SAPUtils {
             }
         }
 
-
+        public void AddUserField(string tableName, IUserField fieldInfo) {
+            CreateUserTableField(tableName,
+                fieldInfo.Name,
+                fieldInfo.Description,
+                fieldInfo.FieldType,
+                fieldInfo.SubType,
+                fieldInfo.Mandatory,
+                fieldInfo.Size,
+                fieldInfo.DefaultValue.ToString(),
+                fieldInfo.ValidValues,
+                fieldInfo.LinkedSystemObject,
+                fieldInfo.LinkedTable,
+                fieldInfo.LinkedUdo);
+        }
         private void CreateUserTable(IUserTable userTable) {
             IUserTablesMD userTableMd = null;
 
@@ -202,7 +215,7 @@ namespace SAPUtils {
                 else {
                     string error = Company.GetLastErrorDescription();
                     throw new Exception(
-                        $"No es posible agregar el campo {fieldName} a la tabla de usuario {tableName}. Error {error}");
+                        $"No es posible agregar el campo {fieldName} a la tabla {tableName}. Error {error}");
                 }
             }
             finally {

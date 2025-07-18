@@ -21,7 +21,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [TimeUserTableField(Name = "StartTime", Description = "Event start time", Required = true)]
+    /// [TimeUserTableField(Name = "StartTime", Description = "Event start time", Mandatory = true)]
     /// public DateTime? StartTime { get; set; }
     /// </code>
     /// </summary>

@@ -19,7 +19,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [PhoneUserTableField(Name = "CustomerPhone", Description = "Primary contact phone number", Required = true)]
+    /// [PhoneUserTableField(Name = "CustomerPhone", Description = "Primary contact phone number", Mandatory = true)]
     /// public string CustomerPhone { get; set; }
     /// </code>
     /// </summary>

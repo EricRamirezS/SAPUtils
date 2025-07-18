@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using SAPbobsCOM;
-using SAPUtils.Models.UserTables;
+using System.Runtime.InteropServices;
 
 // ReSharper disable UnusedMember.Global
 
@@ -29,49 +27,18 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
     /// <b>Source table:</b> CUFD
     /// </para>
     /// </remarks>
-    internal interface IUserTableField {
+    internal interface IUserTableField : IUserField, _Attribute {
+
         /// <summary>
         /// Gets or sets the technical name of the user-defined field (UDF).
         /// </summary>
-        string Name { get; set; }
+        new string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the description of the user-defined field.
         /// This is the human-readable label displayed in SAP Business One.
         /// </summary>
-        string Description { get; set; }
-
-        /// <summary>
-        /// Gets the data type of the field, as defined in SAP Business One.
-        /// </summary>
-        BoFieldTypes FieldType { get; }
-
-        /// <summary>
-        /// Gets the subtype of the field, used for additional type restrictions.
-        /// </summary>
-        BoFldSubTypes SubType { get; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the field is mandatory.
-        /// If `true`, a default value must be assigned before adding the field.
-        /// </summary>
-        bool Required { get; }
-
-        /// <summary>
-        /// Gets or sets the maximum length of the field.
-        /// </summary>
-        int Size { get; }
-
-        /// <summary>
-        /// Gets or sets the default value of the field, used when no value is assigned.
-        /// </summary>
-        object DefaultValue { get; }
-
-        /// <summary>
-        /// Gets a list of valid values for the field.
-        /// Used for fields with predefined value sets.
-        /// </summary>
-        IList<IUserFieldValidValue> ValidValues { get; }
+        new string Description { get; set; }
 
         /// <summary>
         /// Gets or sets a raw string array of valid values for the field.
@@ -83,24 +50,6 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         /// Gets the .NET type that corresponds to this user-defined field.
         /// </summary>
         Type Type { get; }
-
-        /// <summary>
-        /// Gets or sets the SAP Business One system object type this field is linked to, if any.
-        /// Used when the user-defined field should reference a system object such as Business Partners or Items.
-        /// </summary>
-        UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; }
-
-        /// <summary>
-        /// Gets or sets the name of the user-defined table that this field is linked to, if applicable.
-        /// This enables dropdowns or search helps based on user-defined tables.
-        /// </summary>
-        string LinkedTable { get; }
-
-        /// <summary>
-        /// Gets or sets the identifier of the User Defined Object (UDO) that this field is linked to, if any.
-        /// Useful when the field should point to a UDO instead of a raw table.
-        /// </summary>
-        string LinkedUdo { get; }
 
         /// <summary>
         /// Parses a given object value into a format compatible with the SAP Business One field type.

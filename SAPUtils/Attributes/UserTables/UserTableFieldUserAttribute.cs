@@ -49,7 +49,7 @@ namespace SAPUtils.Attributes.UserTables {
         public virtual BoFldSubTypes SubType => BoFldSubTypes.st_None;
 
         /// <inheritdoc />
-        public virtual bool Required { get; set; }
+        public virtual bool Mandatory { get; set; }
 
         /// <inheritdoc />
         public virtual int Size { get; set; } = 1;

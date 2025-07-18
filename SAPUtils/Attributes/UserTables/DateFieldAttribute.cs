@@ -22,7 +22,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [DateTimeUserTableField(Name = "Event", Description = "Event date and time", Required = true)]
+    /// [DateTimeUserTableField(Name = "Event", Description = "Event date and time", Mandatory = true)]
     /// public DateTime? EventDateTime { get; set; }
     /// </code>
     /// </summary>

@@ -20,7 +20,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [AlphaUserTableField(Name = "CustomerCode", Description = "Unique Customer Identifier", Required = true)]
+    /// [AlphaUserTableField(Name = "CustomerCode", Description = "Unique Customer Identifier", Mandatory = true)]
     /// public string CustomerCode { get; set; }
     /// </code>
     /// </summary>

@@ -21,7 +21,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [QuantityUserTableField(Name = "StockQuantity", Description = "Quantity of stock available", Required = true)]
+    /// [QuantityUserTableField(Name = "StockQuantity", Description = "Quantity of stock available", Mandatory = true)]
     /// public double? StockQuantity { get; set; }
     /// </code>
     /// </summary>

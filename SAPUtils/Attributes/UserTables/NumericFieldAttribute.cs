@@ -21,7 +21,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [NumericUserTableField(Name = "Age", Description = "Customer age", Required = true)]
+    /// [NumericUserTableField(Name = "Age", Description = "Customer age", Mandatory = true)]
     /// public int? Age { get; set; }
     /// </code>
     /// </summary>
