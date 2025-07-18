@@ -29,7 +29,7 @@ namespace SAPUtils {
         /// <remarks>
         /// Types must implement <see cref="IUserTableObjectModel"/> interface and be decorated with <see cref="UserTableAttribute"/>.
         /// </remarks>
-        public void InitializeUserData(Type[] tables) {
+        public void InitializeUserTables(Type[] tables) {
             foreach (Type table in tables) {
                 Logger.Trace("Processing table: {0}", table.Name);
                 if (!ValidateTable(table)) continue;
@@ -111,6 +111,17 @@ namespace SAPUtils {
             }
         }
 
+        /// <summary>
+        /// Adds a user-defined field to the specified SAP Business One table by using the provided field information.
+        /// </summary>
+        /// <param name="tableName">The name of the table to which the user-defined field will be added.</param>
+        /// <param name="fieldInfo">An instance of <see cref="IUserField"/> that specifies the field's name, description, type, subtype, and other related metadata.</param>
+        /// <remarks>
+        /// The field will be created with the configurations specified in the <paramref name="fieldInfo"/> parameter, including size, default value, valid values,
+        /// and any linked objects or user-defined tables (UDO).
+        /// Ensure that the specified table name exists within the SAP Business One database schema.
+        /// </remarks>
+        /// <seealso cref="IUserField"/>
         public void AddUserField(string tableName, IUserField fieldInfo) {
             CreateUserTableField(tableName,
                 fieldInfo.Name,
@@ -125,6 +136,7 @@ namespace SAPUtils {
                 fieldInfo.LinkedTable,
                 fieldInfo.LinkedUdo);
         }
+
         private void CreateUserTable(IUserTable userTable) {
             IUserTablesMD userTableMd = null;
 

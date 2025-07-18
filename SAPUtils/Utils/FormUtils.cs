@@ -147,7 +147,7 @@ namespace SAPUtils.Utils {
                 column = AddComboBoxColumn(matrix, uid, field);
             }
             else if (isLinked) {
-                column = string.IsNullOrEmpty(field.LinkedSystemObject?.ToString() ?? field.LinkedUdo)
+                column = field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone && string.IsNullOrEmpty(field.LinkedUdo)
                     ? AddComboBoxFromUdt(matrix, uid, field, form)
                     : AddLinkedButtonColumn(matrix, uid, field, form, application);
             }
@@ -185,7 +185,7 @@ namespace SAPUtils.Utils {
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
         /// <seealso cref="UDFLinkedSystemObjectTypesEnum"/>
         private static bool IsLinkedField(IUserTableField field) {
-            return field.LinkedSystemObject.HasValue ||
+            return field.LinkedSystemObject != UDFLinkedSystemObjectTypesEnum.ulNone ||
                    !string.IsNullOrWhiteSpace(field.LinkedTable) ||
                    !string.IsNullOrWhiteSpace(field.LinkedUdo);
         }
@@ -254,8 +254,8 @@ namespace SAPUtils.Utils {
             string cflId = $"_CFL{uid}";
 
             LinkedButton lb = column.ExtendedObject as LinkedButton;
-            if (lb != null && field.LinkedSystemObject.HasValue) {
-                lb.LinkedObject = (BoLinkedObject)(int)field.LinkedSystemObject.Value;
+            if (lb != null && field.LinkedSystemObject != UDFLinkedSystemObjectTypesEnum.ulNone) {
+                lb.LinkedObject = (BoLinkedObject)(int)field.LinkedSystemObject;
             }
             else if (lb != null && !string.IsNullOrEmpty(field.LinkedUdo)) {
                 lb.LinkedObjectType = field.LinkedUdo;
@@ -279,8 +279,8 @@ namespace SAPUtils.Utils {
                 (ChooseFromListCreationParams)application.CreateObject(BoCreatableObjectType.cot_ChooseFromListCreationParams);
             cflParams.UniqueID = cflId;
             cflParams.MultiSelection = false;
-            cflParams.ObjectType = field.LinkedSystemObject.HasValue
-                ? ((int)field.LinkedSystemObject.Value).ToString()
+            cflParams.ObjectType = field.LinkedSystemObject != UDFLinkedSystemObjectTypesEnum.ulNone
+                ? ((int)field.LinkedSystemObject).ToString()
                 : field.LinkedUdo;
 
 

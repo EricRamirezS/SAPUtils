@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
+using SAPUtils.__Internal.Models;
+using SAPUtils.Models.UserTables;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global
@@ -72,5 +75,12 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         bool? IUserTableField<bool?>.ParseValue(object value) => (bool?)ParseValue(value);
+
+        /// <inheritdoc />
+        public override IList<IUserFieldValidValue> ValidValues { get; internal set; }
+            = new List<IUserFieldValidValue>(2) {
+                new UserFieldValidValue("Y", "Sí"),
+                new UserFieldValidValue("N", "No"),
+            };
     }
 }

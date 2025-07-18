@@ -69,10 +69,10 @@ namespace SAPUtils.Attributes.UserTables {
         public abstract Type Type { get; }
 
         /// <inheritdoc />
-        public IList<IUserFieldValidValue> ValidValues { get; internal set; }
+        public virtual IList<IUserFieldValidValue> ValidValues { get; internal set; }
 
         /// <inheritdoc />
-        public string[] ValidValuePairs
+        public virtual string[] ValidValuePairs
         {
             get => _validValuePairs;
             set
@@ -83,7 +83,7 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
-        public UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; set; }
+        public UDFLinkedSystemObjectTypesEnum LinkedSystemObject { get; set; }
 
         /// <inheritdoc />
         public string LinkedUdo { get; set; }

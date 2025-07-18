@@ -50,7 +50,7 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         /// Gets or sets the SAP Business One system object type this field is linked to, if any.
         /// Used when the user-defined field should reference a system object such as Business Partners or Items.
         /// </summary>
-        UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; }
+        UDFLinkedSystemObjectTypesEnum LinkedSystemObject { get; }
 
         /// <summary>
         /// Gets or sets the name of the user-defined table that this field is linked to, if applicable.
@@ -102,7 +102,7 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
             BoFldSubTypes subType = BoFldSubTypes.st_None,
             int size = 11,
             bool mandatory = false,
-            UDFLinkedSystemObjectTypesEnum? linkedSystemObject = null,
+            UDFLinkedSystemObjectTypesEnum linkedSystemObject = UDFLinkedSystemObjectTypesEnum.ulNone,
             string linkedTable = null,
             string linkedUdo = null,
             object defaultValue = null,
@@ -139,7 +139,7 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         public bool Mandatory { get; }
 
         /// <inheritdoc />
-        public UDFLinkedSystemObjectTypesEnum? LinkedSystemObject { get; }
+        public UDFLinkedSystemObjectTypesEnum LinkedSystemObject { get; }
 
         /// <inheritdoc />
         public string LinkedTable { get; }
