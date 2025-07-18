@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -29,6 +30,7 @@ namespace SAPUtils {
         /// <remarks>
         /// Types must implement <see cref="IUserTableObjectModel"/> interface and be decorated with <see cref="UserTableAttribute"/>.
         /// </remarks>
+        [SuppressMessage("ReSharper", "RedundantArgumentDefaultValue")]
         public void InitializeUserTables(Type[] tables) {
             foreach (Type table in tables) {
                 Logger.Trace("Processing table: {0}", table.Name);
@@ -75,7 +77,8 @@ namespace SAPUtils {
                             dtUserTableField.ValidValues,
                             dtUserTableField.LinkedSystemObject,
                             dtUserTableField.LinkedTable,
-                            dtUserTableField.LinkedUdo);
+                            dtUserTableField.LinkedUdo,
+                            true);
                         Thread.Sleep(100);
                         CreateUserTableField(
                             userTable.Name,
@@ -89,7 +92,8 @@ namespace SAPUtils {
                             dtUserTableField.ValidValues,
                             dtUserTableField.LinkedSystemObject,
                             dtUserTableField.LinkedTable,
-                            dtUserTableField.LinkedUdo);
+                            dtUserTableField.LinkedUdo,
+                            true);
                     }
                     else {
                         CreateUserTableField(
@@ -106,7 +110,8 @@ namespace SAPUtils {
                             userTableField.ValidValues,
                             userTableField.LinkedSystemObject,
                             userTableField.LinkedTable,
-                            userTableField.LinkedUdo);
+                            userTableField.LinkedUdo,
+                            true);
                     }
                 }
             }
@@ -135,7 +140,8 @@ namespace SAPUtils {
                 fieldInfo.ValidValues,
                 fieldInfo.LinkedSystemObject,
                 fieldInfo.LinkedTable,
-                fieldInfo.LinkedUdo);
+                fieldInfo.LinkedUdo,
+                false);
         }
 
         private void CreateUserTable(IUserTable userTable) {
@@ -181,13 +187,14 @@ namespace SAPUtils {
             IList<IUserFieldValidValue> validValues,
             UDFLinkedSystemObjectTypesEnum? linkedSystemObject = null,
             string linkedTable = null,
-            string linkedUdo = null) {
+            string linkedUdo = null,
+            bool userTable = true) {
             UserFieldsMD userFieldsMd = null;
 
             try {
                 userFieldsMd = Company.GetBusinessObject(BoObjectTypes.oUserFields) as UserFieldsMD;
 
-                if (ExistTableField(tableName, fieldName)) {
+                if (ExistTableField(tableName, fieldName, userTable)) {
                     Logger.Debug("Field {0}.{1} already exist", tableName, fieldName);
                     return;
                 }
@@ -237,16 +244,15 @@ namespace SAPUtils {
             }
         }
 
-        private bool ExistTableField(string tableName, string fieldName) {
+        private bool ExistTableField(string tableName, string fieldName, bool userTable) {
             Recordset recordset = null;
             Logger.Trace("Verifying if field {0}.{1} already exist", tableName, fieldName);
             try {
                 recordset = Company.GetBusinessObject(BoObjectTypes.BoRecordset) as Recordset;
                 if (recordset != null) {
-                    recordset.DoQuery(string.Format(IsHana
-                            ? @"SELECT '0' AS ""IGNORE"" FROM CUFD WHERE ""TableID"" = '@{0}' AND ""AliasID"" = '{1}'"
-                            : "SELECT NULL FROM CUFD WHERE TableId = '@{0}' AND AliasId = '{1}'",
-                        tableName, fieldName));
+                    recordset.DoQuery(IsHana
+                        ? $@"SELECT '0' AS ""IGNORE"" FROM CUFD WHERE ""TableID"" = '{(userTable ? "@" : "")}{tableName}' AND ""AliasID"" = '{fieldName}'"
+                        : $"SELECT NULL FROM CUFD WHERE TableId = '{(userTable ? "@" : "")}{tableName}' AND AliasId = '{fieldName}'");
                     return recordset.RecordCount > 0;
                 }
             }
