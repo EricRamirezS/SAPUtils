@@ -54,7 +54,7 @@ namespace SAPUtils.Attributes.UserTables {
                 case null:
                     return "";
                 case DateTime dt:
-                    return dt == DateTime.MinValue ? "" : dt.ToString("yyyyMMdd");
+                    return dt.Year < 1900 ? "" : dt.ToString("yyyyMMdd");
                 case string str:
                 {
                     return DateTime.TryParseExact(str, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsed)
