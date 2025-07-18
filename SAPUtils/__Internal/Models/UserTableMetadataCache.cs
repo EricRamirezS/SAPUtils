@@ -20,7 +20,7 @@ namespace SAPUtils.__Internal.Models {
             {
                 List<(PropertyInfo Property, IUserTableField Field)> props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Name != "Code" && p.Name != "Name")
-                    .Where(p => p.IsDefined(typeof(IgnoreFieldAttribute), true))
+                    .Where(p => !p.IsDefined(typeof(IgnoreFieldAttribute), true))
                     .Select(p =>
                     {
                         IUserTableField field = AuditableField.IsAuditableField(t, p)
@@ -47,7 +47,7 @@ namespace SAPUtils.__Internal.Models {
             {
                 List<(PropertyInfo Property, IUserTableField Field)> props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Name != "Code" && p.Name != "Name")
-                    .Where(p => p.IsDefined(typeof(IgnoreFieldAttribute), true))
+                    .Where(p => !p.IsDefined(typeof(IgnoreFieldAttribute), true))
                     .Select(p =>
                     {
                         IUserTableField field = AuditableField.IsAuditableField(t, p)
