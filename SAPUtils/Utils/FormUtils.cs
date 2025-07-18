@@ -274,6 +274,35 @@ namespace SAPUtils.Utils {
             column.ChooseFromListAlias = SapUtils.GetPrimaryKey(dbTableNane);
             return column;
         }
+
+        public static BoDataType FieldTypeToDataType(BoFieldTypes fieldType, BoFldSubTypes subType) {
+            BoDataType datatype;
+            if (fieldType == BoFieldTypes.db_Numeric) {
+                datatype = BoDataType.dt_SHORT_NUMBER;
+            }
+            else if (subType == BoFldSubTypes.st_Measurement) {
+                datatype = BoDataType.dt_MEASURE;
+            }
+            else if (subType == BoFldSubTypes.st_Percentage) {
+                datatype = BoDataType.dt_PERCENT;
+            }
+            else if (subType == BoFldSubTypes.st_Price) {
+                datatype = BoDataType.dt_PRICE;
+            }
+            else if (subType == BoFldSubTypes.st_Quantity) {
+                datatype = BoDataType.dt_QUANTITY;
+            }
+            else if (subType == BoFldSubTypes.st_Rate) {
+                datatype = BoDataType.dt_RATE;
+            }
+            else if (fieldType == BoFieldTypes.db_Float) {
+                datatype = BoDataType.dt_LONG_NUMBER;
+            }
+            else {
+                datatype = BoDataType.dt_SHORT_TEXT;
+            }
+            return datatype;
+        }
         private static void CreateChooseFromList(IUserTableField field, UserForm form, Application application, string cflId, Column column,
             UserDataSource userDataSource) {
             ChooseFromListCreationParams cflParams =
