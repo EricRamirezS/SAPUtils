@@ -188,7 +188,9 @@ namespace SAPUtils.Forms {
             UpdateMatrix();
 
             EnableMenu("1281", false); // find button
-            EnableMenu("1282", true); // add button
+            if (_useAddContextButton) {
+                EnableMenu("1282", true); // add button
+            }
             EnableMenu("1304", true); //Enable Refresh
 
             (DataColumn DataTableColumn, Column MatrixColumn) value;
