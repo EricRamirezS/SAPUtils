@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SAPbobsCOM;
+using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.SQL;
+using SAPUtils.Models.UserTables;
 
 namespace SAPUtils.__Internal.Repository {
     /// <summary>
@@ -65,14 +68,32 @@ namespace SAPUtils.__Internal.Repository {
         // ReSharper disable once MemberCanBeMadeStatic.Local
         private Company Company => SapAddon.Instance().Company;
 
-        /// <summary>
-        /// Retrieves the next available integer code for a specified user-defined table in the database.
-        /// </summary>
-        /// <param name="tableName">The name of the user-defined table for which the next code is to be fetched.</param>
-        /// <returns>The next available integer code for the specified table.</returns>
+        /// <inheritdoc />
         public int GetNextCodeUserTable(string tableName) {
             _recordset.DoQuery(_queries.GetNextCodeUserTableQuery(tableName));
             return Convert.ToInt32(_recordset.Fields.Item("Code").Value);
+        }
+
+        /// <inheritdoc />
+        public IList<IUserFieldValidValue> GetValidValues(string table) {
+            IList<IUserFieldValidValue> data = new List<IUserFieldValidValue>();
+            try {
+                try {
+                    _recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{table}\" WHERE \"U_Active\" = 'Y'");
+                }
+                catch {
+                    _recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{table}\"");
+                }
+                while (!_recordset.EoF) {
+                    data.Add(new UserFieldValidValue(_recordset.Fields.Item("Code").Value.ToString(),
+                        _recordset.Fields.Item("Name").Value.ToString()));
+                    _recordset.MoveNext();
+                }
+            }
+            catch (Exception ex) {
+                SapAddon.Instance().Logger.Error(ex);
+            }
+            return data;
         }
 
         /// <summary>
@@ -107,5 +128,22 @@ namespace SAPUtils.__Internal.Repository {
         /// <param name="tableName">The name of the user table for which the next code is to be retrieved.</param>
         /// <returns>The next available code as an integer for the specified user table.</returns>
         int GetNextCodeUserTable(string tableName);
+        /// <summary>
+        /// Retrieves a collection of valid values for a specified user-defined table.
+        /// </summary>
+        /// <param name="fieldLinkedTable">
+        /// The name of the user-defined table for which valid values are to be retrieved.
+        /// </param>
+        /// <returns>
+        /// A list of <see cref="IUserFieldValidValue"/> objects representing the valid values
+        /// for fields in the specified user-defined table.
+        /// </returns>
+        /// <remarks>
+        /// This method is responsible for querying the user-defined table to fetch
+        /// its valid values. It utilizes the internal repository logic to ensure
+        /// proper interaction with the underlying database.
+        /// </remarks>
+        /// <seealso cref="IUserFieldValidValue"/>
+        IList<IUserFieldValidValue> GetValidValues(string fieldLinkedTable);
     }
 }

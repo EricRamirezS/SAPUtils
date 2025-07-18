@@ -1,5 +1,6 @@
 using System;
-using SAPUtils.__Internal.Attributes.UserTables;
+using SAPbobsCOM;
+using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global
@@ -42,5 +43,9 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         public PrimaryKeyStrategy PrimaryKeyStrategy { get; set; } = PrimaryKeyStrategy.Serie;
+
+
+        /// <inheritdoc />
+        public BoUTBTableType TableType { get; set; } = BoUTBTableType.bott_NoObject;
     }
 }

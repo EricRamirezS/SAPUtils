@@ -25,7 +25,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class MemoUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
+    public class MemoFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
         private string _stronglyTypedDefaultValue;
 
         /// <inheritdoc />

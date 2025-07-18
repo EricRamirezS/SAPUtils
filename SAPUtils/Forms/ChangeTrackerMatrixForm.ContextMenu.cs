@@ -22,24 +22,27 @@ namespace SAPUtils.Forms {
                     }
                 }
                 if (_userDeleteContextButton) {
-                    if (!menus.Exists("My_DeleteRow")) {
-                        int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
-                        bool restore;
+                    if (menus.Exists("My_DeleteRow")) {
+                        menus.RemoveEx("My_DeleteRow");
+                    }
+                    int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
+                    bool restore = false;
+                    if (rowIndex > 0) {
                         (T item, Status status) = _data[rowIndex - 1];
                         if (item is ISoftDeletable e) {
-                            restore = !e.Active;
+                            restore = !e.Active && status != Status.Modified;
                         }
                         else {
                             restore = status == Status.Delete || status == Status.NewDelete;
                         }
-                        MenuCreationParams creationParams = (MenuCreationParams)Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams);
-                        creationParams.Type = BoMenuType.mt_STRING;
-                        creationParams.UniqueID = "My_DeleteRow";
-                        creationParams.String = restore ? "RestaurarFila" : "Eliminar fila";
-                        creationParams.Enabled = rowIndex >= 0;
-                        creationParams.Position = 2;
-                        popupMenu.SubMenus.AddEx(creationParams);
                     }
+                    MenuCreationParams creationParams = (MenuCreationParams)Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams);
+                    creationParams.Type = BoMenuType.mt_STRING;
+                    creationParams.UniqueID = "My_DeleteRow";
+                    creationParams.String = restore ? "Restaurar Fila" : "Eliminar fila";
+                    creationParams.Enabled = rowIndex >= 0;
+                    creationParams.Position = 2;
+                    popupMenu.SubMenus.AddEx(creationParams);
                 }
             }
             catch (Exception ex) {

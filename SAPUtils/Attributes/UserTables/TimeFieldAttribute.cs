@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Globalization;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
+using SAPUtils.Utils;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global
@@ -26,7 +26,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class TimeUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<DateTime?> {
+    public class TimeFieldAttribute : UserTableFieldAttributeBase, IUserTableField<DateTime?> {
         private DateTime? _stronglyTypedDefaultValue;
 
         /// <inheritdoc />
@@ -47,23 +47,17 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         public override object ParseValue(object value) {
-            if (value is DateTime dt)
-                return dt;
-
-            if (DateTime.TryParseExact(
-                    value?.ToString(),
-                    "HHmm",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out DateTime result) || DateTime.TryParse(value?.ToString(), out result))
-                return result;
-
-            return null;
+            return Parsers.ParseTime(value);
         }
 
         /// <inheritdoc />
         public override string ToSapData(object value) {
-            return ((DateTime)value).ToString("HHmm");
+            return value == null ? "" : ((DateTime)value).ToString("HHmm");
+        }
+
+        /// <inheritdoc />
+        public override string ToColumnData(object value) {
+            return value == null ? "0000" : ((DateTime)value).ToString("HH:mm");
         }
 
         /// <inheritdoc />

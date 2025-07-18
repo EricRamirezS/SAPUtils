@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 
@@ -26,39 +25,12 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class PercentageUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<double?> {
-        private double? _stronglyTypedDefaultValue;
+    public class PercentageFieldAttribute : DoubleUserTableFieldAttribute {
 
         /// <inheritdoc />
-        public override BoFieldTypes FieldType => BoFieldTypes.db_Numeric;
+        public override BoFieldTypes FieldType => BoFieldTypes.db_Float;
 
         /// <inheritdoc />
-        public override int Size { get; set; } = 11;
-
-        /// <inheritdoc />
-        public override object DefaultValue
-        {
-            get => _stronglyTypedDefaultValue;
-            set => _stronglyTypedDefaultValue = (double?)ParseValue(value);
-        }
-
-        /// <inheritdoc/>
-        public override object ParseValue(object value) {
-            return double.TryParse(value?.ToString(), out double result) ? result : 0;
-        }
-
-        /// <inheritdoc />
-        public override string ToSapData(object value) {
-            return value == null ? "0" : ((int)value).ToString(CultureInfo.InvariantCulture);
-        }
-
-        /// <inheritdoc />
-        public override Type Type => typeof(int);
-
-        /// <inheritdoc />
-        double? IUserTableField<double?>.DefaultValue => _stronglyTypedDefaultValue;
-
-        /// <inheritdoc />
-        double? IUserTableField<double?>.ParseValue(object value) => (int?)ParseValue(value);
+        public override BoFldSubTypes SubType => BoFldSubTypes.st_Percentage;
     }
 }

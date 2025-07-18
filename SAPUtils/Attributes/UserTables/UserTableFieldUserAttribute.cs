@@ -63,6 +63,9 @@ namespace SAPUtils.Attributes.UserTables {
         public abstract string ToSapData(object value);
 
         /// <inheritdoc />
+        public virtual string ToColumnData(object value) => ToSapData(value);
+
+        /// <inheritdoc />
         public abstract Type Type { get; }
 
         /// <inheritdoc />

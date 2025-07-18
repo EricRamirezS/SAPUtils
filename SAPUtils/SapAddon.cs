@@ -65,7 +65,7 @@ namespace SAPUtils {
                 ConsoleLogger.Info("Retrieving SAPbouiCOM.Application");
                 _application = oSboGuiApi.GetApplication();
                 ConsoleLogger.Info("Retrieving SAPbobsCOM.Company");
-                _company = Application.Company.GetDICompany() as Company;
+                __Company = Application.Company.GetDICompany() as Company;
                 ConsoleLogger.Debug("Initilizing Logger");
                 Logger = __Internal.Utils.Logger.Instance;
                 Logger.Info("Sap Addon started");
@@ -98,9 +98,10 @@ namespace SAPUtils {
         /// This property provides access to the global SAP B1 company context used throughout the application.
         /// It is an instance of the SAPbobsCOM.Company class.
         /// </remarks>
-        public Company Company => _company;
+        public Company Company => __Company;
 
-        internal static Company _company { get; private set; }
+        // ReSharper disable once InconsistentNaming
+        internal static Company __Company { get; private set; }
 
         /// <summary>
         /// Gets the main application instance for the SAP Addon.

@@ -115,5 +115,7 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         /// <param name="value">The value to be converted.</param>
         /// <returns>A string representation of the value in SAP format.</returns>
         string ToSapData(object value);
+
+        string ToColumnData(object value);
     }
 }

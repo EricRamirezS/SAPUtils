@@ -26,17 +26,19 @@ namespace SAPUtils.Forms {
             _dataReload = false;
         }
         private void SaveChanges() {
+            _helper.Item.Click();
+
             List<(T Item, Status Status)> modifiedData = _data.Where(x => x.Status != Status.Normal).ToList();
 
-            T[] updateItems = modifiedData.Where(x => x.Status == Status.Modified).Select(x => x.Item).ToArray();
+            T[] updateItems = modifiedData.Where(x => x.Status == Status.Modified || x.Status == Status.ModifiedRestored).Select(x => x.Item).ToArray();
             T[] deleteItems = modifiedData.Where(x => x.Status == Status.Delete).Select(x => x.Item).ToArray();
             T[] addItems = modifiedData.Where(x => x.Status == Status.New).Select(x => x.Item).ToArray();
 
             foreach (T item in updateItems) {
-                item.Update();
+                item.Update(true);
             }
             foreach (T item in deleteItems) {
-                item.Delete(true);
+                item.Delete();
             }
             foreach (T item in addItems) {
                 item.Add();
@@ -52,17 +54,16 @@ namespace SAPUtils.Forms {
                 _dataTable.SetValue("Code", index, item.Code ?? "");
                 _dataTable.SetValue("Name", index, item.Name ?? "");
                 foreach ((PropertyInfo property, IUserTableField field) in UserTableMetadataCache.GetUserFields(typeof(T))) {
-                    if (field is DateTimeUserTableFieldAttribute dt) {
+                    if (field is DateTimeFieldAttribute dtf) {
                         if (!(property.GetValue(item) is DateTime value)) continue;
-                        (DataColumn _, Column dateColumn) = ColumnInfo[$"{field.Name}Date"];
-                        (DataColumn _, Column timeColumn) = ColumnInfo[$"{field.Name}Time"];
-                        _dataTable.SetValue(dateColumn.UniqueID, index, value.ToString("yyyyMMdd"));
-                        _dataTable.SetValue(timeColumn.UniqueID, index, value.ToString("HHmm"));
-
+                        (DataColumn _, Column dateColumn) = ColumnInfo[$"{field.Name ?? property.Name}Date"];
+                        (DataColumn _, Column timeColumn) = ColumnInfo[$"{field.Name ?? property.Name}Time"];
+                        _dataTable.SetValue(dateColumn.UniqueID, index, dtf.DateToColumnData(value));
+                        _dataTable.SetValue(timeColumn.UniqueID, index, dtf.TimeToColumnData(value));
                     }
                     else {
-                        (DataColumn _, Column matrixColumn) = ColumnInfo[field.Name];
-                        _dataTable.SetValue(matrixColumn.UniqueID, index, field.ToSapData(property.GetValue(item)));
+                        (DataColumn _, Column matrixColumn) = ColumnInfo[field.Name ?? property.Name];
+                        _dataTable.SetValue(matrixColumn.UniqueID, index, field.ToColumnData(property.GetValue(item)));
                     }
                 }
                 index++;
@@ -89,40 +90,49 @@ namespace SAPUtils.Forms {
             Freeze(false);
         }
         private void UpdateMatrixColors() {
-            bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
-            for (int i = 0; i < _data.Count; i++) {
-                switch (_data[i].Status) {
-                    case Status.Normal:
-                        if (_data[i].Item is ISoftDeletable sd && sd.Active == false) {
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightSlateGray));
+            try {
+                bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
+
+                for (int i = 0; i < _data.Count; i++) {
+                    switch (_data[i].Status) {
+                        case Status.Normal:
+                            if (_data[i].Item is ISoftDeletable sd && sd.Active == false) {
+                                _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightSlateGray));
+                            }
+                            else {
+                                _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.WhiteSmoke));
+                            }
+                            break;
+                        case Status.Modified:
+                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.Khaki));
+                            break;
+                        case Status.ModifiedRestored:
+                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightBlue));
+                            break;
+                        case Status.New:
+                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.PaleGreen));
+                            break;
+                        case Status.NewDelete:
+                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightSalmon));
+                            break;
+                        case Status.Delete:
+                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.IndianRed));
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    if (manualCode) {
+                        if (!(_data[i].Status == Status.New || _data[i].Status == Status.NewDelete)) {
+                            _matrix.CommonSetting.SetCellBackColor(i + 1, 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
                         }
-                        else {
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.WhiteSmoke));
-                        }
-                        break;
-                    case Status.Modified:
-                        _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.Khaki));
-                        break;
-                    case Status.New:
-                        _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.PaleGreen));
-                        break;
-                    case Status.NewDelete:
-                        _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightSalmon));
-                        break;
-                    case Status.Delete:
-                        _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.IndianRed));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                if (manualCode) {
-                    if (!(_data[i].Status == Status.New || _data[i].Status == Status.NewDelete)) {
+                    }
+                    else {
                         _matrix.CommonSetting.SetCellBackColor(i + 1, 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
                     }
                 }
-                else {
-                    _matrix.CommonSetting.SetCellBackColor(i + 1, 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
-                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
             }
         }
         private void DataChanged(object sender, NotifyCollectionChangedEventArgs e) {

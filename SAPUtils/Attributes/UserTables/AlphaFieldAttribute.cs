@@ -8,34 +8,32 @@ using SAPUtils.__Internal.Attributes.UserTables;
 namespace SAPUtils.Attributes.UserTables {
     /// <summary>
     /// Represents an attribute used to mark a class property as a SAP Business One user-defined field (UDF) 
-    /// specifically for storing phone numbers.
+    /// for storing alphanumeric data.
     /// <br/>
-    /// This attribute ensures that the field is stored as `db_Alpha` with the subtype `st_Phone`, 
-    /// providing appropriate formatting for phone numbers.
+    /// This attribute is designed for fields that store string values in SAP Business One, ensuring the 
+    /// correct field type (`db_Alpha`) and default subtype (`st_None`).
     /// <br/>
     /// <b>Usage:</b><br/>
-    /// - Apply this attribute to properties in a user table object model to define a phone number field.<br/>
+    /// - Apply this attribute to properties in a user table object model to define an alphanumeric field.<br/>
+    /// - The default maximum size is <b>50 characters</b>.<br/>
     /// - Implements <see cref="IUserTableField{T}"/> for type-safe parsing and default value handling.<br/>
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [PhoneUserTableField(Name = "CustomerPhone", Description = "Primary contact phone number", Required = true)]
-    /// public string CustomerPhone { get; set; }
+    /// [AlphaUserTableField(Name = "CustomerCode", Description = "Unique Customer Identifier", Required = true)]
+    /// public string CustomerCode { get; set; }
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class PhoneUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
+    public class AlphaFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
+
         private string _stronglyTypedDefaultValue = string.Empty;
 
         /// <inheritdoc />
         public override BoFieldTypes FieldType => BoFieldTypes.db_Alpha;
 
         /// <inheritdoc />
-        public override BoFldSubTypes SubType => BoFldSubTypes.st_Phone;
-
-        /// <inheritdoc />
-        public override int Size { get; set; } = 20;
-
+        public override int Size { get; set; } = 100;
 
         /// <inheritdoc />
         public override object DefaultValue
@@ -46,12 +44,12 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         public override object ParseValue(object value) {
-            return value?.ToString() ?? _stronglyTypedDefaultValue ?? string.Empty;
+            return value?.ToString() ?? _stronglyTypedDefaultValue ?? "";
         }
 
         /// <inheritdoc />
         public override string ToSapData(object value) {
-            return value?.ToString() ?? string.Empty;
+            return value?.ToString() ?? "";
         }
 
         /// <inheritdoc />

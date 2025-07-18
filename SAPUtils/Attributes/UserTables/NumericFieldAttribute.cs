@@ -9,31 +9,28 @@ using SAPUtils.__Internal.Attributes.UserTables;
 namespace SAPUtils.Attributes.UserTables {
     /// <summary>
     /// Represents an attribute used to mark a class property as a SAP Business One user-defined field (UDF) 
-    /// specifically for storing rate values.
+    /// specifically for storing integer numeric values.
     /// <br/>
-    /// This attribute ensures that the field is stored as `db_Float` with the subtype `st_Rate`, 
-    /// applying the system's rate accuracy settings.
+    /// This attribute ensures that the field is stored as `db_Numeric`, suitable for whole numbers, 
+    /// with a default maximum size of 11 digits.
     /// <br/>
     /// <b>Usage:</b><br/>
-    /// - Apply this attribute to properties in a user table object model to define a rate field.<br/>
-    /// - The precision is managed based on the system's rate accuracy settings.<br/>
+    /// - Apply this attribute to properties in a user table object model to define a numeric field.<br/>
+    /// - The default precision is based on the system's price accuracy.<br/>
     /// - Implements <see cref="IUserTableField{T}"/> for type-safe parsing and default value handling.<br/>
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [RateUserTableField(Name = "ExchangeRate", Description = "Exchange rate for currency conversion", Required = true)]
-    /// public double? ExchangeRate { get; set; }
+    /// [NumericUserTableField(Name = "Age", Description = "Customer age", Required = true)]
+    /// public int? Age { get; set; }
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class RateUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<double?> {
-        private double? _stronglyTypedDefaultValue;
+    public class NumericFieldAttribute : UserTableFieldAttributeBase, IUserTableField<int?> {
+        private int? _stronglyTypedDefaultValue;
 
         /// <inheritdoc />
-        public override BoFieldTypes FieldType => BoFieldTypes.db_Float;
-
-        /// <inheritdoc />
-        public override BoFldSubTypes SubType => BoFldSubTypes.st_Rate;
+        public override BoFieldTypes FieldType => BoFieldTypes.db_Numeric;
 
         /// <inheritdoc />
         public override int Size { get; set; } = 11;
@@ -42,12 +39,12 @@ namespace SAPUtils.Attributes.UserTables {
         public override object DefaultValue
         {
             get => _stronglyTypedDefaultValue;
-            set => _stronglyTypedDefaultValue = (double?)ParseValue(value);
+            set => _stronglyTypedDefaultValue = (int?)ParseValue(value);
         }
 
         /// <inheritdoc/>
         public override object ParseValue(object value) {
-            return double.TryParse(value?.ToString(), out double result) ? result : 0;
+            return int.TryParse(value?.ToString(), out int result) ? result : 0;
         }
 
         /// <inheritdoc />
@@ -56,12 +53,12 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
-        public override Type Type => typeof(int);
+        public override Type Type => typeof(int?);
 
         /// <inheritdoc />
-        double? IUserTableField<double?>.DefaultValue => _stronglyTypedDefaultValue;
+        int? IUserTableField<int?>.DefaultValue => _stronglyTypedDefaultValue;
 
         /// <inheritdoc />
-        double? IUserTableField<double?>.ParseValue(object value) => (int?)ParseValue(value);
+        int? IUserTableField<int?>.ParseValue(object value) => (int?)ParseValue(value);
     }
 }

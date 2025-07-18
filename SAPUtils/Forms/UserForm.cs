@@ -108,6 +108,11 @@ namespace SAPUtils.Forms {
                     }
                 }
                 else if (uidValue != null) {
+
+                    if (!string.IsNullOrEmpty(uidValue) && FormUtils.ExistForm(uidValue, Application)) {
+                        Logger.Trace("Closing existing form with UID: {0}", uidValue);
+                        Application.Forms.Item(uidValue).Close();
+                    }
                     attrb = xmlDoc.CreateAttribute("uid");
                     attrb.Value = uidValue;
                     formNode.Attributes?.Append(attrb);

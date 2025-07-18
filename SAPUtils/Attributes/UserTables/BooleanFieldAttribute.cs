@@ -25,7 +25,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class BooleanUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<bool?> {
+    public class BooleanFieldAttribute : UserTableFieldAttributeBase, IUserTableField<bool?> {
         private bool? _stronglyTypedDefaultValue;
 
         /// <inheritdoc />

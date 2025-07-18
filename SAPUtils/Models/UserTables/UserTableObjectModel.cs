@@ -23,7 +23,7 @@ namespace SAPUtils.Models.UserTables {
     public abstract class UserTableObjectModel : IUserTableObjectModel {
 
         internal string OriginalCode { get; private set; }
-        internal bool? OriginalActive { get; private set; }
+        internal bool? OriginalActive { get; set; }
         internal DateTime OriginalCreatedAt { get; private set; }
         internal int OriginalCreatedBy { get; private set; }
 
@@ -36,9 +36,9 @@ namespace SAPUtils.Models.UserTables {
         /// <inheritdoc />
         public abstract bool Add();
         /// <inheritdoc />
-        public abstract bool Delete(bool restore = false);
+        public abstract bool Delete();
         /// <inheritdoc />
-        public abstract bool Update();
+        public abstract bool Update(bool restore = false);
         /// <inheritdoc />
         public abstract bool Save();
 
@@ -86,12 +86,22 @@ namespace SAPUtils.Models.UserTables {
             finally {
                 if (rs != null && Marshal.IsComObject(rs)) Marshal.ReleaseComObject(rs);
             }
-            data = data
-                .OrderByDescending(e => e is ISoftDeletable deletable && deletable.Active)
-                .ThenBy(e => e.Code)
-                .ToList();
+            PrimaryKeyStrategy pks = userTable.PrimaryKeyStrategy;
+            if (pks == PrimaryKeyStrategy.Serie) {
+                data = data
+                    .OrderByDescending(e => e is ISoftDeletable deletable && deletable.Active)
+                    .ThenBy(e => int.TryParse(e.Code, out int num) ? num : int.MaxValue)
+                    .ToList();
+            }
+            else {
+                data = data
+                    .OrderByDescending(e => e is ISoftDeletable deletable && deletable.Active)
+                    .ThenBy(e => e.Code)
+                    .ToList();
+            }
             return data;
         }
+
         private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T item) where T : IUserTableObjectModel, new() {
             ILogger log = Logger.Instance;
             foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(type)) {
@@ -99,15 +109,15 @@ namespace SAPUtils.Models.UserTables {
                     ? propertyInfo.Name
                     : userTableField.Name;
                 log.Trace("Processing field: {0}.{1}", tableName, fieldName);
-                if (userTableField is DateTimeUserTableFieldAttribute dtUserTableField) {
+                if (userTableField is DateTimeFieldAttribute dtUserTableField) {
                     Field date = fields.Item($"U_{fieldName}Date");
                     Field time = fields.Item($"U_{fieldName}Time");
-                    if (date.IsNull() != BoYesNoEnum.tNO || time.IsNull() != BoYesNoEnum.tNO) continue;
+                    if (date.IsNull() == BoYesNoEnum.tYES && time.IsNull() == BoYesNoEnum.tYES) continue;
 
                     DateTime d = (DateTime)date.Value;
-                    DateTime t = (DateTime)time.Value;
+                    DateTime t = dtUserTableField.ParseTimeValue(time.Value);
                     DateTime dt = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second, d.Kind);
-                    propertyInfo.SetValue(item, dtUserTableField.ParseValue(dt));
+                    propertyInfo.SetValue(item, dt);
                 }
                 else {
                     Field field = fields.Item($"U_{fieldName}");
@@ -274,16 +284,25 @@ namespace SAPUtils.Models.UserTables {
         }
 
         /// <inheritdoc />
-        public override bool Update() {
+        public override bool Update(bool restore = false) {
             Log.Debug("Attempting to update {0} in table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
             try {
                 Log.Trace("Retrieving SAP User Table `{0}`...", _userTableAttribute.Name);
                 UserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
                 RestoreOriginalCode();
 
-                if (table.GetByKey(Code)) return Save();
+                if (!table.GetByKey(Code)) {
+                    throw new ItemDoNotExistException(GetType().Name, _userTableAttribute.Name, Code);
+                }
 
-                throw new ItemDoNotExistException(GetType().Name, _userTableAttribute.Name, Code);
+                if (!restore || !(this is ISoftDeletable deletable)) return Save();
+                bool? temp = OriginalActive;
+                OriginalActive = deletable.Active;
+                if (Save()) {
+                    return true;
+                }
+                OriginalActive = temp;
+                return false;
             }
             catch (ItemDoNotExistException ex) {
                 Log.Error(ex);
@@ -296,7 +315,7 @@ namespace SAPUtils.Models.UserTables {
         }
 
         /// <inheritdoc />
-        public override bool Delete(bool restore = false) {
+        public override bool Delete() {
             Log.Debug("Attempting to delete {0} from table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
             try {
                 UserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
@@ -309,11 +328,22 @@ namespace SAPUtils.Models.UserTables {
 
                 int result = -1;
                 if (this is ISoftDeletable softDeletable) {
-                    if (!restore) {
+                    if (OriginalActive.HasValue) {
+                        bool temp = OriginalActive.Value;
                         softDeletable.Active = false;
+                        OriginalActive = false;
+                        if (Save()) {
+                            result = 0;
+                        }
+                        else {
+                            OriginalActive = !temp;
+                        }
                     }
-                    if (Save()) {
-                        result = 0;
+                    else {
+                        softDeletable.Active = false;
+                        if (Save()) {
+                            result = 0;
+                        }
                     }
                 }
                 else {
@@ -399,17 +429,17 @@ namespace SAPUtils.Models.UserTables {
                     }
 
                     switch (userTableField) {
-                        case DateTimeUserTableFieldAttribute _:
+                        case DateTimeFieldAttribute _:
                         {
                             DateTime? dateTime = (DateTime?)value;
                             table.UserFields.Fields.Item($"U_{fieldName}Date").Value = dateTime;
                             table.UserFields.Fields.Item($"U_{fieldName}Time").Value = dateTime;
                             break;
                         }
-                        case DateUserTableFieldAttribute _:
-                        case TimeUserTableFieldAttribute _:
+                        case DateFieldAttribute _:
+                        case TimeFieldAttribute _:
                         {
-                            DateTime? dateTime = (DateTime?)value;
+                            DateTime dateTime = (DateTime?)value ?? DateTime.MinValue;
                             table.UserFields.Fields.Item($"U_{fieldName}").Value = dateTime;
                             break;
                         }
@@ -448,10 +478,12 @@ namespace SAPUtils.Models.UserTables {
 
         private void GenerateCode(PrimaryKeyStrategy primaryKeyStrategy, SAPbobsCOM.IUserTable table) {
             switch (primaryKeyStrategy) {
-                case PrimaryKeyStrategy.Manual when Code == null:
+                case PrimaryKeyStrategy.Manual when string.IsNullOrEmpty(Code):
                     throw new CodeNotSetException(_userTableAttribute.Name);
                 case PrimaryKeyStrategy.Manual when table.GetByKey(Code):
                     throw new ItemAlreadyExistException(_userTableAttribute.Name, Code);
+                case PrimaryKeyStrategy.Manual:
+                    break;
                 case PrimaryKeyStrategy.Guid:
                     Code = Guid.NewGuid().ToString();
                     break;

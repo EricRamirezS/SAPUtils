@@ -2,6 +2,7 @@
 using System.Globalization;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
+using SAPUtils.Utils;
 
 // ReSharper disable UnusedType.Global
 // ReSharper disable ClassNeverInstantiated.Global
@@ -26,7 +27,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class DateUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<DateTime?> {
+    public class DateFieldAttribute : UserTableFieldAttributeBase, IUserTableField<DateTime?> {
         private DateTime? _stronglyTypedDefaultValue;
 
         /// <inheritdoc />
@@ -44,23 +45,25 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         public override object ParseValue(object value) {
-            if (value is DateTime dt)
-                return dt;
-
-            if (DateTime.TryParseExact(
-                    value?.ToString(),
-                    "yyyyMMdd",
-                    CultureInfo.InvariantCulture,
-                    DateTimeStyles.None,
-                    out DateTime result) || DateTime.TryParse(value?.ToString(), out result))
-                return result;
-
-            return null;
+            return Parsers.ParseDate(value);
         }
 
         /// <inheritdoc />
         public override string ToSapData(object value) {
-            return ((DateTime)value).ToString("yyyyMMdd");
+            switch (value) {
+                case null:
+                    return "";
+                case DateTime dt:
+                    return dt == DateTime.MinValue ? "" : dt.ToString("yyyyMMdd");
+                case string str:
+                {
+                    return DateTime.TryParseExact(str, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsed)
+                        ? parsed.ToString("yyyyMMdd")
+                        : "";
+                }
+                default:
+                    return "";
+            }
         }
 
         /// <inheritdoc />

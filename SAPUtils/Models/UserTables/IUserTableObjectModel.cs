@@ -28,13 +28,13 @@ namespace SAPUtils.Models.UserTables {
         /// Deletes the current record from the SAP user table.  
         /// </summary>
         /// <returns>True if the operation is successful, otherwise false.</returns>
-        bool Delete(bool restore = false);
+        bool Delete();
 
         /// <summary>
         /// Updates an existing record in the SAP user table.  
         /// </summary>
         /// <returns>True if the operation is successful, otherwise false.</returns>
-        bool Update();
+        bool Update(bool restore = false);
 
         /// <summary>
         /// Saves the record, performing either an insert or an update depending on  

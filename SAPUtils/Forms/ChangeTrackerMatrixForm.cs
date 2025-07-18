@@ -128,6 +128,8 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPUtils.Models.UserTables.IUserTableObjectModel"/>
         private DataTable _dataTable;
 
+        private EditText _helper;
+
         /// <summary>
         /// Stores the <see cref="Matrix"/> that is utilized in the form to display and manage data.
         /// This variable is initialized during the component initialization phase using the
@@ -171,7 +173,8 @@ namespace SAPUtils.Forms {
         /// <seealso cref="IAuditableUser"/>
         protected ChangeTrackerMatrixForm(
             bool useAddContextButton = true,
-            bool userDeleteContextButton = true) {
+            bool userDeleteContextButton = true,
+            string uid = null) : base(uid) {
             _useAddContextButton = useAddContextButton;
             _userDeleteContextButton = userDeleteContextButton;
             _tableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
@@ -184,17 +187,23 @@ namespace SAPUtils.Forms {
 
             UpdateMatrix();
 
+            EnableMenu("1281", false); // find button
+            EnableMenu("1282", true); // add button
+            EnableMenu("1304", true); //Enable Refresh
+
             (DataColumn DataTableColumn, Column MatrixColumn) value;
             if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue("Active", out value)) value.MatrixColumn.Visible = true;
+                if (ColumnInfo.TryGetValue("Active", out value)) value.MatrixColumn.Visible = false;
             }
             if (typeof(IAuditableDate).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue("CreatedAt", out value)) value.MatrixColumn.Visible = true;
-                if (ColumnInfo.TryGetValue("UpdatedAt", out value)) value.MatrixColumn.Visible = true;
+                if (ColumnInfo.TryGetValue("CreatedAtDate", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue("UpdatedAtDate", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue("CreatedAtTime", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue("UpdatedAtTime", out value)) value.MatrixColumn.Visible = false;
             }
             if (typeof(IAuditableUser).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue("CreatedBy", out value)) value.MatrixColumn.Visible = true;
-                if (ColumnInfo.TryGetValue("UpdatedBy", out value)) value.MatrixColumn.Visible = true;
+                if (ColumnInfo.TryGetValue("CreatedBy", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue("UpdatedBy", out value)) value.MatrixColumn.Visible = false;
             }
         }
 
@@ -223,7 +232,6 @@ namespace SAPUtils.Forms {
         /// <returns>The <see cref="SAPbouiCOM.Button"/> instance representing the save button in the form.</returns>
         /// <seealso cref="SAPbouiCOM.Button"/>
         abstract protected Button GetSaveButton();
-
 
         /// <summary>
         /// Determines if there are unsaved changes in the current data collection.

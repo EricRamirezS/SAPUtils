@@ -8,29 +8,32 @@ using SAPUtils.__Internal.Attributes.UserTables;
 namespace SAPUtils.Attributes.UserTables {
     /// <summary>
     /// Represents an attribute used to mark a class property as a SAP Business One user-defined field (UDF) 
-    /// for storing alphanumeric data.
+    /// specifically for storing address-related data.
     /// <br/>
-    /// This attribute is designed for fields that store string values in SAP Business One, ensuring the 
-    /// correct field type (`db_Alpha`) and default subtype (`st_None`).
+    /// This attribute is designed for fields that store addresses within SAP Business One, ensuring the 
+    /// correct field type (`db_Alpha`) and subtype (`st_Address`).
     /// <br/>
     /// <b>Usage:</b><br/>
-    /// - Apply this attribute to properties in a user table object model to define an alphanumeric field.<br/>
-    /// - The default maximum size is <b>50 characters</b>.<br/>
+    /// - Apply this attribute to properties in a user table object model to define an address field.<br/>
+    /// - The default maximum size is **254 characters**.<br/>
     /// - Implements <see cref="IUserTableField{T}"/> for type-safe parsing and default value handling.<br/>
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [AlphaUserTableField(Name = "CustomerCode", Description = "Unique Customer Identifier", Required = true)]
-    /// public string CustomerCode { get; set; }
+    /// [AddressUserTableField(Name = "BillingAddress", Description = "Customer Billing Address", Required = true)]
+    /// public string BillingAddress { get; set; }
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class AlphaUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
+    public class AddressFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
 
         private string _stronglyTypedDefaultValue = string.Empty;
 
         /// <inheritdoc />
         public override BoFieldTypes FieldType => BoFieldTypes.db_Alpha;
+
+        /// <inheritdoc />
+        public override BoFldSubTypes SubType => BoFldSubTypes.st_Address;
 
         /// <inheritdoc />
         public override int Size { get; set; } = 100;
@@ -44,12 +47,12 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         public override object ParseValue(object value) {
-            return value?.ToString() ?? _stronglyTypedDefaultValue ?? "";
+            return value?.ToString() ?? _stronglyTypedDefaultValue ?? string.Empty;
         }
 
         /// <inheritdoc />
         public override string ToSapData(object value) {
-            return value?.ToString() ?? "";
+            return value?.ToString() ?? string.Empty;
         }
 
         /// <inheritdoc />

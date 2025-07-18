@@ -39,7 +39,7 @@ namespace SAPUtils {
                 IUserTable userTable = (IUserTable)table.GetCustomAttributes(typeof(UserTableAttribute), true).First();
 
                 Logger.Trace("Creating user table: {0}", userTable.Name);
-                CreateUserTable(userTable.Name, userTable.Description);
+                CreateUserTable(userTable);
 
                 foreach (PropertyInfo propertyInfo in table.GetProperties()) {
                     if (propertyInfo.Name == "Code" || propertyInfo.Name == "Name") continue;
@@ -54,14 +54,14 @@ namespace SAPUtils {
                         }
 
                         if (string.IsNullOrWhiteSpace(userTableField.Description)
-                            && typeof(DateTimeUserTableFieldAttribute) != userTableField.GetType()) {
+                            && typeof(DateTimeFieldAttribute) != userTableField.GetType()) {
                             userTableField.Description = propertyInfo.Name;
                         }
                     }
                     else {
                         userTableField = AuditableField.GetUserTableField(table, propertyInfo);
                     }
-                    if (userTableField is DateTimeUserTableFieldAttribute dtUserTableField) {
+                    if (userTableField is DateTimeFieldAttribute dtUserTableField) {
                         CreateUserTableField(
                             userTable.Name,
                             dtUserTableField.Name + "Date",
@@ -112,30 +112,31 @@ namespace SAPUtils {
         }
 
 
-        private void CreateUserTable(string tableName, string tableDescription) {
+        private void CreateUserTable(IUserTable userTable) {
             IUserTablesMD userTableMd = null;
 
             try {
                 userTableMd = Company.GetBusinessObject(BoObjectTypes.oUserTables) as UserTablesMD;
 
-                Logger.Trace("Verifying if table {0} already exist", tableName);
-                if (userTableMd != null && userTableMd.GetByKey(tableName)) {
-                    Logger.Info("Table {0} already exist", tableName);
+                Logger.Trace("Verifying if table {0} already exist", userTable.Name);
+                if (userTableMd != null && userTableMd.GetByKey(userTable.Name)) {
+                    Logger.Info("Table {0} already exist", userTable.Name);
                     return;
                 }
 
                 if (userTableMd == null) return;
 
-                userTableMd.TableName = tableName;
-                userTableMd.TableDescription = tableDescription;
+                userTableMd.TableName = userTable.Name;
+                userTableMd.TableDescription = userTable.Description;
+                userTableMd.TableType = userTable.TableType;
 
                 if (userTableMd.Add() == 0) {
-                    Logger.Info("Table {0} created", tableName);
+                    Logger.Info("Table {0} created", userTable.Name);
                     return;
                 }
 
                 string error = Company.GetLastErrorDescription();
-                throw new Exception($"No es posible agregar la tabla de usuario {tableName}. Error {error}");
+                throw new Exception($"No es posible agregar la tabla de usuario {userTable.Name}. Error {error}");
             }
             finally {
                 if (userTableMd != null) Marshal.ReleaseComObject(userTableMd);
@@ -259,16 +260,28 @@ namespace SAPUtils {
                     Logger.Error("UserTableFieldAttribute not found in {0}.{1}", table.Name, propertyInfo.Name);
                     valid = false;
                 }
-                else if (userTableField.Type != propertyInfo.PropertyType) {
+                else if (NormalizeType(userTableField.Type) != NormalizeType(propertyInfo.PropertyType)) {
                     Logger.Error(
                         "UserTableFieldAttribute {0}.{1} is not valid. " +
                         "Expected property type: {2}, but got: {3}",
                         table.Name, propertyInfo.Name, userTableField.Type, propertyInfo.PropertyType);
                     valid = false;
                 }
+                else {
+                    userTableField.Name = string.IsNullOrWhiteSpace(userTableField.Name)
+                        ? propertyInfo.Name
+                        : userTableField.Name;
+                    userTableField.Description = string.IsNullOrWhiteSpace(userTableField.Description)
+                        ? userTableField.Name
+                        : userTableField.Description;
+                }
             }
 
             return valid;
+
+            Type NormalizeType(Type type) =>
+                Nullable.GetUnderlyingType(type) ?? type;
+
         }
     }
 }

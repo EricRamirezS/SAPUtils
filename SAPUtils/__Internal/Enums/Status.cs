@@ -38,6 +38,8 @@ namespace SAPUtils.__Internal.Enums {
         /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
         Modified,
 
+        ModifiedRestored,
+
         /// <summary>
         /// Represents a newly created item or record within the context of the application.
         /// </summary>

@@ -54,7 +54,7 @@ namespace SAPUtils.__Internal.Utils {
             };
         }
 
-        public static ILogger Instance => _instace ?? (_instace = new Logger(SapAddon._company));
+        public static ILogger Instance => _instace ?? (_instace = new Logger(SapAddon.__Company));
 
         internal static LoggerSettings LoadSettings() {
             if (!File.Exists(LogSettingFileName)) {

@@ -8,35 +8,34 @@ using SAPUtils.__Internal.Attributes.UserTables;
 namespace SAPUtils.Attributes.UserTables {
     /// <summary>
     /// Represents an attribute used to mark a class property as a SAP Business One user-defined field (UDF) 
-    /// specifically for storing address-related data.
+    /// specifically for storing phone numbers.
     /// <br/>
-    /// This attribute is designed for fields that store addresses within SAP Business One, ensuring the 
-    /// correct field type (`db_Alpha`) and subtype (`st_Address`).
+    /// This attribute ensures that the field is stored as `db_Alpha` with the subtype `st_Phone`, 
+    /// providing appropriate formatting for phone numbers.
     /// <br/>
     /// <b>Usage:</b><br/>
-    /// - Apply this attribute to properties in a user table object model to define an address field.<br/>
-    /// - The default maximum size is **254 characters**.<br/>
+    /// - Apply this attribute to properties in a user table object model to define a phone number field.<br/>
     /// - Implements <see cref="IUserTableField{T}"/> for type-safe parsing and default value handling.<br/>
     /// <br/>
     /// <b>Example:</b>
     /// <code>
-    /// [AddressUserTableField(Name = "BillingAddress", Description = "Customer Billing Address", Required = true)]
-    /// public string BillingAddress { get; set; }
+    /// [PhoneUserTableField(Name = "CustomerPhone", Description = "Primary contact phone number", Required = true)]
+    /// public string CustomerPhone { get; set; }
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class AddressUserTableFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
-
+    public class PhoneFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
         private string _stronglyTypedDefaultValue = string.Empty;
 
         /// <inheritdoc />
         public override BoFieldTypes FieldType => BoFieldTypes.db_Alpha;
 
         /// <inheritdoc />
-        public override BoFldSubTypes SubType => BoFldSubTypes.st_Address;
+        public override BoFldSubTypes SubType => BoFldSubTypes.st_Phone;
 
         /// <inheritdoc />
-        public override int Size { get; set; } = 100;
+        public override int Size { get; set; } = 20;
+
 
         /// <inheritdoc />
         public override object DefaultValue

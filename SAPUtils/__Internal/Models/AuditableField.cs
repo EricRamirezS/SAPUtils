@@ -32,7 +32,7 @@ namespace SAPUtils.__Internal.Models {
 
             switch (propertyInfo.Name) {
                 case "Active" when Implements<ISoftDeletable>():
-                    return new BooleanUserTableFieldAttribute {
+                    return new BooleanFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = true,
                         Required = true,
@@ -43,7 +43,7 @@ namespace SAPUtils.__Internal.Models {
                         Description = "Activo",
                     };
                 case "CreatedAt" when Implements<IAuditableDate>():
-                    return new DateTimeUserTableFieldAttribute {
+                    return new DateTimeFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = DateTime.Now,
                         Required = true,
@@ -51,7 +51,7 @@ namespace SAPUtils.__Internal.Models {
                         TimeDescription = "Hora de creación",
                     };
                 case "UpdatedAt" when Implements<IAuditableDate>():
-                    return new DateTimeUserTableFieldAttribute {
+                    return new DateTimeFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = DateTime.Now,
                         Required = true,
@@ -59,14 +59,14 @@ namespace SAPUtils.__Internal.Models {
                         TimeDescription = "Hora de actualización",
                     };
                 case "CreatedBy" when Implements<IAuditableUser>():
-                    return new NumericUserTableFieldAttribute {
+                    return new NumericFieldAttribute {
                         Name = propertyInfo.Name,
                         Description = "Creado por",
                         Required = true,
                         LinkedSystemObject = UDFLinkedSystemObjectTypesEnum.ulUsers,
                     };
                 case "UpdatedBy" when Implements<IAuditableUser>():
-                    return new NumericUserTableFieldAttribute {
+                    return new NumericFieldAttribute {
                         Name = propertyInfo.Name,
                         Description = "Actualizado por",
                         Required = true,
