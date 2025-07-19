@@ -128,7 +128,7 @@ namespace SAPUtils.Forms {
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                    for (int j = 2; j < _matrix.Columns.Count - 1; j++) {
+                    for (int j = 1; j < _matrix.Columns.Count - 1; j++) {
                         bool cellEditable = _matrix.CommonSetting.GetCellEditable(i + 1, j);
                         if (!cellEditable) {
                             _matrix.CommonSetting.SetCellBackColor(i + 1, j, SapColors.ColorToInt(SapColors.DisabledCellGray));
@@ -140,8 +140,8 @@ namespace SAPUtils.Forms {
                     if (manualCode) {
                         if (_data[i].Status == Status.New || _data[i].Status == Status.Discard) continue;
                     }
-                    _matrix.CommonSetting.SetCellBackColor(i + 1, 2, SapColors.ColorToInt(SapColors.DisabledCellGray));
-                    _matrix.CommonSetting.SetCellFontStyle(i + 1, 2, BoFontStyle.fs_Bold);
+                    _matrix.CommonSetting.SetCellBackColor(i + 1, 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
+                    _matrix.CommonSetting.SetCellFontStyle(i + 1, 1, BoFontStyle.fs_Bold);
                 }
             }
             catch (Exception e) {
