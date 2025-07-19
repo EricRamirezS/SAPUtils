@@ -63,6 +63,7 @@ namespace SAPUtils.Forms {
                 if (!changed) return;
                 if (status == Status.Normal) {
                     _data[rowIndex] = (item, Status.Modified);
+                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
                 }
                 UpdateMatrixColors();
             }
@@ -93,6 +94,7 @@ namespace SAPUtils.Forms {
                     propertyField.Property.SetValue(item, newFinalValue);
                     if (status == Status.Normal) {
                         _data[rowIndex] = (item, Status.Modified);
+                        ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
                     }
                     UpdateMatrixColors();
                 }
@@ -110,6 +112,7 @@ namespace SAPUtils.Forms {
                     propertyField.Property.SetValue(item, newFinalValue);
                     if (status == Status.Normal) {
                         _data[rowIndex] = (item, Status.Modified);
+                        ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
                     }
                     UpdateMatrixColors();
                 }
@@ -129,6 +132,7 @@ namespace SAPUtils.Forms {
                 propertyField.Property.SetValue(item, newValue);
                 if (status == Status.Normal) {
                     _data[rowIndex] = (item, Status.Modified);
+                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
                 }
                 UpdateMatrixColors();
             }
@@ -155,18 +159,24 @@ namespace SAPUtils.Forms {
                         case ISoftDeletable sd when sd.Active == false && status == Status.Normal:
                             sd.Active = true;
                             _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
                             break;
                         case ISoftDeletable sd2 when sd2.Active && status == Status.ModifiedRestored:
                             sd2.Active = false;
                             _data[rowIndex - 1] = (item, Status.Delete);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.Delete.GetReadableName();
                             break;
                         default:
                         {
-                            if (status == Status.New || status == Status.NewDelete) {
-                                _data[rowIndex - 1] = (item, status == Status.NewDelete ? Status.New : Status.NewDelete);
+                            if (status == Status.New || status == Status.Discard) {
+                                Status updated = status == Status.Discard ? Status.New : Status.Discard;
+                                _data[rowIndex - 1] = (item, updated);
+                                ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
                             }
                             else {
-                                _data[rowIndex - 1] = (item, status == Status.Delete ? Status.Modified : Status.Delete);
+                                Status updated = status == Status.Delete ? Status.Modified : Status.Delete;
+                                _data[rowIndex - 1] = (item, updated);
+                                ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
                             }
                             break;
                         }
@@ -217,6 +227,12 @@ namespace SAPUtils.Forms {
 
             LoadData();
             UpdateMatrix();
+        }
+
+        /// <inheritdoc />
+        override protected void OnFormResizeAfter(SBOItemEventArg pVal) {
+            base.OnFormResizeAfter(pVal);
+            _matrix.AutoResizeColumns();
         }
         /// <inheritdoc />
         override protected void OnFormCloseBefore(SBOItemEventArg pVal, out bool bubbleEvent) {

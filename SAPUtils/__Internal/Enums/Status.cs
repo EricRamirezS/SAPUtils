@@ -1,17 +1,22 @@
-﻿using SAPUtils.Forms;
+﻿using System;
+using SAPUtils.Forms;
 
 namespace SAPUtils.__Internal.Enums {
     /// <summary>
-    /// Represents a newly created item or record within the context of the application.
+    /// Describes the state or lifecycle stage of an entity, used for tracking changes
+    /// or modifications in data operations.
     /// </summary>
     /// <remarks>
-    /// This status is used to indicate that the item has been newly added but not yet persisted or finalized.
+    /// The <see cref="Status"/> enumeration provides various states that represent the changes
+    /// applied to an entity. Each state conveys the entity's relation to its original, current,
+    /// or future state during data processing.
     /// </remarks>
-    /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}" />
-    /// <seealso cref="Status.Normal" />
-    /// <seealso cref="Status.Modified" />
-    /// <seealso cref="Status.NewDelete" />
-    /// <seealso cref="Status.Delete" />
+    /// <seealso cref="SAPUtils.__Internal.Enums.Status.Normal"/>
+    /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
+    /// <seealso cref="SAPUtils.__Internal.Enums.Status.ModifiedRestored"/>
+    /// <seealso cref="SAPUtils.__Internal.Enums.Status.New"/>
+    /// <seealso cref="SAPUtils.__Internal.Enums.Status.Discard"/>
+    /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
     internal enum Status {
         /// <summary>
         /// Represents the default or unmodified state of an entity.
@@ -25,7 +30,7 @@ namespace SAPUtils.__Internal.Enums {
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.New"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
-        /// <seealso cref="SAPUtils.__Internal.Enums.Status.NewDelete"/>
+        /// <seealso cref="Discard"/>
         Normal,
 
         /// <summary>
@@ -38,6 +43,13 @@ namespace SAPUtils.__Internal.Enums {
         /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
         Modified,
 
+        /// <summary>
+        /// The object was previously soft-deleted and is now marked for restoration.
+        /// Additionally, one or more of its fields have been modified since deletion.
+        /// </summary>
+        /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
+        /// <seealso cref="SAPUtils.__Internal.Enums.Status.Discard"/>
+        /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
         ModifiedRestored,
 
         /// <summary>
@@ -50,7 +62,7 @@ namespace SAPUtils.__Internal.Enums {
         /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
         /// <seealso cref="Status.Normal"/>
         /// <seealso cref="Status.Modified"/>
-        /// <seealso cref="Status.NewDelete"/>
+        /// <seealso cref="Discard"/>
         /// <seealso cref="Status.Delete"/>
         New,
 
@@ -66,7 +78,7 @@ namespace SAPUtils.__Internal.Enums {
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Normal"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
-        NewDelete,
+        Discard,
 
         /// <summary>
         /// Represents a deletion state within the <see cref="Status"/> enumeration.
@@ -79,5 +91,26 @@ namespace SAPUtils.__Internal.Enums {
         /// </remarks>
         /// <seealso cref="ChangeTrackerMatrixForm{T}"/>
         Delete,
+    }
+
+    internal static class StatusExtensions {
+        public static string GetReadableName(this Status status) {
+            switch (status) {
+                case Status.Normal:
+                    return "✅ Normal";
+                case Status.Modified:
+                    return "✏️ Modificar";
+                case Status.ModifiedRestored:
+                    return "🔁 Restaurar";
+                case Status.New:
+                    return "➕ Nuevo";
+                case Status.Discard:
+                    return "❌ Descartar";
+                case Status.Delete:
+                    return "🗑️ Eliminar";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            }
+        }
     }
 }

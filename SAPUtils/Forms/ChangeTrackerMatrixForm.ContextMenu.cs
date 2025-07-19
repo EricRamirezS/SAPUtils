@@ -34,7 +34,7 @@ namespace SAPUtils.Forms {
                             restore = !e.Active && status != Status.Modified;
                         }
                         else {
-                            restore = status == Status.Delete || status == Status.NewDelete;
+                            restore = status == Status.Delete || status == Status.Discard;
                         }
                     }
                     MenuCreationParams creationParams = (MenuCreationParams)Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams);
