@@ -66,18 +66,31 @@
     <Compile Include="Attributes\UserTables\TimeFieldAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs"/>
+      <Compile Include="Events\AppEvents.cs"/>
+      <Compile Include="Events\FormDataEvents.cs"/>
+      <Compile Include="Events\ItemEvents.cs"/>
+      <Compile Include="Events\LayoutKeyEvents.cs"/>
+      <Compile Include="Events\MenuEvents.cs"/>
+      <Compile Include="Events\PrintEvents.cs"/>
+      <Compile Include="Events\ProgressBarEvents.cs"/>
+      <Compile Include="Events\ReportDataEvents.cs"/>
+      <Compile Include="Events\RightClickEvents.cs"/>
+      <Compile Include="Events\ServerInvokeCompletedEvents.cs"/>
+      <Compile Include="Events\StatusBarEvents.cs"/>
+      <Compile Include="Events\UDOEvents.cs"/>
+      <Compile Include="Events\WidgetEvents.cs"/>
       <Compile Include="Exceptions\AddontNotInitializedException.cs"/>
       <Compile Include="Exceptions\CodeNotSetException.cs"/>
       <Compile Include="Exceptions\ItemAlreadyExistException.cs"/>
       <Compile Include="Exceptions\ItemDoNotExistException.cs"/>
       <Compile Include="Exceptions\UserTableAttributeNotFound.cs"/>
-    <Compile Include="Extensions\CellExtension.cs"/>
-    <Compile Include="Extensions\StringExtension.cs"/>
-    <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs"/>
+      <Compile Include="Extensions\CellExtension.cs"/>
+      <Compile Include="Extensions\StringExtension.cs"/>
+      <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs"/>
       <Compile Include="Forms\ChangeTrackerMatrixForm.ContextMenu.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ChangeTrackerMatrixForm.cs"/>
+      <Compile Include="Forms\ChangeTrackerMatrixForm.cs"/>
       <Compile Include="Forms\ChangeTrackerMatrixForm.DataHandling.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
@@ -87,41 +100,43 @@
       <Compile Include="Forms\ChangeTrackerMatrixForm.Initialize.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\UserForm.cs"/>
+      <Compile Include="Forms\UserForm.cs"/>
       <Compile Include="Forms\UserForm.IForm.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
       <Compile Include="Forms\UserForm.Reflections.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Models\Menu\MenuItem.cs"/>
-    <Compile Include="Models\UserTables\IAuditable.cs"/>
-    <Compile Include="Models\UserTables\IAuditableDate.cs"/>
-    <Compile Include="Models\UserTables\IAuditableUser.cs"/>
-    <Compile Include="Models\UserTables\ISoftDeletable.cs"/>
-    <Compile Include="Models\UserTables\IUserFieldValidValue.cs"/>
-    <Compile Include="Models\UserTables\IUserTableObjectModel.cs"/>
+      <Compile Include="Models\Menu\MenuItem.cs"/>
+      <Compile Include="Models\UserTables\IAuditable.cs"/>
+      <Compile Include="Models\UserTables\IAuditableDate.cs"/>
+      <Compile Include="Models\UserTables\IAuditableUser.cs"/>
+      <Compile Include="Models\UserTables\ISoftDeletable.cs"/>
+      <Compile Include="Models\UserTables\IUserFieldValidValue.cs"/>
+      <Compile Include="Models\UserTables\IUserTableObjectModel.cs"/>
       <Compile Include="Models\UserTables\UserTableObjectModel.cs">
       <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utils\FormUtils.cs"/>
-    <Compile Include="Utils\ILogger.cs"/>
-    <Compile Include="Utils\Parsers.cs"/>
-    <Compile Include="Utils\SapColors.cs"/>
-    <Compile Include="Utils\SapUtils.cs"/>
-    <Compile Include="Utils\TopMostDialog.cs"/>
+      <Compile Include="Utils\FormUtils.cs"/>
+      <Compile Include="Utils\ILogger.cs"/>
+      <Compile Include="Utils\Parsers.cs"/>
+      <Compile Include="Utils\SapColors.cs"/>
+      <Compile Include="Utils\SapUtils.cs"/>
+      <Compile Include="Utils\TopMostDialog.cs"/>
       <Compile Include="__Internal\Attributes\UserTables\IUserField.cs"/>
-    <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs"/>
-    <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs"/>
+      <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs"/>
+      <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs"/>
       <Compile Include="__Internal\Attributes\UserTables\UserTableFieldTyped.cs">
           <DependentUpon>IUserTableField.cs</DependentUpon>
       </Compile>
-    <Compile Include="__Internal\Enums\LogLevel.cs"/>
-    <Compile Include="__Internal\Enums\Status.cs"/>
-    <Compile Include="__Internal\Models\AuditableField.cs"/>
-    <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
-    <Compile Include="__Internal\Models\UserTableMetadataCache.cs"/>
-    <Compile Include="__Internal\Repository\Repository.cs"/>
+      <Compile Include="__Internal\Enums\LogLevel.cs"/>
+      <Compile Include="__Internal\Enums\Status.cs"/>
+      <Compile Include="__Internal\Events\EventSubscriber.cs"/>
+      <Compile Include="__Internal\Extensions\MatrixExtensions.cs"/>
+      <Compile Include="__Internal\Models\AuditableField.cs"/>
+      <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
+      <Compile Include="__Internal\Models\UserTableMetadataCache.cs"/>
+      <Compile Include="__Internal\Repository\Repository.cs"/>
       <Compile Include="__Internal\SQL\CommonQueries.Abstract.cs">
           <DependentUpon>CommonQueries.cs</DependentUpon>
       </Compile>
@@ -131,16 +146,16 @@
       <Compile Include="__Internal\SQL\HanaQueries.cs">
           <DependentUpon>IQueries.cs</DependentUpon>
       </Compile>
-    <Compile Include="__Internal\SQL\IQueries.cs"/>
+      <Compile Include="__Internal\SQL\IQueries.cs"/>
       <Compile Include="__Internal\SQL\MSSQLQueries.cs">
           <DependentUpon>IQueries.cs</DependentUpon>
       </Compile>
-    <Compile Include="__Internal\Utils\ConsoleLogger.cs"/>
-    <Compile Include="__Internal\Utils\DummyForm.cs"/>
-    <Compile Include="__Internal\Utils\HitchIconClass.cs"/>
-    <Compile Include="__Internal\Utils\Logger.cs"/>
-    <Compile Include="__Internal\Utils\LoggerImpl.cs"/>
-    <Compile Include="__Internal\Utils\LogSettings.cs"/>
+      <Compile Include="__Internal\Utils\ConsoleLogger.cs"/>
+      <Compile Include="__Internal\Utils\DummyForm.cs"/>
+      <Compile Include="__Internal\Utils\HitchIconClass.cs"/>
+      <Compile Include="__Internal\Utils\Logger.cs"/>
+      <Compile Include="__Internal\Utils\LoggerImpl.cs"/>
+      <Compile Include="__Internal\Utils\LogSettings.cs"/>
     <Compile Include="SapAddon.cs" />
     <Compile Include="SapAddon.FileGenerator.cs">
       <DependentUpon>SapAddon.cs</DependentUpon>
@@ -154,7 +169,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Enums\"/>
+      <Folder Include="Enums\"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.35.0" />

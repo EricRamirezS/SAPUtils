@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using SAPbouiCOM;
+using SAPUtils.__Internal.Events;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Utils;
 using Application = SAPbouiCOM.Framework.Application;
@@ -71,6 +72,7 @@ namespace SAPUtils {
                 Logger.Info("Sap Addon started");
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
                 System.Windows.Forms.Application.ThreadException += ApplicationOnThreadException;
+                EventSubscriber.Subscribe();
             }
             catch (Exception ex) {
                 ConsoleLogger.Critical("Addon could not be initialized", ex);

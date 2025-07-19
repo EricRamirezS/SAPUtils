@@ -3,6 +3,7 @@ using System.Reflection;
 using SAPbobsCOM;
 using SAPbouiCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
+using SAPUtils.__Internal.Extensions;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Utils;
@@ -85,13 +86,12 @@ namespace SAPUtils.Forms {
                 }
             }
 
-            DataColumn stateColumn = _dataTable.Columns.Add("_S_T_A_T_E", BoFieldsType.ft_AlphaNumeric);
+            _dataTable.Columns.Add("_S_T_A_T_E", BoFieldsType.ft_AlphaNumeric);
             _stateColumn = _matrix.Columns.Add("_S_T_A_T_E", BoFormItemTypes.it_EDIT);
             _stateColumn.TitleObject.Caption = "[Estado]";
             _stateColumn.Editable = false;
             _stateColumn.Width = 32;
             _stateColumn.DataBind.Bind(_dataTable.UniqueID, "_S_T_A_T_E");
-            ;
 
             _matrix.SelectionMode = BoMatrixSelect.ms_Single;
 

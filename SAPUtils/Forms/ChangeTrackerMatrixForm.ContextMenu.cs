@@ -8,7 +8,7 @@ namespace SAPUtils.Forms {
         private void AddContextMenuItems() {
             try {
                 Menus menus = Application.Menus;
-                MenuItem popupMenu = menus.Item("1280"); // Menú contextual base
+                MenuItem popupMenu = menus.Item("1280"); // Base contextual Menú
 
                 if (menus.Exists(_addRowMenuUid)) {
                     menus.RemoveEx(_addRowMenuUid);
@@ -24,31 +24,30 @@ namespace SAPUtils.Forms {
                         popupMenu.SubMenus.AddEx(creationParams);
                     }
                 }
-                // ReSharper disable once InvertIf, Kept for Readability
                 if (menus.Exists(_deleteRowMenuUid)) {
                     menus.RemoveEx(_deleteRowMenuUid);
                 }
+                // ReSharper disable once InvertIf, Kept for Readability
                 if (_userDeleteContextButton) {
-                    if (!menus.Exists(_deleteRowMenuUid)) {
-                        int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
-                        bool restore = false;
-                        if (rowIndex > 0) {
-                            (T item, Status status) = _data[rowIndex - 1];
-                            if (item is ISoftDeletable e) {
-                                restore = !e.Active && status != Status.Modified;
-                            }
-                            else {
-                                restore = status == Status.Delete || status == Status.Discard;
-                            }
+                    if (menus.Exists(_deleteRowMenuUid)) return;
+                    int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
+                    bool restore = false;
+                    if (rowIndex > 0) {
+                        (T item, Status status) = _data[rowIndex - 1];
+                        if (item is ISoftDeletable e) {
+                            restore = !e.Active && status != Status.Modified;
                         }
-                        MenuCreationParams creationParams = (MenuCreationParams)Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams);
-                        creationParams.Type = BoMenuType.mt_STRING;
-                        creationParams.UniqueID = _deleteRowMenuUid;
-                        creationParams.String = restore ? "Restaurar Fila" : "Eliminar fila";
-                        creationParams.Enabled = rowIndex >= 0;
-                        creationParams.Position = 2;
-                        popupMenu.SubMenus.AddEx(creationParams);
+                        else {
+                            restore = status == Status.Delete || status == Status.Discard;
+                        }
                     }
+                    MenuCreationParams creationParams = (MenuCreationParams)Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams);
+                    creationParams.Type = BoMenuType.mt_STRING;
+                    creationParams.UniqueID = _deleteRowMenuUid;
+                    creationParams.String = restore ? "Restaurar Fila" : "Eliminar fila";
+                    creationParams.Enabled = rowIndex >= 0;
+                    creationParams.Position = 2;
+                    popupMenu.SubMenus.AddEx(creationParams);
                 }
             }
             catch (Exception ex) {
