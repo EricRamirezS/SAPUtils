@@ -26,7 +26,10 @@ namespace SAPUtils.Forms {
     /// <seealso cref="IUserTableObjectModel"/>
     /// <seealso cref="Status"/>
     /// <seealso cref="UserForm"/>
-    public abstract partial class ChangeTrackerMatrixForm<T> : UserForm where T : IUserTableObjectModel, new() {
+    public abstract partial class ChangeTrackerMatrixForm<T> : UserForm where T : UserTableObjectModel, new() {
+
+
+        private readonly string _addRowMenuUid;
 
         /// <summary>
         /// Represents a collection of data items and their associated status within the <see cref="ChangeTrackerMatrixForm{T}"/>.
@@ -42,6 +45,8 @@ namespace SAPUtils.Forms {
         /// <seealso cref="IUserTableObjectModel"/>
         /// <seealso cref="Status"/>
         private readonly List<(T Item, Status Status)> _data = new List<(T Item, Status Status)>();
+
+        private readonly string _deleteRowMenuUid;
 
         /// <summary>
         /// Represents a collection of observable data of type <typeparamref name="T"/> used to track changes in the form.
@@ -179,6 +184,8 @@ namespace SAPUtils.Forms {
             _userDeleteContextButton = userDeleteContextButton;
             _tableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
 
+            _addRowMenuUid = $"{typeof(T).Name}{UniqueID}AddRow)";
+            _deleteRowMenuUid = $"{typeof(T).Name}{UniqueID}DelRow)";
             CustomInitializeComponent();
 
             EventSubscriber();
@@ -190,6 +197,9 @@ namespace SAPUtils.Forms {
             EnableMenu("1281", false); // find button
             if (_useAddContextButton) {
                 EnableMenu("1282", true); // add button
+            }
+            else {
+                EnableMenu("1282", false); // add button
             }
             EnableMenu("1304", true); //Enable Refresh
 

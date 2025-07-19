@@ -142,68 +142,76 @@ namespace SAPUtils.Forms {
 
             if (pVal.BeforeAction) return;
             if (Application.Forms.ActiveForm.UniqueID != UniqueID) return;
-            switch (pVal.MenuUID) {
-                case "1282":
-                case "My_AddRow":
-                    T it = new T();
-                    if (it is ISoftDeletable itsd) itsd.Active = true;
-                    _observableData.Add(it);
-                    UpdateMatrix();
-                    break;
-                case "My_DeleteRow":
-                {
-                    int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
-                    if (rowIndex <= 0) return;
-                    (T item, Status status) = _data[rowIndex - 1];
-                    switch (item) {
-                        case ISoftDeletable sd when sd.Active == false && status == Status.Normal:
-                            sd.Active = true;
-                            _data[rowIndex - 1] = (item, Status.ModifiedRestored);
-                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
-                            break;
-                        case ISoftDeletable sd2 when sd2.Active && status == Status.ModifiedRestored:
-                            sd2.Active = false;
-                            _data[rowIndex - 1] = (item, Status.Delete);
-                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.Delete.GetReadableName();
-                            break;
-                        default:
-                        {
-                            if (status == Status.New || status == Status.Discard) {
-                                Status updated = status == Status.Discard ? Status.New : Status.Discard;
-                                _data[rowIndex - 1] = (item, updated);
-                                ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
-                            }
-                            else {
-                                Status updated = status == Status.Delete ? Status.Modified : Status.Delete;
-                                _data[rowIndex - 1] = (item, updated);
-                                ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
-                            }
-                            break;
-                        }
-                    }
-                    UpdateMatrixColors();
-                    _matrix.SelectRow(rowIndex, false, false);
-
-                    break;
-                }
-                case "1304":
-                    if (UnsavedChanges()) {
-                        int messageBox = Application.MessageBox(
-                            "Hay cambios sin guardar.\n¿Desea recargar y descartar los cambios??", 2,
-                            "Sí",
-                            "Cancelar");
-
-                        if (messageBox == 2) break;
-                    }
-                    LoadData();
-                    UpdateMatrix();
-                    break;
+            if (pVal.MenuUID == "1282" || pVal.MenuUID == _addRowMenuUid) {
+                T it = new T();
+                if (it is ISoftDeletable itsd) itsd.Active = true;
+                _observableData.Add(it);
+                UpdateMatrix();
             }
+            else if (pVal.MenuUID == _deleteRowMenuUid) {
+                int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
+                if (rowIndex <= 0) return;
+                (T item, Status status) = _data[rowIndex - 1];
+                switch (item) {
+                    case ISoftDeletable sd when sd.Active == false && status == Status.Normal:
+                        sd.Active = true;
+                        _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
+                        break;
+                    case ISoftDeletable sd when sd.Active && status == Status.ModifiedRestored:
+                        sd.Active = false;
+                        _data[rowIndex - 1] = (item, Status.Delete);
+                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.Delete.GetReadableName();
+                        break;
+                    case ISoftDeletable sd when sd.Active && status == Status.New:
+                        sd.Active = false;
+                        _data[rowIndex - 1] = (item, Status.Discard);
+                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.Discard.GetReadableName();
+                        break;
+                    case ISoftDeletable sd when sd.Active == false && status == Status.Discard:
+                        sd.Active = false;
+                        _data[rowIndex - 1] = (item, Status.New);
+                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.New.GetReadableName();
+                        break;
+                    case ISoftDeletable sd when sd.Active == false && item.OriginalActive == false && status == Status.Delete:
+                        sd.Active = false;
+                        _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
+                        break;
+                    default:
+                        if (status == Status.New || status == Status.Discard) {
+                            Status updated = status == Status.Discard ? Status.New : Status.Discard;
+                            _data[rowIndex - 1] = (item, updated);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
+                        }
+                        else {
+                            Status updated = status == Status.Delete ? Status.Modified : Status.Delete;
+                            _data[rowIndex - 1] = (item, updated);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
+                        }
+                        break;
+                }
+                UpdateMatrixColors();
+                _matrix.SelectRow(rowIndex, false, false);
+            }
+            else if (pVal.MenuUID == "1304") {
+                if (UnsavedChanges()) {
+                    int messageBox = Application.MessageBox(
+                        "Hay cambios sin guardar.\n¿Desea recargar y descartar los cambios?", 2,
+                        "Sí",
+                        "Cancelar");
+
+                    if (messageBox == 2) return;
+                }
+                LoadData();
+                UpdateMatrix();
+            }
+
         }
         private void ApplicationOnRightClickEvent(ref ContextMenuInfo eventInfo, out bool bubbleEvent) {
             bubbleEvent = true;
-
-            // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+            if (eventInfo.FormUID != UniqueID) return;
+            // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (eventInfo.EventType) {
                 case BoEventTypes.et_RIGHT_CLICK when eventInfo.BeforeAction:
                 {
@@ -212,7 +220,7 @@ namespace SAPUtils.Forms {
                     }
                     break;
                 }
-                case BoEventTypes.et_FORM_UNLOAD when !eventInfo.BeforeAction:
+                default:
                     RemoveContextMenuItems();
                     break;
             }
@@ -229,11 +237,6 @@ namespace SAPUtils.Forms {
             UpdateMatrix();
         }
 
-        /// <inheritdoc />
-        override protected void OnFormResizeAfter(SBOItemEventArg pVal) {
-            base.OnFormResizeAfter(pVal);
-            _matrix.AutoResizeColumns();
-        }
         /// <inheritdoc />
         override protected void OnFormCloseBefore(SBOItemEventArg pVal, out bool bubbleEvent) {
             base.OnFormCloseBefore(pVal, out bubbleEvent);
