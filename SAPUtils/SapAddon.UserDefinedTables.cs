@@ -73,7 +73,9 @@ namespace SAPUtils {
                             dtUserTableField.SubType,
                             dtUserTableField.Mandatory,
                             dtUserTableField.Size,
-                            null,
+                            dtUserTableField.DefaultValue != null
+                                ? dtUserTableField.DateToSapData(dtUserTableField.ParseDateValue(dtUserTableField.DefaultValue))
+                                : null,
                             dtUserTableField.ValidValues,
                             dtUserTableField.LinkedSystemObject,
                             dtUserTableField.LinkedTable,
@@ -88,7 +90,9 @@ namespace SAPUtils {
                             BoFldSubTypes.st_Time,
                             dtUserTableField.Mandatory,
                             dtUserTableField.Size,
-                            null,
+                            dtUserTableField.DefaultValue != null
+                                ? dtUserTableField.TimeToSapData(dtUserTableField.ParseTimeValue(dtUserTableField.DefaultValue))
+                                : null,
                             dtUserTableField.ValidValues,
                             dtUserTableField.LinkedSystemObject,
                             dtUserTableField.LinkedTable,
@@ -128,7 +132,10 @@ namespace SAPUtils {
         /// Ensure that the specified table name exists within the SAP Business One database schema.
         /// </remarks>
         /// <seealso cref="IUserField"/>
-        public void AddUserField(string tableName, IUserField fieldInfo) {
+        public void AddSapTableUserField(string tableName, IUserField fieldInfo) {
+            if (fieldInfo is DateTimeFieldAttribute) {
+                throw new NotSupportedException("Cannot create DateTimeFieldAttribute Field in System Table, use Date and Time instead.");
+            }
             CreateUserTableField(tableName,
                 fieldInfo.Name,
                 fieldInfo.Description,
@@ -136,7 +143,9 @@ namespace SAPUtils {
                 fieldInfo.SubType,
                 fieldInfo.Mandatory,
                 fieldInfo.Size,
-                fieldInfo.DefaultValue?.ToString(),
+                fieldInfo.DefaultValue == null
+                    ? null
+                    : fieldInfo.ToSapData(fieldInfo.DefaultValue),
                 fieldInfo.ValidValues,
                 fieldInfo.LinkedSystemObject,
                 fieldInfo.LinkedTable,
@@ -211,7 +220,7 @@ namespace SAPUtils {
                     userFieldsMd.EditSize = size.Value;
                 }
 
-                if (string.IsNullOrEmpty(defaultValue) == false) {
+                if (defaultValue != null) {
                     userFieldsMd.DefaultValue = defaultValue;
                 }
 

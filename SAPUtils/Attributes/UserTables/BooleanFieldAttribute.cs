@@ -29,7 +29,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public class BooleanFieldAttribute : UserTableFieldAttributeBase, IUserTableField<bool?> {
-        private bool? _stronglyTypedDefaultValue;
+        private bool? _stronglyTypedDefaultValue = false;
 
         /// <inheritdoc />
         public override BoFieldTypes FieldType => BoFieldTypes.db_Alpha;

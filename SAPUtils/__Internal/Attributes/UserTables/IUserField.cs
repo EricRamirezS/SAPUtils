@@ -74,5 +74,19 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         /// Used for fields with predefined value sets.
         /// </summary>
         IList<IUserFieldValidValue> ValidValues { get; }
+
+        /// <summary>
+        /// Parses a given object value into a format compatible with the SAP Business One field type.
+        /// </summary>
+        /// <param name="value">The raw value to be parsed.</param>
+        /// <returns>The parsed value, formatted according to SAP standards.</returns>
+        object ParseValue(object value);
+
+        /// <summary>
+        /// Converts a value to the format required by SAP Business One for storage.
+        /// </summary>
+        /// <param name="value">The value to be converted.</param>
+        /// <returns>A string representation of the value in SAP format.</returns>
+        string ToSapData(object value);
     }
 }
