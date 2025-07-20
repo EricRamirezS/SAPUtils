@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace SAPUtils.Enums {
@@ -764,5 +765,11 @@ namespace SAPUtils.Enums {
         DefineWithholdingTaxCodes = 65015,
 
         UpdateParentItemPricesSelectionCriteria = 65018,
+    }
+
+    public static class FormTypesExtensions {
+        public static bool Equals(this FormTypes enumVal, string str) {
+            return Convert.ToInt32(enumVal).ToString() == str;
+        }
     }
 }
