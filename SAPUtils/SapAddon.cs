@@ -41,7 +41,8 @@ namespace SAPUtils {
         /// and its lifecycle is tied to the SAP Addon's execution.
         /// It is intended for internal use only within the application.
         /// </remarks>
-        private static SAPbouiCOM.Application _application;
+        // ReSharper disable once InconsistentNaming
+        internal static SAPbouiCOM.Application __application;
 
         /// <summary>
         /// Represents a static instance of the SapAddon class, ensuring only a single instance
@@ -64,7 +65,7 @@ namespace SAPUtils {
                 ConsoleLogger.Info("Connecting SboGuiApi");
                 oSboGuiApi.Connect(SapConnectionString);
                 ConsoleLogger.Info("Retrieving SAPbouiCOM.Application");
-                _application = oSboGuiApi.GetApplication();
+                __application = oSboGuiApi.GetApplication();
                 ConsoleLogger.Info("Retrieving SAPbobsCOM.Company");
                 __Company = Application.Company.GetDICompany() as Company;
                 ConsoleLogger.Debug("Initilizing Logger");
@@ -91,7 +92,7 @@ namespace SAPUtils {
         /// <value>
         /// The current SAPbouiCOM.Application instance associated with the add-on.
         /// </value>
-        public SAPbouiCOM.Application Application => _application;
+        public SAPbouiCOM.Application Application => __application;
 
         /// <summary>
         /// Represents the SAP B1 company object used to manage database connections and execute SAP Business One-specific operations.
@@ -134,7 +135,7 @@ namespace SAPUtils {
         /// </summary>
         /// <returns>An instance of the <see cref="SapAddon"/>.</returns>
         public static SapAddon Instance() {
-            return Instance(new string[] { });
+            return _instance ?? throw new InvalidOperationException("SapAddon instance not found");
         }
 
         /// <summary>

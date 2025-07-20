@@ -26,19 +26,19 @@ namespace SAPUtils.__Internal.Events {
         /// <seealso cref="SAPUtils.SapAddon" />
         /// <seealso cref="SAPbouiCOM.Application" />
         internal static void Subscribe() {
-            SapAddon.Instance().Application.FormDataEvent += FormDataEvents.Handle;
-            SapAddon.Instance().Application.AppEvent += AppEvents.Handle;
-            SapAddon.Instance().Application.ItemEvent += ItemEvents.Handle;
-            SapAddon.Instance().Application.LayoutKeyEvent += LayoutKeyEvents.Handle;
-            SapAddon.Instance().Application.MenuEvent += MenuEvents.Handle;
-            SapAddon.Instance().Application.PrintEvent += PrintEvents.Handle;
-            SapAddon.Instance().Application.ProgressBarEvent += ProgressBarEvents.Handle;
-            SapAddon.Instance().Application.ReportDataEvent += ReportDataEvents.Handle;
-            SapAddon.Instance().Application.RightClickEvent += RightClickEvents.Handle;
-            SapAddon.Instance().Application.ServerInvokeCompletedEvent += ServerInvokeCompletedEvents.Handle;
-            SapAddon.Instance().Application.StatusBarEvent += StatusBarEvents.Handle;
-            SapAddon.Instance().Application.UDOEvent += UDOEvents.Handle;
-            SapAddon.Instance().Application.WidgetEvent += WidgetEvents.Handle;
+            SapAddon.__application.FormDataEvent += FormDataEvents.Handle;
+            SapAddon.__application.AppEvent += AppEvents.Handle;
+            SapAddon.__application.ItemEvent += ItemEvents.Handle;
+            SapAddon.__application.LayoutKeyEvent += LayoutKeyEvents.Handle;
+            SapAddon.__application.MenuEvent += MenuEvents.Handle;
+            SapAddon.__application.PrintEvent += PrintEvents.Handle;
+            SapAddon.__application.ProgressBarEvent += ProgressBarEvents.Handle;
+            SapAddon.__application.ReportDataEvent += ReportDataEvents.Handle;
+            SapAddon.__application.RightClickEvent += RightClickEvents.Handle;
+            SapAddon.__application.ServerInvokeCompletedEvent += ServerInvokeCompletedEvents.Handle;
+            SapAddon.__application.StatusBarEvent += StatusBarEvents.Handle;
+            SapAddon.__application.UDOEvent += UDOEvents.Handle;
+            SapAddon.__application.WidgetEvent += WidgetEvents.Handle;
         }
     }
 
