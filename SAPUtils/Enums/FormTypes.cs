@@ -768,7 +768,7 @@ namespace SAPUtils.Enums {
     }
 
     public static class FormTypesExtensions {
-        public static bool Equals(this FormTypes enumVal, string str) {
+        public static bool Is(this FormTypes enumVal, string str) {
             return Convert.ToInt32(enumVal).ToString() == str;
         }
     }
