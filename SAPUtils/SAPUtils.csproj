@@ -66,6 +66,7 @@
     <Compile Include="Attributes\UserTables\TimeFieldAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs"/>
+      <Compile Include="Enums\FormTypes.cs"/>
       <Compile Include="Events\AppEvents.cs"/>
       <Compile Include="Events\FormDataEvents.cs"/>
       <Compile Include="Events\ItemEvents.cs"/>
@@ -167,9 +168,6 @@
     <Compile Include="SapAddon.UserDefinedTables.cs">
       <DependentUpon>SapAddon.cs</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-      <Folder Include="Enums\"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Core" Version="1.35.0" />
