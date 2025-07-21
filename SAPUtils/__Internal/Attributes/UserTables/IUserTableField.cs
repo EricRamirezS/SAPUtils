@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using SAPUtils.Attributes.UserTables;
 
 // ReSharper disable UnusedMember.Global
 

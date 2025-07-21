@@ -48,6 +48,8 @@ namespace SAPUtils.Forms {
 
         private readonly string _deleteRowMenuUid;
 
+        private readonly List<(T Item, Status Status)> _failedData = new List<(T Item, Status Status)>();
+
         /// <summary>
         /// Represents a collection of observable data of type <typeparamref name="T"/> used to track changes in the form.
         /// </summary>
@@ -180,6 +182,7 @@ namespace SAPUtils.Forms {
             bool useAddContextButton = true,
             bool userDeleteContextButton = true,
             string uid = null) : base(uid) {
+            if (!Alive) return;
             _useAddContextButton = useAddContextButton;
             _userDeleteContextButton = userDeleteContextButton;
             _tableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));

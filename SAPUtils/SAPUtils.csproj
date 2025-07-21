@@ -54,6 +54,7 @@
     <Compile Include="Attributes\UserTables\DateTimeFieldAttribute.cs"/>
     <Compile Include="Attributes\UserTables\DateFieldAttribute.cs"/>
     <Compile Include="Attributes\UserTables\DoubleUserTableFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\IUserField.cs"/>
     <Compile Include="Attributes\UserTables\MeasurementFieldAttribute.cs"/>
     <Compile Include="Attributes\UserTables\MemoFieldAttribute.cs"/>
     <Compile Include="Attributes\UserTables\NumericFieldAttribute.cs"/>
@@ -63,12 +64,14 @@
       <Compile Include="Attributes\UserTables\PrimaryKeyStrategy.cs"/>
     <Compile Include="Attributes\UserTables\QuantityFieldAttribute.cs"/>
     <Compile Include="Attributes\UserTables\RateFieldAttribute.cs"/>
+      <Compile Include="Attributes\UserTables\StringFieldAttribute.cs"/>
     <Compile Include="Attributes\UserTables\TimeFieldAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs"/>
       <Compile Include="Enums\FormTypes.cs"/>
       <Compile Include="Events\AppEvents.cs"/>
       <Compile Include="Events\FormDataEvents.cs"/>
+      <Compile Include="Events\InvalidFieldEvent.cs"/>
       <Compile Include="Events\ItemEvents.cs"/>
       <Compile Include="Events\LayoutKeyEvents.cs"/>
       <Compile Include="Events\MenuEvents.cs"/>
@@ -85,6 +88,7 @@
       <Compile Include="Exceptions\ItemAlreadyExistException.cs"/>
       <Compile Include="Exceptions\ItemDoNotExistException.cs"/>
       <Compile Include="Exceptions\UserTableAttributeNotFound.cs"/>
+      <Compile Include="Extensions\BusinessObjectInfoExtensions.cs"/>
       <Compile Include="Extensions\CellExtension.cs"/>
       <Compile Include="Extensions\StringExtension.cs"/>
       <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs"/>
@@ -124,7 +128,6 @@
       <Compile Include="Utils\SapColors.cs"/>
       <Compile Include="Utils\SapUtils.cs"/>
       <Compile Include="Utils\TopMostDialog.cs"/>
-      <Compile Include="__Internal\Attributes\UserTables\IUserField.cs"/>
       <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs"/>
       <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs"/>
       <Compile Include="__Internal\Attributes\UserTables\UserTableFieldTyped.cs">

@@ -2,7 +2,7 @@
 using SAPbobsCOM;
 using SAPUtils.Models.UserTables;
 
-namespace SAPUtils.__Internal.Attributes.UserTables {
+namespace SAPUtils.Attributes.UserTables {
     /// <summary>
     /// Represents a definition of a user field in the context of SAP utilities.
     /// </summary>
@@ -88,5 +88,13 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         /// <param name="value">The value to be converted.</param>
         /// <returns>A string representation of the value in SAP format.</returns>
         string ToSapData(object value);
+
+        /// <summary>
+        /// Validates the specified value against the constraints and rules defined for the user field.
+        /// </summary>
+        /// <param name="value">The value to be validated.</param>
+        /// <returns><c>true</c> if the value is valid according to the field's constraints; otherwise, <c>false</c>.</returns>
+        /// <seealso cref="T:SAPUtils.Models.UserTables.IUserFieldValidValue" />
+        bool ValidateField(object value);
     }
 }

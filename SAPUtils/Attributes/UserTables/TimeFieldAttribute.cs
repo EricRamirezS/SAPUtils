@@ -56,6 +56,9 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        public override bool ValidateField(object value) => true;
+
+        /// <inheritdoc />
         public override string ToColumnData(object value) {
             return value == null ? "0000" : ((DateTime)value).ToString("HH:mm");
         }

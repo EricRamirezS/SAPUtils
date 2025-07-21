@@ -1,5 +1,4 @@
 ﻿using System;
-using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 
 // ReSharper disable UnusedType.Global
@@ -25,38 +24,5 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class AlphaFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
-
-        private string _stronglyTypedDefaultValue = string.Empty;
-
-        /// <inheritdoc />
-        public override BoFieldTypes FieldType => BoFieldTypes.db_Alpha;
-
-        /// <inheritdoc />
-        public override int Size { get; set; } = 100;
-
-        /// <inheritdoc />
-        public override object DefaultValue
-        {
-            get => _stronglyTypedDefaultValue;
-            set => _stronglyTypedDefaultValue = (string)ParseValue(value);
-        }
-
-        /// <inheritdoc />
-        public override object ParseValue(object value) {
-            return value?.ToString() ?? _stronglyTypedDefaultValue ?? "";
-        }
-
-        /// <inheritdoc />
-        public override string ToSapData(object value) {
-            return value?.ToString() ?? "";
-        }
-
-        /// <inheritdoc />
-        public override Type Type => typeof(string);
-
-        string IUserTableField<string>.DefaultValue => _stronglyTypedDefaultValue;
-
-        string IUserTableField<string>.ParseValue(object value) => Convert.ToString(ParseValue(value));
-    }
+    public class AlphaFieldAttribute : StringFieldAttribute { }
 }

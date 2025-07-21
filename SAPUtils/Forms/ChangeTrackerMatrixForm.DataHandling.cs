@@ -153,11 +153,20 @@ namespace SAPUtils.Forms {
             _dataReload = true;
             _observableData.Clear();
             List<T> items = LoadCustomData() ?? UserTableObjectModel.GetAll<T>();
+
             items.ForEach(e => _observableData.Add(e));
             for (int i = 0; i < _data.Count; i++) {
                 (T item, _) = _data[i];
                 _data[i] = (item, Status.Normal);
             }
+
+            _failedData.ForEach(e => _observableData.Add(e.Item));
+            for (int i = 0; i < _failedData.Count; i++) {
+                (T item, Status status) = _failedData[_data.Count + i];
+                _data[_data.Count + i] = (item, status);
+            }
+
+            _failedData.Clear();
             _dataReload = false;
         }
 
@@ -166,18 +175,31 @@ namespace SAPUtils.Forms {
 
             List<(T Item, Status Status)> modifiedData = _data.Where(x => x.Status != Status.Normal).ToList();
 
-            T[] updateItems = modifiedData.Where(x => x.Status == Status.Modified || x.Status == Status.ModifiedRestored).Select(x => x.Item).ToArray();
+            T[] updateItems = modifiedData.Where(x => x.Status == Status.Modified).Select(x => x.Item).ToArray();
+            T[] restoredItems = modifiedData.Where(x => x.Status == Status.ModifiedRestored).Select(x => x.Item).ToArray();
             T[] deleteItems = modifiedData.Where(x => x.Status == Status.Delete).Select(x => x.Item).ToArray();
             T[] addItems = modifiedData.Where(x => x.Status == Status.New).Select(x => x.Item).ToArray();
 
+
             foreach (T item in updateItems) {
-                item.Update(true);
+                if (item.Update()) continue;
+                _failedData.Add((item, Status.Modified));
+                ;
+            }
+            foreach (T item in restoredItems) {
+                if (item.Update(true)) continue;
+                _failedData.Add((item, Status.ModifiedRestored));
+                ;
             }
             foreach (T item in deleteItems) {
-                item.Delete();
+                if (item.Delete()) continue;
+                _failedData.Add((item, Status.Delete));
+                ;
             }
             foreach (T item in addItems) {
-                item.Add();
+                if (item.Add()) continue;
+                _failedData.Add((item, Status.New));
+                ;
             }
         }
 

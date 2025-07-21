@@ -26,7 +26,7 @@ namespace SAPUtils.Attributes.UserTables {
     /// }
     /// </code>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
     public sealed class UserTableAttribute : Attribute, IUserTable {
 
         /// <inheritdoc />

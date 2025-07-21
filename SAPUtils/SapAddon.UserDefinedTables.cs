@@ -161,7 +161,7 @@ namespace SAPUtils {
 
                 Logger.Trace("Verifying if table {0} already exist", userTable.Name);
                 if (userTableMd != null && userTableMd.GetByKey(userTable.Name)) {
-                    Logger.Info("Table {0} already exist", userTable.Name);
+                    Logger.Debug("Table {0} already exist", userTable.Name);
                     return;
                 }
 
@@ -282,7 +282,7 @@ namespace SAPUtils {
             Logger.Trace("Veryfing table {0} has Attribute UserTableAttribute", table.Name);
             if (table.GetCustomAttributes(typeof(UserTableAttribute), true).FirstOrDefault() is UserTableAttribute) return true;
 
-            Logger.Error("UserTable Attribute not found in {0}", table.Name);
+            Logger.Error("UserTable Attribute not found in class {0}", table.Name);
             return false;
 
         }

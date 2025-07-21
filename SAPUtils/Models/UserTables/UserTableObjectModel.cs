@@ -10,6 +10,7 @@ using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.Repository;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.Events;
 using SAPUtils.Exceptions;
 using SAPUtils.Utils;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
@@ -486,6 +487,14 @@ namespace SAPUtils.Models.UserTables {
         /// <inheritdoc />
         public override bool Save() {
             try {
+                foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(GetType())) {
+                    if (AuditableField.IsAuditableField(GetType(), propertyInfo)) continue;
+                    Log.Trace("Validating {0}'s field {1} = {2}", GetType().Name, propertyInfo.Name, propertyInfo.GetValue(this));
+                    if (userTableField.ValidateField(propertyInfo.GetValue(this))) continue;
+                    Log.Debug("Invalid value for field {0}: {1}", propertyInfo.Name, propertyInfo.GetValue(this));
+                    InvalidFieldEvent.Invoke(propertyInfo, userTableField);
+                    return false;
+                }
                 UserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
                 if (Code == null && OriginalCode == null) {
                     PrimaryKeyStrategy primaryKeyStrategy = _userTableAttribute.PrimaryKeyStrategy;

@@ -68,6 +68,9 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        public override bool ValidateField(object value) => true;
+
+        /// <inheritdoc />
         public override Type Type => typeof(bool?);
 
         /// <inheritdoc />
@@ -77,10 +80,13 @@ namespace SAPUtils.Attributes.UserTables {
         bool? IUserTableField<bool?>.ParseValue(object value) => (bool?)ParseValue(value);
 
         /// <inheritdoc />
-        public override IList<IUserFieldValidValue> ValidValues { get; internal set; }
-            = new List<IUserFieldValidValue>(2) {
+        public override sealed IList<IUserFieldValidValue> ValidValues
+        {
+            get => new List<IUserFieldValidValue>(2) {
                 new UserFieldValidValue("Y", "Sí"),
                 new UserFieldValidValue("N", "No"),
             };
+            internal set { }
+        }
     }
 }

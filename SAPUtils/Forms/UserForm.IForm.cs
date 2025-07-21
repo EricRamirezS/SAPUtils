@@ -8,7 +8,7 @@ namespace SAPUtils.Forms {
         /// </summary>
         public void Select() {
             Logger.Trace("Selecting form with UID: {0}", UniqueID);
-            UIAPIRawForm.Select();
+            UIAPIRawForm?.Select();
         }
 
         /// <summary>
@@ -16,7 +16,7 @@ namespace SAPUtils.Forms {
         /// </summary>
         public void Close() {
             Logger.Debug("Closing form with UID: {0}", UniqueID);
-            UIAPIRawForm.Close();
+            UIAPIRawForm?.Close();
         }
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace SAPUtils.Forms {
         /// </summary>
         public void Refresh() {
             Logger.Debug("Refreshing form with UID: {0}", UniqueID);
-            UIAPIRawForm.Refresh();
+            UIAPIRawForm?.Refresh();
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace SAPUtils.Forms {
         /// <returns></returns>
         public string GetAsXML() {
             Logger.Trace("Getting XML representation of form with UID: {0}", UniqueID);
-            return UIAPIRawForm.GetAsXML();
+            return UIAPIRawForm?.GetAsXML();
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace SAPUtils.Forms {
         public void Update() {
             Logger.Debug("Updating form with UID: {0}", UniqueID);
             try {
-                UIAPIRawForm.Update();
+                UIAPIRawForm?.Update();
                 Logger.Info("Form updated successfully");
             }
             catch (Exception ex) {
@@ -103,7 +103,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="UserForm"/>
         public void Freeze(bool newVal) {
             Logger.Debug("Setting form freeze state to {0} for form with UID: {1}", newVal, UniqueID);
-            UIAPIRawForm.Freeze(newVal);
+            UIAPIRawForm?.Freeze(newVal);
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace SAPUtils.Forms {
         public void EnableMenu(string menuUid, bool enableFlag) {
             Logger.Trace("Setting menu {0} enabled state to {1} for form with UID: {2}",
                 menuUid, enableFlag, UniqueID);
-            UIAPIRawForm.EnableMenu(menuUid, enableFlag);
+            UIAPIRawForm?.EnableMenu(menuUid, enableFlag);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="EnableMenu(string, bool)"/>
         public void ResetMenuStatus() {
             Logger.Debug("Resetting menu status for form with UID: {0}", UniqueID);
-            UIAPIRawForm.ResetMenuStatus();
+            UIAPIRawForm?.ResetMenuStatus();
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace SAPUtils.Forms {
         /// <param name="height">The new height of the form.</param>
         public void Resize(int width, int height) {
             Logger.Debug("Resizing form to Width: {0}, Height: {1}", width, height);
-            UIAPIRawForm.Resize(width, height);
+            UIAPIRawForm?.Resize(width, height);
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace SAPUtils.Forms {
         /// </summary>
         public void EnableFormatSearch() {
             Logger.Debug("Enabling format search for form with UID: {0}", UniqueID);
-            UIAPIRawForm.EnableFormatSearch();
+            UIAPIRawForm?.EnableFormatSearch();
         }
 
         /// <summary>
@@ -203,7 +203,10 @@ namespace SAPUtils.Forms {
         public string Title
         {
             get => UIAPIRawForm.Title;
-            set => UIAPIRawForm.Title = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Title = value;
+            }
         }
 
         /// <summary>
@@ -212,8 +215,12 @@ namespace SAPUtils.Forms {
         public BoFormStateEnum State
         {
             get => UIAPIRawForm.State;
-            set => UIAPIRawForm.State = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.State = value;
+            }
         }
+
 
         /// <summary>
         /// Indicates whether the form is visible.
@@ -221,7 +228,10 @@ namespace SAPUtils.Forms {
         public bool Visible
         {
             get => UIAPIRawForm.Visible;
-            set => UIAPIRawForm.Visible = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Visible = value;
+            }
         }
 
         /// <summary>
@@ -230,7 +240,10 @@ namespace SAPUtils.Forms {
         public string DefButton
         {
             get => UIAPIRawForm.DefButton;
-            set => UIAPIRawForm.DefButton = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.DefButton = value;
+            }
         }
 
         /// <summary>
@@ -260,7 +273,10 @@ namespace SAPUtils.Forms {
         public BoFormMode Mode
         {
             get => UIAPIRawForm.Mode;
-            set => UIAPIRawForm.Mode = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Mode = value;
+            }
         }
 
         /// <summary>
@@ -284,7 +300,10 @@ namespace SAPUtils.Forms {
         public int PaneLevel
         {
             get => UIAPIRawForm.PaneLevel;
-            set => UIAPIRawForm.PaneLevel = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.PaneLevel = value;
+            }
         }
 
         /// <summary>
@@ -293,7 +312,10 @@ namespace SAPUtils.Forms {
         public int Top
         {
             get => UIAPIRawForm.Top;
-            set => UIAPIRawForm.Top = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Top = value;
+            }
         }
 
         /// <summary>
@@ -302,7 +324,10 @@ namespace SAPUtils.Forms {
         public int Left
         {
             get => UIAPIRawForm.Left;
-            set => UIAPIRawForm.Left = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Left = value;
+            }
         }
 
         /// <summary>
@@ -314,7 +339,10 @@ namespace SAPUtils.Forms {
         public int Height
         {
             get => UIAPIRawForm.Height;
-            set => UIAPIRawForm.Height = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Height = value;
+            }
         }
 
         /// <summary>
@@ -326,7 +354,10 @@ namespace SAPUtils.Forms {
         public int Width
         {
             get => UIAPIRawForm.Width;
-            set => UIAPIRawForm.Width = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.Width = value;
+            }
         }
 
         /// <summary>
@@ -336,7 +367,10 @@ namespace SAPUtils.Forms {
         public int ClientHeight
         {
             get => UIAPIRawForm.ClientHeight;
-            set => UIAPIRawForm.ClientHeight = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.ClientHeight = value;
+            }
         }
 
         /// <summary>
@@ -346,7 +380,10 @@ namespace SAPUtils.Forms {
         public int ClientWidth
         {
             get => UIAPIRawForm.ClientWidth;
-            set => UIAPIRawForm.ClientWidth = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.ClientWidth = value;
+            }
         }
 
         /// <summary>
@@ -374,7 +411,10 @@ namespace SAPUtils.Forms {
         public int SupportedModes
         {
             get => UIAPIRawForm.SupportedModes;
-            set => UIAPIRawForm.SupportedModes = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.SupportedModes = value;
+            }
         }
 
         /// <summary>
@@ -420,7 +460,10 @@ namespace SAPUtils.Forms {
         public bool AutoManaged
         {
             get => UIAPIRawForm.AutoManaged;
-            set => UIAPIRawForm.AutoManaged = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.AutoManaged = value;
+            }
         }
 
         /// <summary>
@@ -470,7 +513,10 @@ namespace SAPUtils.Forms {
         public string ActiveItem
         {
             get => UIAPIRawForm.ActiveItem;
-            set => UIAPIRawForm.ActiveItem = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.ActiveItem = value;
+            }
         }
 
         /// <summary>
@@ -503,7 +549,10 @@ namespace SAPUtils.Forms {
         public string ReportType
         {
             get => UIAPIRawForm.ReportType;
-            set => UIAPIRawForm.ReportType = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.ReportType = value;
+            }
         }
 
         /// <summary>
@@ -513,7 +562,10 @@ namespace SAPUtils.Forms {
         public bool VisibleEx
         {
             get => UIAPIRawForm.VisibleEx;
-            set => UIAPIRawForm.VisibleEx = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.VisibleEx = value;
+            }
         }
 
         /// <summary>
@@ -522,7 +574,10 @@ namespace SAPUtils.Forms {
         public int MaxWidth
         {
             get => UIAPIRawForm.MaxWidth;
-            set => UIAPIRawForm.MaxWidth = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.MaxWidth = value;
+            }
         }
 
         /// <summary>
@@ -531,18 +586,21 @@ namespace SAPUtils.Forms {
         public int MaxHeight
         {
             get => UIAPIRawForm.MaxHeight;
-            set => UIAPIRawForm.MaxHeight = value;
+            set
+            {
+                if (Alive) UIAPIRawForm.MaxHeight = value;
+            }
         }
 
         /// <summary>
         /// A collection of all the items in the form.
         /// </summary>
-        public Items Items => UIAPIRawForm.Items;
+        public Items Items => UIAPIRawForm?.Items;
 
         /// <summary>
         /// The data source of the form.
         /// </summary>
-        public DataSource DataSources => UIAPIRawForm.DataSources;
+        public DataSource DataSources => UIAPIRawForm?.DataSources;
 
         /// <summary>
         /// Gets the number of open forms of the same type.
@@ -566,28 +624,28 @@ namespace SAPUtils.Forms {
         /// </remarks>
         /// <seealso cref="UserForm"/>
         /// <seealso cref="SAPbouiCOM.Forms.GetForm"/>
-        public int TypeCount => UIAPIRawForm.TypeCount;
+        public int TypeCount => UIAPIRawForm?.TypeCount ?? -1;
 
         /// <summary>
         /// <p><b>Deprecated in UI API 2004.</b></p>
         /// The property is supported for backward compatibility in the next two releases. Use TypeEX instead.
         /// </summary>
-        public int Type => UIAPIRawForm.Type;
+        public int Type => UIAPIRawForm?.Type ?? -1;
 
         /// <summary>
         /// Indicates whether the form is a modal window.
         /// </summary>
-        public bool Modal => UIAPIRawForm.Modal;
+        public bool Modal => UIAPIRawForm?.Modal == false;
 
         /// <summary>
         /// Indicates whether the form has focus.
         /// </summary>
-        public bool Selected => UIAPIRawForm.Selected;
+        public bool Selected => UIAPIRawForm?.Selected ?? false;
 
         /// <summary>
         /// The form's unique ID.
         /// </summary>
-        public string UniqueID => UIAPIRawForm.UniqueID;
+        public string UniqueID => UIAPIRawForm?.UniqueID;
 
         /// <summary>
         /// Gets the <see cref="SAPbouiCOM.Menus"/> collection associated with the form,
@@ -614,12 +672,12 @@ namespace SAPUtils.Forms {
         /// </remarks>
         /// <seealso cref="UserForm"/>
         /// <seealso cref="SAPbouiCOM.Menus"/>
-        public Menus Menu => UIAPIRawForm.Menu;
+        public Menus Menu => UIAPIRawForm?.Menu;
 
         /// <summary>
         /// The form's border style.
         /// </summary>
-        public BoFormBorderStyle BorderStyle => UIAPIRawForm.BorderStyle;
+        public BoFormBorderStyle BorderStyle => UIAPIRawForm?.BorderStyle ?? default;
 
         /// <summary>
         /// Gets the type of the form as a unique string identifier.
@@ -644,7 +702,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="UserForm"/>
         /// <seealso cref="TypeCount"/>
         /// <seealso cref="SAPbouiCOM.Forms.GetForm"/>
-        public string TypeEx => UIAPIRawForm.TypeEx;
+        public string TypeEx => UIAPIRawForm?.TypeEx;
 
         /// <summary>
         /// Gets a reference to the <see cref="SAPbouiCOM.BusinessObject"/> associated with the user-defined object connected to the form.
@@ -679,7 +737,7 @@ namespace SAPUtils.Forms {
         /// </example>
         /// <seealso cref="UserForm"/>
         /// <seealso cref="SAPbouiCOM.FormCreationParams.ObjectType"/>
-        public BusinessObject BusinessObject => UIAPIRawForm.BusinessObject;
+        public BusinessObject BusinessObject => UIAPIRawForm?.BusinessObject;
 
         /// <summary>
         /// Gets the <see cref="SAPbouiCOM.DataBrowser"/> object associated with the form,
@@ -711,12 +769,12 @@ namespace SAPUtils.Forms {
         /// </example>
         /// <seealso cref="UserForm"/>
         /// <seealso cref="SAPbouiCOM.DataBrowser"/>
-        public DataBrowser DataBrowser => UIAPIRawForm.DataBrowser;
+        public DataBrowser DataBrowser => UIAPIRawForm?.DataBrowser;
 
         /// <summary>
         /// A collection of the ChooseFromList items on the form.
         /// </summary>
-        public ChooseFromListCollection ChooseFromLists => UIAPIRawForm.ChooseFromLists;
+        public ChooseFromListCollection ChooseFromLists => UIAPIRawForm?.ChooseFromLists;
 
         /// <summary>
         /// Gets the <see cref="SAPbouiCOM.FormSettings"/> object associated with the form.
@@ -739,16 +797,16 @@ namespace SAPUtils.Forms {
         /// </example>
         /// <seealso cref="UserForm"/>
         /// <seealso cref="SAPbouiCOM.FormSettings"/>
-        public FormSettings Settings => UIAPIRawForm.Settings;
+        public FormSettings Settings => UIAPIRawForm?.Settings;
 
         /// <summary>
         /// Indicates whether the form is a system form.
         /// </summary>
-        public bool IsSystem => UIAPIRawForm.IsSystem;
+        public bool IsSystem => UIAPIRawForm?.IsSystem ?? false;
 
         /// <summary>
         /// The user-defined field form's unique ID.
         /// </summary>
-        public string UDFFormUID => UIAPIRawForm.UDFFormUID;
+        public string UDFFormUID => UIAPIRawForm?.UDFFormUID;
     }
 }

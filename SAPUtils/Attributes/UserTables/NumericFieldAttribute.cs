@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 
@@ -60,5 +61,18 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         int? IUserTableField<int?>.ParseValue(object value) => (int?)ParseValue(value);
+
+
+        /// <inheritdoc />
+        public override bool ValidateField(object value) {
+            if (!(ParseValue(value) is int i)) {
+                return !Mandatory;
+            }
+            if (i >= Math.Pow(10, Size) && i <= -Math.Pow(10, Size)) {
+                return false;
+            }
+            if (ValidValues == null || !ValidValues.Any()) return true;
+            return ValidValues.Any(e => e.Value == i.ToString());
+        }
     }
 }

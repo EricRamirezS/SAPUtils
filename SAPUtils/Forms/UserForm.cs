@@ -14,8 +14,6 @@ namespace SAPUtils.Forms {
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public abstract partial class UserForm : FormBase {
-
-
         /// <summary>
         /// Base class for SAP Business One user forms that provides common functionality
         /// and integration with the SAP UI API.
@@ -32,6 +30,8 @@ namespace SAPUtils.Forms {
             Logger.Debug("Starting UserForm construction");
             try {
                 LoadForm(manualUid);
+                if (!Alive) return;
+
                 // ReSharper disable once VirtualMemberCallInConstructor
                 OnInitializeComponent();
                 InitializedSetter = true;
@@ -100,6 +100,10 @@ namespace SAPUtils.Forms {
                     if (!string.IsNullOrEmpty(uidValue) && FormUtils.ExistForm(uidValue, Application)) {
                         Logger.Trace("Closing existing form with UID: {0}", uidValue);
                         Application.Forms.Item(uidValue).Close();
+                        if (FormUtils.ExistForm(uidValue, Application)) {
+                            Logger.Info("No se pudo cerrar el formulario {0}", uidValue);
+                            return;
+                        }
                     }
                     else if (string.IsNullOrEmpty(uidValue)) {
                         uidValue = Guid.NewGuid().ToString("N").Substring(0, 10);
@@ -112,6 +116,10 @@ namespace SAPUtils.Forms {
                     if (!string.IsNullOrEmpty(uidValue) && FormUtils.ExistForm(uidValue, Application)) {
                         Logger.Trace("Closing existing form with UID: {0}", uidValue);
                         Application.Forms.Item(uidValue).Close();
+                        if (FormUtils.ExistForm(uidValue, Application)) {
+                            Logger.Info("No se pudo cerrar el formulario {0}", uidValue);
+                            return;
+                        }
                     }
                     attrb = xmlDoc.CreateAttribute("uid");
                     attrb.Value = uidValue;

@@ -119,6 +119,9 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        public override bool ValidateField(object value) => true;
+
+        /// <inheritdoc />
         public override Type Type => typeof(DateTime?);
 
         /// <inheritdoc />

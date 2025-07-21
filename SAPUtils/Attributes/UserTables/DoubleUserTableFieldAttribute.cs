@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.Utils;
 
@@ -65,5 +66,17 @@ namespace SAPUtils.Attributes.UserTables {
 
         /// <inheritdoc />
         double? IUserTableField<double?>.ParseValue(object value) => (double?)ParseValue(value);
+
+        /// <inheritdoc />
+        public override bool ValidateField(object value) {
+            if (!(ParseValue(value) is double d)) {
+                return !Mandatory;
+            }
+            if (d >= Math.Pow(10, Size) && d <= -Math.Pow(10, Size)) {
+                return false;
+            }
+            if (ValidValues == null || !ValidValues.Any()) return true;
+            return ValidValues.Any(e => e.Value == d.ToString(CultureInfo.InvariantCulture));
+        }
     }
 }

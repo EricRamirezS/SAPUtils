@@ -25,41 +25,8 @@ namespace SAPUtils.Attributes.UserTables {
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class AddressFieldAttribute : UserTableFieldAttributeBase, IUserTableField<string> {
-
-        private string _stronglyTypedDefaultValue = string.Empty;
-
-        /// <inheritdoc />
-        public override BoFieldTypes FieldType => BoFieldTypes.db_Alpha;
-
+    public class AddressFieldAttribute : StringFieldAttribute {
         /// <inheritdoc />
         public override BoFldSubTypes SubType => BoFldSubTypes.st_Address;
-
-        /// <inheritdoc />
-        public override int Size { get; set; } = 100;
-
-        /// <inheritdoc />
-        public override object DefaultValue
-        {
-            get => _stronglyTypedDefaultValue;
-            set => _stronglyTypedDefaultValue = (string)ParseValue(value);
-        }
-
-        /// <inheritdoc />
-        public override object ParseValue(object value) {
-            return value?.ToString() ?? _stronglyTypedDefaultValue ?? string.Empty;
-        }
-
-        /// <inheritdoc />
-        public override string ToSapData(object value) {
-            return value?.ToString() ?? string.Empty;
-        }
-
-        /// <inheritdoc />
-        public override Type Type => typeof(string);
-
-        string IUserTableField<string>.DefaultValue => _stronglyTypedDefaultValue;
-
-        string IUserTableField<string>.ParseValue(object value) => Convert.ToString(ParseValue(value));
     }
 }
