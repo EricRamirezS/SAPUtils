@@ -66,19 +66,28 @@ namespace SAPUtils.Forms {
             _matrix.LoadFromDataSourceEx();
             _matrix.AutoResizeColumns();
 
-            if (_tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) {
-                index = 0;
-                foreach ((T _, Status status) in _data) {
-                    if (status == Status.New || status == Status.Discard) {
-                        _matrix.CommonSetting.SetCellEditable(index + 1, 1, true);
+            index = 0;
+            foreach ((T data, Status status) in _data) {
+                if (IsEditable(data)) {
+                    for (int j = 1; j < _matrix.Columns.Count - 1; j++) {
+                        bool editableCol = _matrix.Columns.Item(j).Editable;
+                        _matrix.CommonSetting.SetCellEditable(index + 1, 1, editableCol);
                     }
-                    else {
-                        _matrix.CommonSetting.SetCellEditable(index + 1, 1, false);
+                    if (_tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) {
+                        if (status == Status.New || status == Status.Discard) {
+                            _matrix.CommonSetting.SetCellEditable(index + 1, 1, true);
+                        }
+                        else {
+                            _matrix.CommonSetting.SetCellEditable(index + 1, 1, false);
+                        }
                     }
-
-                    index++;
                 }
+                else {
+                    _matrix.CommonSetting.SetRowEditable(index + 1, false);
+                }
+                index++;
             }
+
 
             UpdateMatrixColors();
             Freeze(false);
@@ -101,6 +110,10 @@ namespace SAPUtils.Forms {
             try {
                 bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
                 for (int i = 0; i < _data.Count; i++) {
+                    if (!IsEditable(_data[i].Item)) {
+                        _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
+                        continue;
+                    }
                     switch (_data[i].Status) {
                         case Status.Normal:
                             if (_data[i].Item is ISoftDeletable sd && sd.Active == false) {
@@ -137,7 +150,8 @@ namespace SAPUtils.Forms {
                 }
 
                 for (int i = 0; i < _data.Count; i++) {
-                    if (manualCode) {
+                    bool cellEditable = _matrix.CommonSetting.GetCellEditable(i + 1, 1);
+                    if (manualCode && cellEditable) {
                         if (_data[i].Status == Status.New || _data[i].Status == Status.Discard) continue;
                     }
                     _matrix.CommonSetting.SetCellBackColor(i + 1, 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
@@ -160,13 +174,22 @@ namespace SAPUtils.Forms {
                 _data[i] = (item, Status.Normal);
             }
 
-            _failedData.ForEach(e => _observableData.Add(e.Item));
-            for (int i = 0; i < _failedData.Count; i++) {
-                (T item, Status status) = _failedData[_data.Count + i];
-                _data[_data.Count + i] = (item, status);
+            foreach ((T Item, Status Status) failed in _failedUpdate.Concat(_failedDelete)) {
+                int observableIndex = _observableData.ToList().FindIndex(item => item.Code == failed.Item.Code);
+                if (observableIndex < 0) continue;
+
+                _observableData[observableIndex] = failed.Item;
+
+                int dataIndex = _data.FindIndex(item => item.Item.Code == failed.Item.Code);
+                if (dataIndex < 0) continue;
+
+                _data[dataIndex] = (failed.Item, failed.Status);
             }
 
-            _failedData.Clear();
+            _failedAdd.ForEach(e => _observableData.Add(e.Item));
+            _failedAdd.Clear();
+            _failedUpdate.Clear();
+            _failedDelete.Clear();
             _dataReload = false;
         }
 
@@ -183,23 +206,19 @@ namespace SAPUtils.Forms {
 
             foreach (T item in updateItems) {
                 if (item.Update()) continue;
-                _failedData.Add((item, Status.Modified));
-                ;
+                _failedUpdate.Add((item, Status.Modified));
             }
             foreach (T item in restoredItems) {
                 if (item.Update(true)) continue;
-                _failedData.Add((item, Status.ModifiedRestored));
-                ;
+                _failedUpdate.Add((item, Status.ModifiedRestored));
             }
             foreach (T item in deleteItems) {
                 if (item.Delete()) continue;
-                _failedData.Add((item, Status.Delete));
-                ;
+                _failedDelete.Add((item, Status.Delete));
             }
             foreach (T item in addItems) {
                 if (item.Add()) continue;
-                _failedData.Add((item, Status.New));
-                ;
+                _failedAdd.Add((item, Status.New));
             }
         }
 

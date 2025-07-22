@@ -57,7 +57,7 @@ namespace SAPUtils.Attributes.UserTables {
                 return false;
             }
             if (ValidValues == null || !ValidValues.Any()) return true;
-            return ValidValues.All(e => e.Value != s);
+            return ValidValues.Any(e => e.Value == s);
         }
     }
 }

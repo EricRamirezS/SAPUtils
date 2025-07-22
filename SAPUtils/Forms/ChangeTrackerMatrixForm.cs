@@ -26,7 +26,7 @@ namespace SAPUtils.Forms {
     /// <seealso cref="IUserTableObjectModel"/>
     /// <seealso cref="Status"/>
     /// <seealso cref="UserForm"/>
-    public abstract partial class ChangeTrackerMatrixForm<T> : UserForm where T : UserTableObjectModel, new() {
+    public abstract partial class ChangeTrackerMatrixForm<T> : UserForm where T : IUserTableObjectModel, new() {
 
 
         private readonly string _addRowMenuUid;
@@ -48,7 +48,9 @@ namespace SAPUtils.Forms {
 
         private readonly string _deleteRowMenuUid;
 
-        private readonly List<(T Item, Status Status)> _failedData = new List<(T Item, Status Status)>();
+        private readonly List<(T Item, Status Status)> _failedAdd = new List<(T Item, Status Status)>();
+        private readonly List<(T Item, Status Status)> _failedDelete = new List<(T Item, Status Status)>();
+        private readonly List<(T Item, Status Status)> _failedUpdate = new List<(T Item, Status Status)>();
 
         /// <summary>
         /// Represents a collection of observable data of type <typeparamref name="T"/> used to track changes in the form.
@@ -95,6 +97,9 @@ namespace SAPUtils.Forms {
         /// </remarks>
         /// <seealso cref="ChangeTrackerMatrixForm{T}"/>
         private readonly bool _userDeleteContextButton;
+
+        protected readonly Dictionary<string, ChooseFromList> ChooseFromListInfo =
+            new Dictionary<string, ChooseFromList>();
 
         /// <summary>
         /// Represents a mapping between the column information of a data table and its corresponding matrix column.
@@ -203,18 +208,25 @@ namespace SAPUtils.Forms {
 
             (DataColumn DataTableColumn, Column MatrixColumn) value;
             if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue("Active", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Editable = false;
             }
             if (typeof(IAuditableDate).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue("CreatedAtDate", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue("UpdatedAtDate", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue("CreatedAtTime", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue("UpdatedAtTime", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
+                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
             }
             // ReSharper disable once InvertIf, Kept for Readability
             if (typeof(IAuditableUser).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue("CreatedBy", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue("UpdatedBy", out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Visible = false;
+                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Editable = false;
+                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Editable = false;
             }
         }
 
@@ -243,6 +255,8 @@ namespace SAPUtils.Forms {
         /// <returns>The <see cref="SAPbouiCOM.Button"/> instance representing the save button in the form.</returns>
         /// <seealso cref="SAPbouiCOM.Button"/>
         abstract protected Button GetSaveButton();
+
+        virtual protected bool IsEditable(T item) => true;
 
         /// <summary>
         /// Determines if there are unsaved changes in the current data collection.

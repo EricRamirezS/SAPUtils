@@ -13,6 +13,10 @@ namespace SAPUtils.Forms {
                 if (menus.Exists(_addRowMenuUid)) {
                     menus.RemoveEx(_addRowMenuUid);
                 }
+                if (menus.Exists(_deleteRowMenuUid)) {
+                    menus.RemoveEx(_deleteRowMenuUid);
+                }
+
                 if (_useAddContextButton) {
                     if (!menus.Exists(_addRowMenuUid)) {
                         MenuCreationParams creationParams = (MenuCreationParams)Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams);
@@ -24,9 +28,7 @@ namespace SAPUtils.Forms {
                         popupMenu.SubMenus.AddEx(creationParams);
                     }
                 }
-                if (menus.Exists(_deleteRowMenuUid)) {
-                    menus.RemoveEx(_deleteRowMenuUid);
-                }
+
                 // ReSharper disable once InvertIf, Kept for Readability
                 if (_userDeleteContextButton) {
                     if (menus.Exists(_deleteRowMenuUid)) return;
@@ -54,6 +56,7 @@ namespace SAPUtils.Forms {
                 Application.SetStatusBarMessage("Error al agregar menú contextual: " + ex.Message, BoMessageTime.bmt_Short);
             }
         }
+
         private void RemoveContextMenuItems() {
             Menus menus = Application.Menus;
 

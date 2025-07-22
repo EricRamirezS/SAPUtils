@@ -7,6 +7,7 @@ using SAPUtils.__Internal.Extensions;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Utils;
+using ChooseFromList = SAPbouiCOM.ChooseFromList;
 
 namespace SAPUtils.Forms {
     public abstract partial class ChangeTrackerMatrixForm<T> {
@@ -72,10 +73,9 @@ namespace SAPUtils.Forms {
                     ColumnInfo.Add(fieldName + "Date", (dateColumn, date));
                     ColumnInfo.Add(fieldName + "Time", (timeColumn, time));
 
-                    i++;
                 }
                 else {
-                    string columnId = $"_C{i++}";
+                    string columnId = $"_C{i}";
                     int size = field.SubType == BoFldSubTypes.st_Time ? 5 : field.Size;
                     DataColumn dataColumn = _dataTable.Columns.Add(columnId, FormUtils.GetFieldType(field.FieldType, field.SubType), size);
 
@@ -83,7 +83,19 @@ namespace SAPUtils.Forms {
                     column.DataBind.Bind(_dataTable.UniqueID, columnId);
 
                     ColumnInfo.Add(fieldName, (dataColumn, column));
+                    string cflId = $"_CFL{columnId}";
+                    ChooseFromList cfl = null;
+                    try {
+                        cfl = UIAPIRawForm.ChooseFromLists.Item(cflId);
+                    }
+                    catch {
+                        // ignored
+                    }
+                    finally {
+                        ChooseFromListInfo.Add(fieldName, cfl);
+                    }
                 }
+                i++;
             }
 
             _dataTable.Columns.Add("_S_T_A_T_E", BoFieldsType.ft_AlphaNumeric);

@@ -173,7 +173,8 @@ namespace SAPUtils.Forms {
                         _data[rowIndex - 1] = (item, Status.New);
                         ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.New.GetReadableName();
                         break;
-                    case ISoftDeletable sd when sd.Active == false && item.OriginalActive == false && status == Status.Delete:
+                    case ISoftDeletable sd when sd.Active == false && item is UserTableObjectModel utom && utom.OriginalActive == false &&
+                                                status == Status.Delete:
                         sd.Active = false;
                         _data[rowIndex - 1] = (item, Status.ModifiedRestored);
                         ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
@@ -263,6 +264,7 @@ namespace SAPUtils.Forms {
         /// <inheritdoc />
         override protected void OnFormCloseAfter(SBOItemEventArg pVal) {
             base.OnFormCloseAfter(pVal);
+            RemoveContextMenuItems();
             EventUnsubscriber();
         }
     }

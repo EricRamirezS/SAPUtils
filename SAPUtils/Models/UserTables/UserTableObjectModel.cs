@@ -120,7 +120,7 @@ namespace SAPUtils.Models.UserTables {
             return data;
         }
 
-        private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T item) where T : IUserTableObjectModel, new() {
+        private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T item) where T : IUserTableObjectModel {
             ILogger log = Logger.Instance;
             foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(type)) {
                 string fieldName = string.IsNullOrWhiteSpace(userTableField.Name)
