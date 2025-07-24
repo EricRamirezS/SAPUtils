@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.SQL;
 using SAPUtils.Models.UserTables;
+using SAPUtils.Query;
 
 namespace SAPUtils.__Internal.Repository {
     /// <summary>
@@ -75,15 +77,33 @@ namespace SAPUtils.__Internal.Repository {
         }
 
         /// <inheritdoc />
-        public IList<IUserFieldValidValue> GetValidValues(string table) {
+        public IList<IUserFieldValidValue> GetValidValuesFromUserTable(string userTableName) {
             IList<IUserFieldValidValue> data = new List<IUserFieldValidValue>();
             try {
-                try {
-                    _recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{table}\" WHERE \"U_Active\" = 'Y'");
+                Type tableType = UserTableMetadataCache.GetTableType(userTableName);
+                if (tableType != null) {
+
+                    MethodInfo getAllMethod = FindStaticGetAllMethod(tableType);
+                    if (getAllMethod != null) {
+                        IWhere where = null;
+                        if (typeof(ISoftDeletable).IsAssignableFrom(tableType)) {
+                            where = Where.Builder().Equals("U_Active", true).Build();
+                        }
+
+                        object result = getAllMethod.Invoke(null, new object[] { where });
+                        IEnumerable<object> items = (IEnumerable<object>)result;
+                        foreach (object item in items) {
+                            string code = item.GetType().GetProperty("Code")?.GetValue(item)?.ToString();
+                            string name = item.GetType().GetProperty("DisplayName")?.GetValue(item)?.ToString();
+
+                            if (code != null && name != null)
+                                data.Add(new UserFieldValidValue(code, name));
+                        }
+                        return data;
+                    }
                 }
-                catch {
-                    _recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{table}\"");
-                }
+                _recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{userTableName}\"");
+
                 while (!_recordset.EoF) {
                     data.Add(new UserFieldValidValue(_recordset.Fields.Item("Code").Value.ToString(),
                         _recordset.Fields.Item("Name").Value.ToString()));
@@ -96,6 +116,7 @@ namespace SAPUtils.__Internal.Repository {
             return data;
         }
 
+
         /// <summary>
         /// Releases all resources used by the <see cref="Repository"/> class.
         /// </summary>
@@ -107,6 +128,25 @@ namespace SAPUtils.__Internal.Repository {
         public void Dispose() {
             Marshal.ReleaseComObject(_recordset);
             GC.Collect();
+        }
+
+        private static MethodInfo FindStaticGetAllMethod(Type type) {
+            while (type != null) {
+                MethodInfo method = type.GetMethod(
+                    "GetAll",
+                    BindingFlags.Public | BindingFlags.Static,
+                    null,
+                    new[] { typeof(IWhere) },
+                    null
+                );
+
+                if (method != null)
+                    return method;
+
+                type = type.BaseType;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -131,7 +171,7 @@ namespace SAPUtils.__Internal.Repository {
         /// <summary>
         /// Retrieves a collection of valid values for a specified user-defined table.
         /// </summary>
-        /// <param name="fieldLinkedTable">
+        /// <param name="userTableName">
         /// The name of the user-defined table for which valid values are to be retrieved.
         /// </param>
         /// <returns>
@@ -144,6 +184,6 @@ namespace SAPUtils.__Internal.Repository {
         /// proper interaction with the underlying database.
         /// </remarks>
         /// <seealso cref="IUserFieldValidValue"/>
-        IList<IUserFieldValidValue> GetValidValues(string fieldLinkedTable);
+        IList<IUserFieldValidValue> GetValidValuesFromUserTable(string userTableName);
     }
 }

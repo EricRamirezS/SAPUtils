@@ -122,6 +122,12 @@
       <Compile Include="Models\UserTables\UserTableObjectModel.cs">
       <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
     </Compile>
+      <Compile Include="Query\IWhere.cs"/>
+      <Compile Include="Query\IWhereBuilder.cs"/>
+      <Compile Include="Query\IWhereCondition.cs"/>
+      <Compile Include="Query\LogicalOperator.cs"/>
+      <Compile Include="Query\SqlComparison.cs"/>
+      <Compile Include="Query\Where.cs"/>
       <Compile Include="Utils\FormUtils.cs"/>
       <Compile Include="Utils\ILogger.cs"/>
       <Compile Include="Utils\Parsers.cs"/>
@@ -140,6 +146,10 @@
       <Compile Include="__Internal\Models\AuditableField.cs"/>
       <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
       <Compile Include="__Internal\Models\UserTableMetadataCache.cs"/>
+      <Compile Include="__Internal\Query\SqlWhereBuilder.cs"/>
+      <Compile Include="__Internal\Query\WhereBuilder.cs"/>
+      <Compile Include="__Internal\Query\WhereCondition.cs"/>
+      <Compile Include="__Internal\Query\WhereGroup.cs"/>
       <Compile Include="__Internal\Repository\Repository.cs"/>
       <Compile Include="__Internal\SQL\CommonQueries.Abstract.cs">
           <DependentUpon>CommonQueries.cs</DependentUpon>

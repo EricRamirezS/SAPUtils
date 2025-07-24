@@ -233,7 +233,7 @@ namespace SAPUtils.__Internal.Extensions {
                 }
             }
             if (vv == null) {
-                vv = Repository.Repository.Get().GetValidValues(field.LinkedTable);
+                vv = Repository.Repository.Get().GetValidValuesFromUserTable(field.LinkedTable);
             }
             foreach (IUserFieldValidValue userFieldValidValue in vv) {
                 bool add = true;

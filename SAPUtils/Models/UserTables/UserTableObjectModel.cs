@@ -7,11 +7,13 @@ using System.Runtime.InteropServices;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
+using SAPUtils.__Internal.Query;
 using SAPUtils.__Internal.Repository;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Events;
 using SAPUtils.Exceptions;
+using SAPUtils.Query;
 using SAPUtils.Utils;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 
@@ -63,16 +65,18 @@ namespace SAPUtils.Models.UserTables {
         /// <summary>
         /// Retrieves all records from the specified user table and maps them to instances of the given type.
         /// </summary>
+        /// <param name="where"></param>
         /// <typeparam name="T">
         /// A type that implements <see cref="IUserTableObjectModel"/> and is decorated with <see cref="UserTableAttribute"/>.
         /// </typeparam>
         /// <returns>
         /// A list of objects of type <typeparamref name="T"/> representing the records found in the user table.
         /// </returns>
-        public static List<T> GetAll<T>() where T : IUserTableObjectModel, new() {
+        public static List<T> GetAll<T>(IWhere where = null) where T : IUserTableObjectModel, new() {
             List<T> data = new List<T>();
             Type type = typeof(T);
             ILogger log = Logger.Instance;
+            where = where ?? Where.Builder().Build();
             log.Debug("Fetching All {0} with Code: {1}", type.FullName);
 
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
@@ -87,7 +91,8 @@ namespace SAPUtils.Models.UserTables {
             Recordset rs = null;
             try {
                 rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-                string query = $"SELECT * FROM \"@{tableName}\"";
+                tableName = SapAddon.Instance().IsHana ? $"[@{tableName}]" : $"\"@{tableName}\"";
+                string query = $"SELECT T0.* FROM {tableName} T0 {new SqlWhereBuilder(where).Build()}";
                 rs.DoQuery(query);
 
                 while (!rs.EoF) {
@@ -351,8 +356,8 @@ namespace SAPUtils.Models.UserTables {
         /// <returns>
         /// A list of all records as instances of <typeparamref name="T"/>.
         /// </returns>
-        public static List<T> GetAll() {
-            return GetAll<T>();
+        public static List<T> GetAll(IWhere where = null) {
+            return GetAll<T>(where);
         }
 
         /// <summary>
