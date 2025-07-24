@@ -11,6 +11,9 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
         /// <summary>
         /// Gets the name of the user-defined table in SAP Business One.
         /// </summary>
+        /// <remarks>
+        /// <b>Length:</b> 21 characters.
+        /// </remarks>
         string Name { get; }
 
         /// <summary>
