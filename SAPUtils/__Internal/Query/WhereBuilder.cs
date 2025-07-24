@@ -57,7 +57,7 @@ namespace SAPUtils.__Internal.Query {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 ColumnName = column,
                 Comparison = SqlComparison.Between,
-                ComparingBetween = (from, to)
+                ComparingBetween = (from, to),
             });
             return this;
         }
@@ -66,7 +66,7 @@ namespace SAPUtils.__Internal.Query {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 ColumnName = column,
                 Comparison = SqlComparison.NotBetween,
-                ComparingBetween = (from, to)
+                ComparingBetween = (from, to),
             });
             return this;
         }
@@ -75,7 +75,7 @@ namespace SAPUtils.__Internal.Query {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 ColumnName = column,
                 Comparison = SqlComparison.In,
-                ComparingIn = values
+                ComparingIn = values,
             });
             return this;
         }
@@ -84,7 +84,7 @@ namespace SAPUtils.__Internal.Query {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 ColumnName = column,
                 Comparison = SqlComparison.NotIn,
-                ComparingIn = values
+                ComparingIn = values,
             });
             return this;
         }
@@ -92,7 +92,7 @@ namespace SAPUtils.__Internal.Query {
         public IWhereBuilder Exists(string subquery) {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 Comparison = SqlComparison.Exists,
-                SubQuery = subquery
+                SubQuery = subquery,
             });
             return this;
         }
@@ -100,7 +100,7 @@ namespace SAPUtils.__Internal.Query {
         public IWhereBuilder NotExists(string subquery) {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 Comparison = SqlComparison.NotExists,
-                SubQuery = subquery
+                SubQuery = subquery,
             });
             return this;
         }

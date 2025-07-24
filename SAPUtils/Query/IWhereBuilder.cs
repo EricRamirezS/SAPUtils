@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SAPUtils.Query {
     /// <summary>
@@ -21,6 +22,7 @@ namespace SAPUtils.Query {
     ///     .Build();
     /// </code>
     /// </example>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public interface IWhereBuilder {
         /// <summary>
         /// Groups a set of conditions together using the specified logical operator.

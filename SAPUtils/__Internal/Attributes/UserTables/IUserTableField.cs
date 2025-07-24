@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using SAPUtils.Attributes.UserTables;
 
@@ -28,6 +29,7 @@ namespace SAPUtils.__Internal.Attributes.UserTables {
     /// <b>Source table:</b> CUFD
     /// </para>
     /// </remarks>
+    [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
     internal interface IUserTableField : IUserField, _Attribute {
 
         /// <summary>

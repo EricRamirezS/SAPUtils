@@ -5,7 +5,7 @@ namespace SAPUtils.Query {
     /// Provides a static factory method to create instances of <see cref="IWhereBuilder"/>.
     /// This class serves as the entry point for fluently constructing WHERE clauses.
     /// </summary>
-    public class Where {
+    public static class Where {
         /// <summary>
         /// Creates a new instance of <see cref="IWhereBuilder"/> to begin constructing a WHERE clause.
         /// </summary>

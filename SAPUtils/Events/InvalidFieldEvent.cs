@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using SAPUtils.Attributes.UserTables;
 
 namespace SAPUtils.Events {
@@ -11,7 +12,8 @@ namespace SAPUtils.Events {
     /// event to signal invalid field encounters with the parameters necessary to
     /// identify the affected field.
     /// </remarks>
-    public class InvalidFieldEvent {
+    [SuppressMessage("ReSharper", "EventNeverSubscribedTo.Global")]
+    public static class InvalidFieldEvent {
         /// <summary>
         /// Represents the delegate used to handle invalid field events in the context of SAP utilities.
         /// </summary>

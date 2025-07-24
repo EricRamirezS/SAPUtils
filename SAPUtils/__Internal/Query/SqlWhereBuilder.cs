@@ -5,7 +5,7 @@ using System.Linq;
 using SAPUtils.Query;
 
 namespace SAPUtils.__Internal.Query {
-    public class SqlWhereBuilder {
+    internal class SqlWhereBuilder {
         private readonly IWhere _rootGroup;
 
         public SqlWhereBuilder(IWhere rootGroup) {
@@ -24,7 +24,7 @@ namespace SAPUtils.__Internal.Query {
         private static string BuildGroup(IWhere group) {
             List<string> expressions = new List<string>();
 
-            foreach (WhereCondition cond in group.Conditions) {
+            foreach (IWhereCondition cond in group.Conditions) {
                 string col = Quote(cond.ColumnName);
                 string clause;
                 switch (cond.Comparison) {

@@ -98,6 +98,18 @@ namespace SAPUtils.Forms {
         /// <seealso cref="ChangeTrackerMatrixForm{T}"/>
         private readonly bool _userDeleteContextButton;
 
+        /// <summary>
+        /// Represents a mapping between field names and their respective <see cref="SAPbouiCOM.ChooseFromList"/> objects
+        /// within the context of the <see cref="ChangeTrackerMatrixForm{T}"/>.
+        /// This dictionary allows easy association of fields with relevant ChooseFromList configurations,
+        /// enabling dynamic selection or filtering operations in SAP Business One forms.
+        /// </summary>
+        /// <remarks>
+        /// Each key in the dictionary corresponds to a field name, while the value is the associated
+        /// <see cref="SAPbouiCOM.ChooseFromList"/> object, it may be null.
+        /// </remarks>
+        /// <seealso cref="SAPbouiCOM.ChooseFromList"/>
+        /// <seealso cref="ChangeTrackerMatrixForm{T}"/>
         protected readonly Dictionary<string, ChooseFromList> ChooseFromListInfo =
             new Dictionary<string, ChooseFromList>();
 
@@ -256,6 +268,15 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPbouiCOM.Button"/>
         abstract protected Button GetSaveButton();
 
+        /// <summary>
+        /// Determines whether a specific item of type <typeparamref name="T"/> is editable.
+        /// </summary>
+        /// <param name="item">
+        /// The item of type <typeparamref name="T"/> to evaluate.
+        /// </param>
+        /// <returns>
+        /// A boolean value indicating whether the specified item is editable.
+        /// </returns>
         virtual protected bool IsEditable(T item) => true;
 
         /// <summary>
