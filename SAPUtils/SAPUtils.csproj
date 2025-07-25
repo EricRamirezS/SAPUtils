@@ -68,6 +68,7 @@
     <Compile Include="Attributes\UserTables\TimeFieldAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableAttribute.cs"/>
       <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs"/>
+      <Compile Include="Database\Repository.cs"/>
       <Compile Include="Enums\FormTypes.cs"/>
       <Compile Include="Events\AppEvents.cs"/>
       <Compile Include="Events\FormDataEvents.cs"/>
@@ -151,7 +152,6 @@
       <Compile Include="__Internal\Query\WhereBuilder.cs"/>
       <Compile Include="__Internal\Query\WhereCondition.cs"/>
       <Compile Include="__Internal\Query\WhereGroup.cs"/>
-      <Compile Include="__Internal\Repository\Repository.cs"/>
       <Compile Include="__Internal\SQL\CommonQueries.Abstract.cs">
           <DependentUpon>CommonQueries.cs</DependentUpon>
       </Compile>

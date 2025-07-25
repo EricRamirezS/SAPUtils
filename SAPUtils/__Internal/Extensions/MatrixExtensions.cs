@@ -9,6 +9,7 @@ using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.Database;
 using SAPUtils.Extensions;
 using SAPUtils.Forms;
 using SAPUtils.Models.UserTables;
@@ -233,7 +234,8 @@ namespace SAPUtils.__Internal.Extensions {
                 }
             }
             if (vv == null) {
-                vv = Repository.Repository.Get().GetValidValuesFromUserTable(field.LinkedTable);
+                using (IRepository repository = Repository.Get())
+                    vv = repository.GetValidValuesFromUserTable(field.LinkedTable);
             }
             foreach (IUserFieldValidValue userFieldValidValue in vv) {
                 bool add = true;

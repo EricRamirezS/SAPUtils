@@ -8,9 +8,9 @@ using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.Query;
-using SAPUtils.__Internal.Repository;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.Database;
 using SAPUtils.Events;
 using SAPUtils.Exceptions;
 using SAPUtils.Query;
@@ -746,7 +746,7 @@ namespace SAPUtils.Models.UserTables {
                     Code = Guid.NewGuid().ToString();
                     break;
                 case PrimaryKeyStrategy.Serie:
-                    using (IRepository repository = Repository.Get())
+                    using (Repository repository = (Repository)Repository.Get())
                         Code = repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
                     break;
                 default:
@@ -765,7 +765,7 @@ namespace SAPUtils.Models.UserTables {
                 case PrimaryKeyStrategy.Guid:
                     return Guid.NewGuid().ToString();
                 case PrimaryKeyStrategy.Serie:
-                    using (IRepository repository = Repository.Get())
+                    using (Repository repository = (Repository)Repository.Get())
                         return repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
                 default:
                     throw new ArgumentOutOfRangeException(nameof(PrimaryKeyStrategy));

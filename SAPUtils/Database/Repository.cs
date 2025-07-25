@@ -8,7 +8,7 @@ using SAPUtils.__Internal.SQL;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Query;
 
-namespace SAPUtils.__Internal.Repository {
+namespace SAPUtils.Database {
     /// <summary>
     /// Provides methods for managing user table records and obtaining the next available code
     /// for user-defined tables. Implements the <see cref="IRepository"/> interface.
@@ -27,16 +27,27 @@ namespace SAPUtils.__Internal.Repository {
         private readonly IQueries _queries;
 
         /// <summary>
+        /// Indicates whether the database server in use is SAP HANA.
+        /// </summary>
+        /// <remarks>
+        /// This variable is derived from <see cref="SapAddon.IsHana"/>, which checks the database type
+        /// of the connected SAP Business One company. It is utilized to optimize database operations
+        /// and implement logic specific to HANA databases.
+        /// </remarks>
+        /// <seealso cref="SAPUtils.SapAddon"/>
+        protected readonly bool IsHana;
+
+        /// <summary>
         /// Represents an instance of the SAP Business One Recordset object used for executing SQL queries and data
         /// retrieval within the Business One system.
         /// </summary>
         /// <remarks>
-        /// The <see cref="_recordset"/> variable is initialized as a SAP Business One Recordset object,
+        /// The <see cref="Recordset"/> variable is initialized as a SAP Business One Recordset object,
         /// used to interact with the company database and execute SQL-based operations.
         /// It is instantiated based on the SAP Company connection provided by the <see cref="SapAddon"/> instance.
         /// It is disposed of when the Repository instance is disposed to release unmanaged resources.
         /// </remarks>
-        private readonly Recordset _recordset;
+        protected readonly Recordset Recordset;
 
         /// <summary>
         /// Provides an implementation of the repository layer for managing
@@ -48,14 +59,15 @@ namespace SAPUtils.__Internal.Repository {
         /// Depending on the database type (HANA or MSSQL), the appropriate query implementation is instantiated.
         /// </remarks>
         private Repository() {
-            if (SapAddon.Instance().IsHana) {
+            IsHana = SapAddon.Instance().IsHana;
+            if (IsHana) {
                 _queries = new HanaQueries();
             }
             else {
                 _queries = new MssqlQueries();
             }
 
-            _recordset = Company.GetBusinessObject(BoObjectTypes.BoRecordset) as Recordset;
+            Recordset = Company.GetBusinessObject(BoObjectTypes.BoRecordset) as Recordset;
         }
 
         /// <summary>
@@ -69,12 +81,6 @@ namespace SAPUtils.__Internal.Repository {
         /// </remarks>
         // ReSharper disable once MemberCanBeMadeStatic.Local
         private Company Company => SapAddon.Instance().Company;
-
-        /// <inheritdoc />
-        public int GetNextCodeUserTable(string tableName) {
-            _recordset.DoQuery(_queries.GetNextCodeUserTableQuery(tableName));
-            return Convert.ToInt32(_recordset.Fields.Item("Code").Value);
-        }
 
         /// <inheritdoc />
         public IList<IUserFieldValidValue> GetValidValuesFromUserTable(string userTableName) {
@@ -102,12 +108,12 @@ namespace SAPUtils.__Internal.Repository {
                         return data;
                     }
                 }
-                _recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{userTableName}\"");
+                Recordset.DoQuery($"SELECT \"Code\", \"Name\" FROM \"@{userTableName}\"");
 
-                while (!_recordset.EoF) {
-                    data.Add(new UserFieldValidValue(_recordset.Fields.Item("Code").Value.ToString(),
-                        _recordset.Fields.Item("Name").Value.ToString()));
-                    _recordset.MoveNext();
+                while (!Recordset.EoF) {
+                    data.Add(new UserFieldValidValue(Recordset.Fields.Item("Code").Value.ToString(),
+                        Recordset.Fields.Item("Name").Value.ToString()));
+                    Recordset.MoveNext();
                 }
             }
             catch (Exception ex) {
@@ -126,8 +132,14 @@ namespace SAPUtils.__Internal.Repository {
         /// and to avoid memory leaks, especially when working with unmanaged resources.
         /// </remarks>
         public void Dispose() {
-            Marshal.ReleaseComObject(_recordset);
+            Marshal.ReleaseComObject(Recordset);
             GC.Collect();
+        }
+
+        /// <inheritdoc />
+        internal int GetNextCodeUserTable(string tableName) {
+            Recordset.DoQuery(_queries.GetNextCodeUserTableQuery(tableName));
+            return Convert.ToInt32(Recordset.Fields.Item("Code").Value);
         }
 
         private static MethodInfo FindStaticGetAllMethod(Type type) {
@@ -162,12 +174,6 @@ namespace SAPUtils.__Internal.Repository {
     /// Defines the contract for a repository that provides operations for interacting with user-defined tables.
     /// </summary>
     public interface IRepository : IDisposable {
-        /// <summary>
-        /// Retrieves the next available code for a user table based on its name.
-        /// </summary>
-        /// <param name="tableName">The name of the user table for which the next code is to be retrieved.</param>
-        /// <returns>The next available code as an integer for the specified user table.</returns>
-        int GetNextCodeUserTable(string tableName);
         /// <summary>
         /// Retrieves a collection of valid values for a specified user-defined table.
         /// </summary>
