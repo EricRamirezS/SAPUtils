@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Numerics;
+using System.Text;
 
 namespace SAPUtils.Utils {
     /// <summary>
@@ -14,6 +16,9 @@ namespace SAPUtils.Utils {
     /// <seealso cref="System.ArgumentException"/>
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class SapUtils {
+
+        private const string Base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
         /// <summary>
         /// Represents a dictionary containing the primary key field names for various SAP Business One tables.
         /// The key of the dictionary is the table name, and the value is the corresponding primary key field name.
@@ -159,6 +164,21 @@ namespace SAPUtils.Utils {
                 return key;
 
             throw new ArgumentException($"Clave primaria no conocida para la tabla '{tableName}'.");
+        }
+
+        public static string GenerateUniqueId() {
+            Guid guid = Guid.NewGuid();
+            byte[] bytes = guid.ToByteArray();
+            BigInteger bigInt = new BigInteger(bytes);
+            if (bigInt < 0) bigInt = -bigInt;
+
+            StringBuilder sb = new StringBuilder();
+            while (bigInt > 0) {
+                sb.Insert(0, Base62Chars[(int)(bigInt % 62)]);
+                bigInt /= 62;
+            }
+
+            return sb.ToString().PadLeft(10, '0').Substring(0, 10);
         }
     }
 }
