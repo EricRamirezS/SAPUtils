@@ -58,7 +58,7 @@ namespace SAPUtils.Database {
         /// query objects and enables interaction with the SAP Business One `Recordset` object.
         /// Depending on the database type (HANA or MSSQL), the appropriate query implementation is instantiated.
         /// </remarks>
-        private Repository() {
+        protected Repository() {
             IsHana = SapAddon.Instance().IsHana;
             if (IsHana) {
                 _queries = new HanaQueries();
