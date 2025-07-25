@@ -47,6 +47,7 @@ namespace SAPUtils.Forms {
         /// <summary>
         /// Gets the current SAP Business One Company instance.
         /// </summary>
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         protected Company Company => SapAddon.Instance().Company;
 
         /// <summary>

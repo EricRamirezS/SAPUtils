@@ -808,9 +808,9 @@ namespace SAPUtils.Models.UserTables {
 
             // 2. Preparar expresiones
             string paddedCodeExpr = _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
-                ? (isHana
+                ? isHana
                     ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
-                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})")
+                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})"
                 : Quote("Code");
 
             if (Code != null) {
@@ -894,9 +894,9 @@ namespace SAPUtils.Models.UserTables {
 
             // Expresión de ordenamiento
             string paddedCodeExpr = _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
-                ? (isHana
+                ? isHana
                     ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
-                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})")
+                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})"
                 : Quote("Code");
 
             // Consulta SQL

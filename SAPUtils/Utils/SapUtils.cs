@@ -166,6 +166,10 @@ namespace SAPUtils.Utils {
             throw new ArgumentException($"Clave primaria no conocida para la tabla '{tableName}'.");
         }
 
+        /// <summary>
+        /// Generates a unique identifier as a string in Base62 format, with a fixed length of 10 characters, derived from a GUID.
+        /// </summary>
+        /// <returns>A 10-character string representing the unique identifier, padded with leading zeros if necessary.</returns>
         public static string GenerateUniqueId() {
             Guid guid = Guid.NewGuid();
             byte[] bytes = guid.ToByteArray();

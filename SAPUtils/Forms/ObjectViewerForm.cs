@@ -1,11 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using SAPbouiCOM;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Utils;
 
 namespace SAPUtils.Forms {
+    /// <summary>
+    /// Abstract base class for creating object viewer forms for specific types of user table objects.
+    /// </summary>
+    /// <typeparam name="T">The type derived from <c cref="SAPUtils.Models.UserTables.UserTableObjectModel"/> that represents the user table object model.</typeparam>
+    /// <remarks>
+    /// Provides a set of abstract methods and customizable behavior for interacting with forms in SAP B1.
+    /// </remarks>
+    /// <seealso cref="SAPUtils.Forms.UserForm"/>
+    /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel"/>
+    [SuppressMessage("ReSharper", "UnusedParameter.Global")]
     public abstract class ObjectViewerForm<T> : UserForm where T : UserTableObjectModel, new() {
 
         private const string SearchRecordMenuUid = "1281";
@@ -18,13 +29,21 @@ namespace SAPUtils.Forms {
         private readonly Button _addButton;
         private readonly ButtonCombo _addButtonCombo;
         private readonly Button _cancelButton;
+        private readonly Item _helper;
         private readonly Button _okButton;
         private readonly Button _searchButton;
         private readonly Button _updateButton;
-        private Item _helper;
 
         private T _item;
 
+        /// <summary>
+        /// Represents an abstract base form for viewing and interacting with objects of type <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to be viewed, which must inherit from <see cref="UserTableObjectModel"/> and have a parameterless constructor.</typeparam>
+        /// <param name="uid">The unique identifier for the form. If not specified, a default identifier will be generated.</param>
+        /// <param name="item">The object of type <typeparamref name="T"/> to be displayed in the form. If null, the form is initialized in "New Mode".</param>
+        /// <seealso cref="UserForm" />
+        /// <seealso cref="UserTableObjectModel" />
         protected ObjectViewerForm(string uid = null, T item = null) : base(uid) {
             EnableMenu(SearchRecordMenuUid, true);
             EnableMenu(NewRecordMenuUid, true);
@@ -117,7 +136,7 @@ namespace SAPUtils.Forms {
 
                 case PreviousRecordMenuUid: // Previous Record
                     _item = _item ?? new T();
-                    T prev = _item.GetNextRecord<T>();
+                    T prev = _item.GetPreviousRecord<T>();
                     if (prev != null) {
                         EditMode(prev);
                     }
@@ -125,7 +144,7 @@ namespace SAPUtils.Forms {
 
                 case FirstRecordMenuUid: // First Record
                     _item = _item ?? new T();
-                    T first = _item.GetNextRecord<T>();
+                    T first = _item.GetFirstRecord<T>();
                     if (first != null) {
                         EditMode(first);
                     }
@@ -133,7 +152,7 @@ namespace SAPUtils.Forms {
 
                 case LastRecordMenuUid: // Last Record
                     _item = _item ?? new T();
-                    T last = _item.GetNextRecord<T>();
+                    T last = _item.GetLastRecord<T>();
                     if (last != null) {
                         EditMode(last);
                     }
@@ -327,7 +346,12 @@ namespace SAPUtils.Forms {
         }
 
 
-        protected virtual void ChangeFormMode(BoFormMode mode) {
+        /// <summary>
+        /// Changes the mode of the form to the specified mode.
+        /// </summary>
+        /// <param name="mode">The mode to set for the form, represented by <see cref="SAPbouiCOM.BoFormMode"/>.</param>
+        /// <seealso cref="SAPbouiCOM.BoFormMode"/>
+        virtual protected void ChangeFormMode(BoFormMode mode) {
             UIAPIRawForm.Mode = mode;
             int originalPane = PaneLevel;
             PaneLevel = originalPane == 1 ? 2 : 1; // Pane arbitrario
@@ -338,19 +362,117 @@ namespace SAPUtils.Forms {
             bubbleEvent = ValidateForm();
         }
 
+        /// <summary>
+        /// Validates the current form to ensure its data meets the required criteria.
+        /// </summary>
+        /// <returns>
+        /// A boolean value indicating whether the form validation was successful.
+        /// <c>true</c> if the form is valid; otherwise, <c>false</c>.
+        /// </returns>
+        /// <remarks>
+        /// This method should be implemented in inheriting classes to define
+        /// specific validation logic for each form.
+        /// </remarks>
+        /// <seealso cref="SAPUtils.Forms.UserForm" />
+        /// <seealso cref="UserTableObjectModel" />
         abstract protected bool ValidateForm();
+        /// <summary>
+        /// Saves a new instance of the specified item, performing any necessary logic prior to persistence.
+        /// </summary>
+        /// <param name="item">The instance of <see cref="T"/> to be saved as a new record.</param>
+        /// <returns>
+        /// A <see cref="bool"/> indicating whether the save operation was successful.
+        /// </returns>
+        /// <seealso cref="UserTableObjectModel"/>
         abstract protected bool SaveNew(T item);
+        /// <summary>
+        /// Updates an existing item in the system.
+        /// </summary>
+        /// <param name="item">The item of type <see cref="T"/> to be updated.</param>
+        /// <returns>
+        /// A boolean value indicating whether the update operation was successful.
+        /// </returns>
+        /// <seealso cref="UserTableObjectModel"/>
         abstract protected bool SaveUpdate(T item);
+        /// <summary>
+        /// Invoked when the form enters a new mode state (Add Mode).
+        /// Typically used to configure necessary fields, visibility states, or initialize information
+        /// specific to creating a new record in the form.
+        /// </summary>
         abstract protected void OnNewMode();
+        /// <summary>
+        /// This method is invoked during the edit mode transition for the form.
+        /// It allows customization of the behavior or appearance of the form when it enters edit mode.
+        /// </summary>
         abstract protected void OnEditMode();
+        /// <summary>
+        /// Invoked during the find mode activation in the form.
+        /// Allows customizing the behavior for enabling/disabling UI components,
+        /// clearing fields, and preparing the form for search operations.
+        /// </summary>
+        /// <remarks>
+        /// This method should be overridden in derived classes to provide specific
+        /// implementation for handling the find mode activation.
+        /// </remarks>
         abstract protected void OnFindMode();
+        /// <summary>
+        /// Loads the information of the specified item into the form. This method is used to populate
+        /// the form fields based on the provided item's data.
+        /// </summary>
+        /// <param name="item">
+        /// The item of type <see cref="T"/> to load into the form. This object contains the information
+        /// that will be used to update the form fields.
+        /// </param>
+        /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel" />
         abstract protected void LoadFoundItem(T item);
+        /// <summary>
+        /// Searches for items based on the current form's field values.
+        /// </summary>
+        /// <returns>A list of items of type <c>T</c> that match the search criteria.</returns>
+        /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel" />
         abstract protected List<T> SearchItems();
+        /// <summary>
+        /// Retrieves the ButtonCombo control used for the "Add" actions in the form.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="ButtonCombo"/> instance representing the combo box for "Add" actions.
+        /// </returns>
+        /// <seealso cref="ButtonCombo"/>
         abstract protected ButtonCombo GetAddButtonCombo();
+        /// <summary>
+        /// Retrieves the button used for the "Add" operation on the form.
+        /// </summary>
+        /// <returns>A <see cref="Button"/> object representing the "Add" button on the form.</returns>
+        /// <seealso cref="Button" />
         abstract protected Button GetAddButton();
+        /// <summary>
+        /// Retrieves the cancel button associated with the form.
+        /// </summary>
+        /// <returns>A <see cref="Button"/> object representing the cancel button.</returns>
+        /// <seealso cref="Button" />
         abstract protected Button GetCancelButton();
+        /// <summary>
+        /// Retrieves the search button for the form.
+        /// </summary>
+        /// <returns>
+        /// An instance of <see cref="SAPbouiCOM.Button"/> representing the search button.
+        /// </returns>
+        /// <seealso cref="Button" />
         abstract protected Button GetSearchButton();
+        /// <summary>
+        /// Retrieves the "OK" button instance within the form.
+        /// </summary>
+        /// <returns>A <see cref="SAPbouiCOM.Button"/> object representing the "OK" button.</returns>
+        /// <seealso cref="Button" />
         abstract protected Button GetOkButton();
+        /// <summary>
+        /// Retrieves the update button component of the form.
+        /// </summary>
+        /// <returns>The <see cref="Button"/> instance representing the update button of the form.</returns>
+        /// <remarks>
+        /// Derived classes must implement this method to provide the specific button component.
+        /// </remarks>
+        /// <seealso cref="Button" />
         abstract protected Button GetUpdateButton();
     }
 }

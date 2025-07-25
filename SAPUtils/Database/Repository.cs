@@ -8,6 +8,8 @@ using SAPUtils.__Internal.SQL;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Query;
 
+// ReSharper disable MemberCanBePrivate.Global
+
 namespace SAPUtils.Database {
     /// <summary>
     /// Provides methods for managing user table records and obtaining the next available code
@@ -136,7 +138,6 @@ namespace SAPUtils.Database {
             GC.Collect();
         }
 
-        /// <inheritdoc />
         internal int GetNextCodeUserTable(string tableName) {
             Recordset.DoQuery(_queries.GetNextCodeUserTableQuery(tableName));
             return Convert.ToInt32(Recordset.Fields.Item("Code").Value);
