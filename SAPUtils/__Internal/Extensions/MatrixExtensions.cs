@@ -209,7 +209,7 @@ namespace SAPUtils.__Internal.Extensions {
                     .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
                     ?.MakeGenericMethod(type);
                 if (method != null) {
-                    object result = method.Invoke(null, null);
+                    object result = method.Invoke(null, new object[] { null });
                     // Si quieres convertirlo a IEnumerable
                     IEnumerable enumerable = result as IEnumerable;
                     List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
