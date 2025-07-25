@@ -290,6 +290,43 @@ namespace SAPUtils.Models.UserTables {
             bool found = (bool)getByKeyMethod.Invoke(obj, new[] { key });
             return found ? obj as T : null;
         }
+
+        /// <summary>
+        /// Retrieves the previous record of the specified type from a sequence of user table object models.
+        /// </summary>
+        /// <typeparam name="T">The type of the user table object model to retrieve, which must implement <see cref="IUserTableObjectModel"/> and have a parameterless constructor.</typeparam>
+        /// <returns>
+        /// The previous record of the specified type, or <c>null</c> if no record exists.
+        /// </returns>
+        /// <seealso cref="IUserTableObjectModel"/>
+        public abstract T GetPreviousRecord<T>() where T : class, IUserTableObjectModel, new();
+        /// <summary>
+        /// Retrieves the next record of the specified type from a sequence of user table object models.
+        /// </summary>
+        /// <typeparam name="T">The type of the user table object model to retrieve, which must implement <see cref="IUserTableObjectModel"/> and have a parameterless constructor.</typeparam>
+        /// <returns>
+        /// The next record of the specified type, or <c>null</c> if no record exists.
+        /// </returns>
+        /// <seealso cref="IUserTableObjectModel"/>
+        public abstract T GetNextRecord<T>() where T : class, IUserTableObjectModel, new();
+        /// <summary>
+        /// Retrieves the first record of the specified type from a sequence of user table object models.
+        /// </summary>
+        /// <typeparam name="T">The type of the user table object model to retrieve, which must implement <see cref="IUserTableObjectModel"/> and have a parameterless constructor.</typeparam>
+        /// <returns>
+        /// The first record of the specified type, or <c>null</c> if no record exists.
+        /// </returns>
+        /// <seealso cref="IUserTableObjectModel"/>
+        public abstract T GetFirstRecord<T>() where T : class, IUserTableObjectModel, new();
+        /// <summary>
+        /// Retrieves the last record of the specified type from a sequence of user table object models.
+        /// </summary>
+        /// <typeparam name="T">The type of the user table object model to retrieve, which must implement <see cref="IUserTableObjectModel"/> and have a parameterless constructor.</typeparam>
+        /// <returns>
+        /// The last record of the specified type, or <c>null</c> if no record exists.
+        /// </returns>
+        /// <seealso cref="IUserTableObjectModel"/>
+        public abstract T GetLastRecord<T>() where T : class, IUserTableObjectModel, new();
     }
 
     /// <summary>
@@ -600,6 +637,100 @@ namespace SAPUtils.Models.UserTables {
             return false;
         }
 
+        /// <inheritdoc />
+        public override T1 GetPreviousRecord<T1>() {
+            string previousCode = GetPreviousCode();
+            if (previousCode == null) return null;
+            return Get(previousCode, out T1 t) ? t : null;
+        }
+        /// <inheritdoc />
+        public override T1 GetNextRecord<T1>() {
+            string nextCode = GetNextCode();
+            if (nextCode == null) return null;
+            return Get(nextCode, out T1 t) ? t : null;
+        }
+
+        /// <inheritdoc />
+        public override T1 GetFirstRecord<T1>() {
+            string previousCode = GetFirstCode();
+            if (previousCode == null) return null;
+            return Get(previousCode, out T1 t) ? t : null;
+        }
+        /// <inheritdoc />
+        public override T1 GetLastRecord<T1>() {
+            string nextCode = GetLastCode();
+            if (nextCode == null) return null;
+            return Get(nextCode, out T1 t) ? t : null;
+        }
+
+        /// <summary>
+        /// Retrieves the previous record based on the current context within the user table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
+        /// </typeparam>
+        /// <returns>
+        /// Returns an instance of the previous record if found; otherwise, returns <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
+        /// </remarks>
+        /// <seealso cref="UserTableObjectModel{T}"/>
+        public T GetPreviousRecord() {
+            return GetPreviousRecord<T>();
+        }
+
+        /// <summary>
+        /// Retrieves the next record based on the current context within the user table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
+        /// </typeparam>
+        /// <returns>
+        /// Returns an instance of the next record if found; otherwise, returns <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
+        /// </remarks>
+        /// <seealso cref="UserTableObjectModel{T}"/>
+        public T GetNextRecord() {
+            return GetNextRecord<T>();
+        }
+
+        /// <summary>
+        /// Retrieves the first record based on the current context within the user table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
+        /// </typeparam>
+        /// <returns>
+        /// Returns an instance of the first record if found; otherwise, returns <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
+        /// </remarks>
+        /// <seealso cref="UserTableObjectModel{T}"/>
+        public T GetFirstRecord() {
+            return GetFirstRecord<T>();
+        }
+
+        /// <summary>
+        /// Retrieves the last record based on the current context within the user table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
+        /// </typeparam>
+        /// <returns>
+        /// Returns an instance of the last record if found; otherwise, returns <c>null</c>.
+        /// </returns>
+        /// <remarks>
+        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
+        /// </remarks>
+        /// <seealso cref="UserTableObjectModel{T}"/>
+        public T GetLastRecord() {
+            return GetLastRecord<T>();
+        }
+
         private void GenerateCode(PrimaryKeyStrategy primaryKeyStrategy, SAPbobsCOM.IUserTable table) {
             switch (primaryKeyStrategy) {
                 case PrimaryKeyStrategy.Manual when string.IsNullOrEmpty(Code):
@@ -627,6 +758,147 @@ namespace SAPUtils.Models.UserTables {
             if (Code == OriginalCode) return;
             Log.Debug("Reverting {0} Code to: {1}", GetType().Name, OriginalCode);
             Code = OriginalCode;
+        }
+
+
+        private string GetNextCode() {
+            return GetAdjacentCode(next: true);
+        }
+
+        private string GetPreviousCode() {
+            return GetAdjacentCode(next: false);
+        }
+
+        private string GetAdjacentCode(bool next) {
+            string orderDir = next ? "ASC" : "DESC";
+            string comparisonOp = next ? ">" : "<";
+            string userTable = $"@{_userTableAttribute.Name}";
+            Recordset rs;
+            bool isHana = SapAddon.Instance().IsHana;
+
+            // 1. Obtener longitud máxima (solo si es Serie)
+            int maxLength = 0;
+            if (_userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie) {
+                string lenQuery = isHana
+                    ? $"SELECT MAX(LENGTH({Quote("Code")})) AS \"MaxLen\" FROM {Quote(userTable)}"
+                    : $"SELECT MAX(LEN({Quote("Code")})) AS MaxLen FROM {Quote(userTable)}";
+
+                rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
+                rs.DoQuery(lenQuery);
+                maxLength = rs.Fields.Item(0).Value != null ? (int)rs.Fields.Item(0).Value : 0;
+            }
+
+            // 2. Preparar expresiones
+            string paddedCodeExpr = _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
+                ? (isHana
+                    ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
+                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})")
+                : Quote("Code");
+
+            if (Code != null) {
+
+
+                string paddedCurrent = Code == null
+                    ? null
+                    : _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
+                        ? Code.PadLeft(maxLength, '0')
+                        : Code;
+
+                string where = paddedCurrent == null
+                    ? ""
+                    : $"WHERE {paddedCodeExpr} {comparisonOp} '{paddedCurrent.Replace("'", "''")}'";
+
+                // 3. Consulta principal
+                string mainQuery = isHana
+                    ? $@"
+                    SELECT {Quote("Code")}
+                    FROM {Quote(userTable)}
+                    {where}
+                    ORDER BY {paddedCodeExpr} {orderDir}
+                    LIMIT 1"
+                    : $@"
+                    SELECT TOP 1 {Quote("Code")}
+                    FROM {Quote(userTable)}
+                    {where}
+                    ORDER BY {paddedCodeExpr} {orderDir}";
+
+                rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
+                rs.DoQuery(mainQuery);
+                if (!rs.EoF)
+                    return rs.Fields.Item("Code").Value.ToString();
+            }
+            rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
+            // 4. Si no se encontró, consulta fallback
+            string fallbackQuery = isHana
+                ? $@"
+                    SELECT {Quote("Code")}
+                    FROM {Quote(userTable)}
+                    ORDER BY {paddedCodeExpr} {orderDir}
+                    LIMIT 1"
+                : $@"
+                SELECT TOP 1 {Quote("Code")}
+                FROM {Quote(userTable)}
+                ORDER BY {paddedCodeExpr} {orderDir}";
+
+            rs.DoQuery(fallbackQuery);
+            return rs.EoF ? null : rs.Fields.Item("Code").Value.ToString();
+
+            string Quote(string s) => isHana ? $"\"{s}\"" : $"[{s}]";
+        }
+
+        private string GetFirstCode() {
+            return GetEdgeCode(first: true);
+        }
+
+        private string GetLastCode() {
+            return GetEdgeCode(first: false);
+        }
+
+
+        private string GetEdgeCode(bool first) {
+            string orderDir = first ? "ASC" : "DESC";
+
+            string userTable = $"@{_userTableAttribute.Name}";
+            Recordset rs;
+            bool isHana = SapAddon.Instance().IsHana;
+
+            // Obtener longitud máxima si es Serie
+            int maxLength = 0;
+            if (_userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie) {
+                string lenQuery = isHana
+                    ? $"SELECT MAX(LENGTH({Quote("Code")})) AS \"MaxLen\" FROM {Quote(userTable)}"
+                    : $"SELECT MAX(LEN({Quote("Code")})) AS MaxLen FROM {Quote(userTable)}";
+
+                rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
+                rs.DoQuery(lenQuery);
+                maxLength = rs.Fields.Item(0).Value != null ? (int)rs.Fields.Item(0).Value : 0;
+            }
+
+            // Expresión de ordenamiento
+            string paddedCodeExpr = _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
+                ? (isHana
+                    ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
+                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})")
+                : Quote("Code");
+
+            // Consulta SQL
+            string query = isHana
+                ? $@"
+                    SELECT {Quote("Code")}
+                    FROM {Quote(userTable)}
+                    ORDER BY {paddedCodeExpr} {orderDir}
+                    LIMIT 1"
+                : $@"
+                    SELECT TOP 1 {Quote("Code")}
+                    FROM {Quote(userTable)}
+                    ORDER BY {paddedCodeExpr} {orderDir}";
+
+            rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
+            rs.DoQuery(query);
+
+            return rs.EoF ? null : rs.Fields.Item("Code").Value.ToString();
+
+            string Quote(string s) => isHana ? $"\"{s}\"" : $"[{s}]";
         }
     }
 
