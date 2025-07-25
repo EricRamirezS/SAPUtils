@@ -167,7 +167,7 @@ namespace SAPUtils.Database {
         /// the necessary functionalities for repository pattern operations.
         /// </summary>
         /// <returns>An instance of the <see cref="IRepository"/> interface, specifically implemented by <see cref="Repository"/>.</returns>
-        public static IRepository Get() => new Repository();
+        internal static IRepository Get() => new Repository();
     }
 
     /// <summary>
