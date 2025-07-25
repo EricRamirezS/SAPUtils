@@ -62,6 +62,9 @@ namespace SAPUtils.Models.UserTables {
         /// <inheritdoc />
         public abstract bool Save();
 
+        /// <inheritdoc />
+        public abstract string GetNextAvailableCode();
+
         /// <summary>
         /// Retrieves all records from the specified user table and maps them to instances of the given type.
         /// </summary>
@@ -751,6 +754,21 @@ namespace SAPUtils.Models.UserTables {
             }
             if (Name == null) {
                 Name = Code;
+            }
+        }
+
+        /// <inheritdoc />
+        public override string GetNextAvailableCode() {
+            switch (_userTableAttribute.PrimaryKeyStrategy) {
+                case PrimaryKeyStrategy.Manual:
+                    return "";
+                case PrimaryKeyStrategy.Guid:
+                    return Guid.NewGuid().ToString();
+                case PrimaryKeyStrategy.Serie:
+                    using (IRepository repository = Repository.Get())
+                        return repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(PrimaryKeyStrategy));
             }
         }
 

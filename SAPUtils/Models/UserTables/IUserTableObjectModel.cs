@@ -54,5 +54,11 @@ namespace SAPUtils.Models.UserTables {
         /// </summary>
         /// <returns>True if the operation is successful, otherwise false.</returns>
         bool Save();
+
+        /// <summary>
+        /// Retrieves the next available unique code for the SAP user table.
+        /// </summary>
+        /// <returns>A string representing the next available code.</returns>
+        string GetNextAvailableCode();
     }
 }

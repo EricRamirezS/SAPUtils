@@ -105,6 +105,7 @@
       <Compile Include="Forms\ChangeTrackerMatrixForm.Initialize.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
+      <Compile Include="Forms\ObjectViewerForm.cs"/>
       <Compile Include="Forms\UserForm.cs"/>
       <Compile Include="Forms\UserForm.IForm.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
