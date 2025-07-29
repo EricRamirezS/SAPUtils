@@ -23,6 +23,7 @@ namespace SAPUtils.Query {
     /// </code>
     /// </example>
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
     public interface IWhereBuilder {
         /// <summary>
         /// Groups a set of conditions together using the specified logical operator.
