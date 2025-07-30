@@ -38,10 +38,10 @@ namespace SAPUtils.Models.UserTables {
         private static readonly ConcurrentDictionary<(Type, string), UserTableObjectModel> Cache =
             new ConcurrentDictionary<(Type, string), UserTableObjectModel>();
 
-        internal string OriginalCode { get; private set; }
+        internal string OriginalCode { get; set; }
         internal bool? OriginalActive { get; set; }
-        internal DateTime OriginalCreatedAt { get; private set; }
-        internal int OriginalCreatedBy { get; private set; }
+        internal DateTime OriginalCreatedAt { get; set; }
+        internal int OriginalCreatedBy { get; set; }
 
         /// <inheritdoc />
         public abstract string Code { get; set; }
@@ -285,14 +285,10 @@ namespace SAPUtils.Models.UserTables {
         /// <seealso cref="SAPUtils.SapAddon"/>
         public static T GetBusinessObjectByKey<T>(BoObjectTypes objectType, object key) where T : class {
             Company company = SapAddon.Instance().Company;
-            object obj = company.GetBusinessObject(objectType);
+            dynamic obj = company.GetBusinessObject(objectType);
 
             //All SAP BO Business Objects should have GetByKey method
-            MethodInfo getByKeyMethod = obj.GetType().GetMethod("GetByKey");
-            if (getByKeyMethod == null) return null;
-            bool found = (bool)getByKeyMethod.Invoke(obj, new[] {
-                key
-            });
+            bool found = obj.GetByKey(key);
             return found ? obj as T : null;
         }
 
@@ -549,9 +545,6 @@ namespace SAPUtils.Models.UserTables {
                 }
                 Log.Debug("Saving {0} into table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
                 bool exist = table.GetByKey(Code);
-                if (this is ISoftDeletable deletable && OriginalActive.HasValue) {
-                    deletable.Active = OriginalActive.Value;
-                }
 
                 if (exist) {
                     Log.Trace("Updating existing {0} in table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
@@ -564,6 +557,10 @@ namespace SAPUtils.Models.UserTables {
                         userAudit.CreatedBy = OriginalCreatedBy;
                         userAudit.UpdatedBy = SapAddon.Instance().Company.UserSignature;
                     }
+
+                    if (this is ISoftDeletable deletable && OriginalActive.HasValue) {
+                        deletable.Active = OriginalActive.Value;
+                    }
                 }
                 else {
                     Log.Trace("Inserting new {0} into table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
@@ -572,11 +569,18 @@ namespace SAPUtils.Models.UserTables {
                     if (this is IAuditableDate dateAudit) {
                         dateAudit.CreatedAt = DateTime.Now;
                         dateAudit.UpdatedAt = DateTime.Now;
+                        OriginalCreatedAt = dateAudit.CreatedAt;
                     }
 
                     if (this is IAuditableUser userAudit) {
                         userAudit.CreatedBy = SapAddon.Instance().Company.UserSignature;
                         userAudit.UpdatedBy = SapAddon.Instance().Company.UserSignature;
+                        OriginalCreatedBy = userAudit.CreatedBy;
+                    }
+
+                    if (this is ISoftDeletable deletableField) {
+                        deletableField.Active = true;
+                        OriginalActive = deletableField.Active;
                     }
                 }
 
