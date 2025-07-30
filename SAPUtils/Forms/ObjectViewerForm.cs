@@ -278,6 +278,8 @@ namespace SAPUtils.Forms {
             //TODO: No hacer nada si solo se abrio el Combobox, pero nada se seleccionó, actualmente llama a la opción ya seleccionada
             bool validationSuccess = ValidateForm();
             if (!validationSuccess) return;
+            int option = ShowMessageBox("Este documento no puede modificarse tras la creación. ¿Continuar?", 1, "Sí", "No");
+            if (option != 1) return;
             _item = new T();
             bool success = SaveNew(_item);
             if (!success) return;
@@ -309,9 +311,11 @@ namespace SAPUtils.Forms {
             _updateButton.Item.Visible = false;
             UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
             UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
+            ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
+            _cancelButton.Item.Enabled = true;
+            _okButton.Item.Enabled = true;
             OnEditMode();
             LoadFoundItem(_item);
-            ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
             Freeze(false);
         }
 
@@ -326,8 +330,10 @@ namespace SAPUtils.Forms {
             _updateButton.Item.Visible = false;
             UIAPIRawForm.DefButton = _addButton.Item.UniqueID;
             UIAPIRawForm.Mode = BoFormMode.fm_ADD_MODE;
-            OnNewMode();
             ChangeFormMode(BoFormMode.fm_ADD_MODE);
+            _addButtonCombo.Item.Enabled = true;
+            _cancelButton.Item.Enabled = true;
+            OnNewMode();
             Freeze(false);
         }
         private void SearchMode() {
@@ -340,8 +346,10 @@ namespace SAPUtils.Forms {
             _okButton.Item.Visible = false;
             _updateButton.Item.Visible = false;
             UIAPIRawForm.DefButton = _searchButton.Item.UniqueID;
-            OnFindMode();
             ChangeFormMode(BoFormMode.fm_FIND_MODE);
+            _cancelButton.Item.Enabled = true;
+            _searchButton.Item.Enabled = true;
+            OnFindMode();
             Freeze(false);
         }
 
