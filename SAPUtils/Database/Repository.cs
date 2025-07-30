@@ -95,10 +95,12 @@ namespace SAPUtils.Database {
                     if (getAllMethod != null) {
                         IWhere where = null;
                         if (typeof(ISoftDeletable).IsAssignableFrom(tableType)) {
-                            where = Where.Builder().Equals("U_Active", true).Build();
+                            where = Where.Builder().Equals("Active", true).Build();
                         }
 
-                        object result = getAllMethod.Invoke(null, new object[] { where });
+                        object result = getAllMethod.Invoke(null, new object[] {
+                            where
+                        });
                         IEnumerable<object> items = (IEnumerable<object>)result;
                         foreach (object item in items) {
                             string code = item.GetType().GetProperty("Code")?.GetValue(item)?.ToString();
@@ -149,7 +151,9 @@ namespace SAPUtils.Database {
                     "GetAll",
                     BindingFlags.Public | BindingFlags.Static,
                     null,
-                    new[] { typeof(IWhere) },
+                    new[] {
+                        typeof(IWhere)
+                    },
                     null
                 );
 
