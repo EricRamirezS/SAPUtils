@@ -57,6 +57,54 @@ namespace SAPUtils.Events {
         public static event ItemBeforeHandler ItemBefore;
 
         /// <summary>
+        /// Event raised before a form is loaded in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event allows for customization or validation logic to be executed prior to the form loading process.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form that is being loaded.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing the details of the event.</param>
+        /// <param name="bubbleEvent">
+        /// A boolean flag that determines whether the event should continue to propagate.
+        /// Set to `false` to stop the event propagation.
+        /// </param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
+        public static event ItemBeforeHandler FormLoadBefore;
+
+        /// <summary>
+        /// Event raised before the "Item Pressed" action occurs in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event enables custom logic or validations to be applied before executing an action triggered by pressing an item.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form where the item press event is triggered.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing the details of the item press event.</param>
+        /// <param name="bubbleEvent">
+        /// A boolean flag indicating whether the event should continue to propagate.
+        /// Set to `false` to cancel the propagation of the event.
+        /// </param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
+        public static event ItemBeforeHandler ItemPressedBefore;
+
+        /// <summary>
+        /// Event raised before a combo box selection is changed in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event allows for customization or validation logic to be executed prior to a combo box selection change.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form on which the combo box selection is being changed.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing details of the combo box selection event.</param>
+        /// <param name="bubbleEvent">
+        /// A boolean flag that determines whether the event should continue to propagate.
+        /// Set to `false` to stop the event propagation.
+        /// </param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
+        public static event ItemBeforeHandler ComboSelectBefore;
+
+        /// <summary>
         /// Event triggered after an item event occurs in a form within the SAP Business One application framework.
         /// </summary>
         /// <remarks>
@@ -68,6 +116,47 @@ namespace SAPUtils.Events {
         /// <seealso cref="SAPbouiCOM.ItemEvent"/>
         /// <seealso cref="SAPUtils.Events.ItemEvents.ItemBeforeHandler"/>
         public static event ItemAfterHandler ItemAfter;
+
+        /// <summary>
+        /// Event triggered after a form is loaded in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event is used to perform custom actions or initializations after the form loading process has been completed.
+        /// It provides an opportunity to interact with form elements after they are fully initialized.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form that has been loaded.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing event details.</param>
+        /// <param name="bubbleEvent">
+        /// A boolean flag that determines whether subsequent event handlers should execute.
+        /// Set to `false` to prevent further propagation of the event.
+        /// </param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.FormEvents"/>
+        public static event ItemAfterHandler FormLoadAfter;
+
+        /// <summary>
+        /// Event raised after an ItemPress action is performed within the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event allows for post-processing logic to be implemented following the completion of an ItemPress action.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form where the ItemPress action occurred.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing details of the event.</param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
+        public static event ItemAfterHandler ItemPressedAfter;
+
+        /// <summary>
+        /// Event raised after a ComboBox selection is made in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event allows post-action handling or additional processing to occur after a ComboBox selection is completed.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form where the ComboBox selection occurred.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing event details.</param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
+        public static event ItemAfterHandler ComboSelectAfter;
 
         /// <summary>
         /// Handles event logic for specific application events.
@@ -82,10 +171,36 @@ namespace SAPUtils.Events {
         internal static void Handle(string formUid, ref ItemEvent pVal, out bool bubbleEvent) {
             bubbleEvent = true;
             if (pVal.BeforeAction) {
-                ItemBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
+                switch (pVal.EventType) {
+                    case BoEventTypes.et_FORM_LOAD:
+                        FormLoadBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
+                        break;
+                    case BoEventTypes.et_ITEM_PRESSED:
+                        ItemPressedBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
+                        break;
+                    case BoEventTypes.et_COMBO_SELECT:
+                        ComboSelectBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
+                        break;
+                    default:
+                        ItemBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
+                        break;
+                }
             }
             else {
-                ItemAfter?.Invoke(formUid, ref pVal);
+                switch (pVal.EventType) {
+                    case BoEventTypes.et_FORM_LOAD:
+                        FormLoadAfter?.Invoke(formUid, ref pVal);
+                        break;
+                    case BoEventTypes.et_ITEM_PRESSED:
+                        ItemPressedAfter?.Invoke(formUid, ref pVal);
+                        break;
+                    case BoEventTypes.et_COMBO_SELECT:
+                        ComboSelectAfter?.Invoke(formUid, ref pVal);
+                        break;
+                    default:
+                        ItemAfter?.Invoke(formUid, ref pVal);
+                        break;
+                }
             }
         }
     }
