@@ -94,7 +94,7 @@ namespace SAPUtils.Models.UserTables {
             Recordset rs = null;
             try {
                 rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-                tableName = SapAddon.Instance().IsHana ? $"[@{tableName}]" : $"\"@{tableName}\"";
+                tableName = SapAddon.Instance().IsHana ? $"\"@{tableName}\"" : $"[@{tableName}]";
                 string query = $"SELECT T0.* FROM {tableName} T0 {new SqlWhereBuilder(where).Build()}";
                 rs.DoQuery(query);
 
@@ -290,7 +290,9 @@ namespace SAPUtils.Models.UserTables {
             //All SAP BO Business Objects should have GetByKey method
             MethodInfo getByKeyMethod = obj.GetType().GetMethod("GetByKey");
             if (getByKeyMethod == null) return null;
-            bool found = (bool)getByKeyMethod.Invoke(obj, new[] { key });
+            bool found = (bool)getByKeyMethod.Invoke(obj, new[] {
+                key
+            });
             return found ? obj as T : null;
         }
 
