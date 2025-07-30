@@ -31,6 +31,30 @@ namespace SAPUtils.Forms {
             return null;
         }
 
+        private void AddRowToMatrix(int index, T item, Status status) {
+            if (index < 0) {
+                index = _dataTable.Rows.Count;
+            }
+            _dataTable.Rows.Add();
+            _dataTable.SetValue("#", index, index + 1);
+            _dataTable.SetValue("Code", index, item.Code ?? "");
+            _dataTable.SetValue("Name", index, item.Name ?? "");
+            foreach ((PropertyInfo property, IUserTableField field) in UserTableMetadataCache.GetUserFields(typeof(T))) {
+                if (field is DateTimeFieldAttribute dtf) {
+                    if (!(property.GetValue(item) is DateTime value)) continue;
+                    (DataColumn _, Column dateColumn) = ColumnInfo[$"{field.Name ?? property.Name}Date"];
+                    (DataColumn _, Column timeColumn) = ColumnInfo[$"{field.Name ?? property.Name}Time"];
+                    _dataTable.SetValue(dateColumn.UniqueID, index, dtf.DateToColumnData(value));
+                    _dataTable.SetValue(timeColumn.UniqueID, index, dtf.TimeToColumnData(value));
+                }
+                else {
+                    (DataColumn _, Column matrixColumn) = ColumnInfo[field.Name ?? property.Name];
+                    _dataTable.SetValue(matrixColumn.UniqueID, index, field.ToColumnData(property.GetValue(item)));
+                }
+            }
+            _dataTable.SetValue("_S_T_A_T_E", index, status.GetReadableName());
+        }
+
         /// <summary>
         /// Updates the matrix control by refreshing its data and applying necessary configurations.
         /// This includes populating the data table, adjusting column values, handling custom properties,
@@ -41,25 +65,8 @@ namespace SAPUtils.Forms {
             int index = 0;
             _dataTable.Rows.Clear();
             foreach ((T item, Status status) in _data) {
-                _dataTable.Rows.Add();
-                _dataTable.SetValue("#", index, index + 1);
-                _dataTable.SetValue("Code", index, item.Code ?? "");
-                _dataTable.SetValue("Name", index, item.Name ?? "");
-                foreach ((PropertyInfo property, IUserTableField field) in UserTableMetadataCache.GetUserFields(typeof(T))) {
-                    if (field is DateTimeFieldAttribute dtf) {
-                        if (!(property.GetValue(item) is DateTime value)) continue;
-                        (DataColumn _, Column dateColumn) = ColumnInfo[$"{field.Name ?? property.Name}Date"];
-                        (DataColumn _, Column timeColumn) = ColumnInfo[$"{field.Name ?? property.Name}Time"];
-                        _dataTable.SetValue(dateColumn.UniqueID, index, dtf.DateToColumnData(value));
-                        _dataTable.SetValue(timeColumn.UniqueID, index, dtf.TimeToColumnData(value));
-                    }
-                    else {
-                        (DataColumn _, Column matrixColumn) = ColumnInfo[field.Name ?? property.Name];
-                        _dataTable.SetValue(matrixColumn.UniqueID, index, field.ToColumnData(property.GetValue(item)));
-                    }
-                }
-                _dataTable.SetValue("_S_T_A_T_E", index, status.GetReadableName());
-
+                AddRowToMatrix(index, item, status);
+                ;
                 index++;
             }
 
@@ -108,58 +115,75 @@ namespace SAPUtils.Forms {
         /// <seealso cref="ChangeTrackerMatrixForm{T}"/>
         protected void UpdateMatrixColors() {
             try {
+                Freeze(true);
                 bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
-                for (int i = 0; i < _data.Count; i++) {
-                    if (!IsEditable(_data[i].Item)) {
-                        _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
+                int rowCount = _data.Count;
+                int columnCount = _matrix.Columns.Count;
+
+                int grayColor = SapColors.ColorToInt(SapColors.DisabledCellGray);
+                int whiteColor = SapColors.ColorToInt(Color.WhiteSmoke);
+                int khakiColor = SapColors.ColorToInt(Color.Khaki);
+                int blueColor = SapColors.ColorToInt(Color.LightBlue);
+                int greenColor = SapColors.ColorToInt(Color.PaleGreen);
+                int salmonColor = SapColors.ColorToInt(Color.LightSalmon);
+                int redColor = SapColors.ColorToInt(Color.IndianRed);
+                int softDeletedColor = SapColors.ColorToInt(Color.LightSlateGray);
+                for (int i = 0; i < rowCount; i++) {
+                    (T Item, Status Status) row = _data[i];
+                    int rowIndex = i + 1;
+
+                    if (!IsEditable(row.Item)) {
+                        _matrix.CommonSetting.SetRowBackColor(rowIndex, grayColor);
                         continue;
                     }
-                    switch (_data[i].Status) {
+
+                    int color;
+                    switch (row.Status) {
                         case Status.Normal:
-                            if (_data[i].Item is ISoftDeletable sd && sd.Active == false) {
-                                _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightSlateGray));
-                            }
-                            else {
-                                _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.WhiteSmoke));
-                            }
+                            if (row.Item is ISoftDeletable sd && !sd.Active)
+                                color = softDeletedColor;
+                            else
+                                color = whiteColor;
                             break;
-                        case Status.Modified:
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.Khaki));
-                            break;
-                        case Status.ModifiedRestored:
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightBlue));
-                            break;
-                        case Status.New:
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.PaleGreen));
-                            break;
-                        case Status.Discard:
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.LightSalmon));
-                            break;
-                        case Status.Delete:
-                            _matrix.CommonSetting.SetRowBackColor(i + 1, SapColors.ColorToInt(Color.IndianRed));
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        case Status.Modified: color = khakiColor; break;
+                        case Status.ModifiedRestored: color = blueColor; break;
+                        case Status.New: color = greenColor; break;
+                        case Status.Discard: color = salmonColor; break;
+                        case Status.Delete: color = redColor; break;
+                        default: throw new ArgumentOutOfRangeException();
                     }
-                    for (int j = 1; j < _matrix.Columns.Count - 1; j++) {
-                        bool cellEditable = _matrix.CommonSetting.GetCellEditable(i + 1, j);
-                        if (!cellEditable) {
-                            _matrix.CommonSetting.SetCellBackColor(i + 1, j, SapColors.ColorToInt(SapColors.DisabledCellGray));
+
+                    _matrix.CommonSetting.SetRowBackColor(rowIndex, color);
+
+                    // Solo si hay más de 2 columnas vale la pena entrar aquí
+                    if (columnCount <= 2) continue;
+                    for (int j = 1; j < columnCount - 1; j++) {
+                        if (!_matrix.CommonSetting.GetCellEditable(rowIndex, j)) {
+                            _matrix.CommonSetting.SetCellBackColor(rowIndex, j, grayColor);
                         }
                     }
                 }
 
-                for (int i = 0; i < _data.Count; i++) {
-                    bool cellEditable = _matrix.CommonSetting.GetCellEditable(i + 1, 1);
+                for (int i = 0; i < rowCount; i++) {
+                    int rowIndex = i + 1;
+
+                    bool cellEditable = _matrix.CommonSetting.GetCellEditable(rowIndex, 1);
+
                     if (manualCode && cellEditable) {
-                        if (_data[i].Status == Status.New || _data[i].Status == Status.Discard) continue;
+                        Status status = _data[i].Status;
+                        if (status == Status.New || status == Status.Discard)
+                            continue;
                     }
-                    _matrix.CommonSetting.SetCellBackColor(i + 1, 1, SapColors.ColorToInt(SapColors.DisabledCellGray));
-                    _matrix.CommonSetting.SetCellFontStyle(i + 1, 1, BoFontStyle.fs_Bold);
+
+                    _matrix.CommonSetting.SetCellBackColor(rowIndex, 1, grayColor);
+                    _matrix.CommonSetting.SetCellFontStyle(rowIndex, 1, BoFontStyle.fs_Bold);
                 }
             }
             catch (Exception e) {
                 Logger.Error(e);
+            }
+            finally {
+                Freeze(false);
             }
         }
 
@@ -250,7 +274,7 @@ namespace SAPUtils.Forms {
 
                             Status oldStatus = _data[index].Status;
 
-                            _data[index] = (newItem, oldStatus); // O Status.New si prefieres
+                            _data[index] = (newItem, oldStatus);
                         }
                     }
                     break;

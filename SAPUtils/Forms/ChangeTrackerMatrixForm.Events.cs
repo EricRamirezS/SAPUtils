@@ -64,8 +64,8 @@ namespace SAPUtils.Forms {
                 if (status == Status.Normal) {
                     _data[rowIndex] = (item, Status.Modified);
                     ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                    UpdateMatrixColors();
                 }
-                UpdateMatrixColors();
             }
             else if (coluid.EndsWith("D") || coluid.EndsWith("T")) {
                 // DateTimeUserTableField Handler
@@ -113,8 +113,8 @@ namespace SAPUtils.Forms {
                     if (status == Status.Normal) {
                         _data[rowIndex] = (item, Status.Modified);
                         ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                        UpdateMatrixColors();
                     }
-                    UpdateMatrixColors();
                 }
             }
             else {
@@ -133,8 +133,8 @@ namespace SAPUtils.Forms {
                 if (status == Status.Normal) {
                     _data[rowIndex] = (item, Status.Modified);
                     ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                    UpdateMatrixColors();
                 }
-                UpdateMatrixColors();
             }
         }
         private void Application_MenuEvent(ref MenuEvent pVal, out bool bubbleEvent) {
@@ -146,7 +146,6 @@ namespace SAPUtils.Forms {
                 T it = new T();
                 if (it is ISoftDeletable itsd) itsd.Active = true;
                 _observableData.Add(it);
-                UpdateMatrix();
             }
             else if (pVal.MenuUID == _deleteRowMenuUid) {
                 int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
