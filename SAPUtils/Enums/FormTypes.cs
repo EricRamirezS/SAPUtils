@@ -768,8 +768,26 @@ namespace SAPUtils.Enums {
     }
 
     public static class FormTypesExtensions {
+        /// <summary>
+        /// Determines whether the string representation of the enum value matches the provided string.
+        /// </summary>
+        /// <param name="enumVal">The enum value to evaluate.</param>
+        /// <param name="str">The string to compare against the enum value.</param>
+        /// <returns>True if the string representation of the enum value matches the provided string; otherwise, false.</returns>
+        /// <seealso cref="FormTypes"/>
         public static bool Is(this FormTypes enumVal, string str) {
             return Convert.ToInt32(enumVal).ToString() == str;
+        }
+
+        /// <summary>
+        /// Determines whether the string representation of the enum matches the provided string as UDF Form.
+        /// </summary>
+        /// <param name="enumVal">The enum value to evaluate.</param>
+        /// <param name="str">The string to compare against the negative integer representation of the enum value.</param>
+        /// <returns>True if the string representation of the negative integer value of the enum matches the provided string; otherwise, false.</returns>
+        /// <seealso cref="SAPUtils.Enums.FormTypes"/>
+        public static bool IsUDF(this FormTypes enumVal, string str) {
+            return (-1 * Convert.ToInt32(enumVal)).ToString() == str;
         }
     }
 }
