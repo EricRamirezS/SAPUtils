@@ -38,78 +38,88 @@ namespace SAPUtils.Query {
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="value">The value to compare against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder Equals(string column, object value);
+        IWhereBuilder Equals(string column, object value, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a not-equals condition (column != value) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="value">The value to compare against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder NotEquals(string column, object value);
+        IWhereBuilder NotEquals(string column, object value, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a greater than condition (column > value) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="value">The value to compare against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder GreaterThan(string column, object value);
+        IWhereBuilder GreaterThan(string column, object value, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a greater than or equal to condition (column >= value) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="value">The value to compare against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder GreaterThanOrEqual(string column, object value);
+        IWhereBuilder GreaterThanOrEqual(string column, object value, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a less than condition (column &lt; value) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="value">The value to compare against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder LessThan(string column, object value);
+        IWhereBuilder LessThan(string column, object value, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a less than or equal to condition (column &lt;= value) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="value">The value to compare against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder LessThanOrEqual(string column, object value);
+        IWhereBuilder LessThanOrEqual(string column, object value, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a LIKE condition (column LIKE 'pattern') to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="pattern">The pattern to match against (e.g., "%value%").</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder Like(string column, string pattern);
+        IWhereBuilder Like(string column, string pattern, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a NOT LIKE condition (column NOT LIKE 'pattern') to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="pattern">The pattern to not match against (e.g., "%value%").</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder NotLike(string column, string pattern);
+        IWhereBuilder NotLike(string column, string pattern, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds an IS NULL condition (column IS NULL) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder IsNull(string column);
+        IWhereBuilder IsNull(string column, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds an IS NOT NULL condition (column IS NOT NULL) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder IsNotNull(string column);
+        IWhereBuilder IsNotNull(string column, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a BETWEEN condition (column BETWEEN from AND to) to the WHERE clause.
@@ -117,8 +127,9 @@ namespace SAPUtils.Query {
         /// <param name="column">The name of the column.</param>
         /// <param name="from">The starting value of the range.</param>
         /// <param name="to">The ending value of the range.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder Between(string column, object from, object to);
+        IWhereBuilder Between(string column, object from, object to, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a NOT BETWEEN condition (column NOT BETWEEN from AND to) to the WHERE clause.
@@ -126,24 +137,27 @@ namespace SAPUtils.Query {
         /// <param name="column">The name of the column.</param>
         /// <param name="from">The starting value of the range.</param>
         /// <param name="to">The ending value of the range.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder NotBetween(string column, object from, object to);
+        IWhereBuilder NotBetween(string column, object from, object to, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds an IN condition (column IN (values)) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="values">A collection of values to check against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder In(string column, IEnumerable<object> values);
+        IWhereBuilder In(string column, IEnumerable<object> values, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a NOT IN condition (column NOT IN (values)) to the WHERE clause.
         /// </summary>
         /// <param name="column">The name of the column.</param>
         /// <param name="values">A collection of values to not check against.</param>
+        /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder NotIn(string column, IEnumerable<object> values);
+        IWhereBuilder NotIn(string column, IEnumerable<object> values, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds an EXISTS condition (EXISTS (subquery)) to the WHERE clause.
