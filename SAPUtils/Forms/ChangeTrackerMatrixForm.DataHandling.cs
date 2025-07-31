@@ -214,6 +214,7 @@ namespace SAPUtils.Forms {
             _failedAdd.Clear();
             _failedUpdate.Clear();
             _failedDelete.Clear();
+            _matrix.AutoResizeColumns();
             _dataReload = false;
         }
 
@@ -228,21 +229,48 @@ namespace SAPUtils.Forms {
             T[] addItems = modifiedData.Where(x => x.Status == Status.New).Select(x => x.Item).ToArray();
 
 
+            int success = 0;
+            int failed = 0;
             foreach (T item in updateItems) {
-                if (item.Update()) continue;
+                if (item.Update()) {
+                    success++;
+                    continue;
+                }
+                failed++;
                 _failedUpdate.Add((item, Status.Modified));
             }
             foreach (T item in restoredItems) {
-                if (item.Update(true)) continue;
+                if (item.Update(true)) {
+                    success++;
+                    continue;
+                }
+                failed++;
                 _failedUpdate.Add((item, Status.ModifiedRestored));
             }
             foreach (T item in deleteItems) {
-                if (item.Delete()) continue;
+                if (item.Delete()) {
+                    success++;
+                    continue;
+                }
+                failed++;
                 _failedDelete.Add((item, Status.Delete));
             }
             foreach (T item in addItems) {
-                if (item.Add()) continue;
+                if (item.Add()) {
+                    success++;
+                    continue;
+                }
+                failed++;
                 _failedAdd.Add((item, Status.New));
+            }
+            if (failed > 0 && success == 0) {
+                SetStatusBarMessage($"No se han podido guardar los cambios.", type: BoStatusBarMessageType.smt_Error);
+            }
+            if (failed > 0) {
+                SetStatusBarMessage($"Se han guardado {success} cambios. Han fallado {failed} cambios.", type: BoStatusBarMessageType.smt_Warning);
+            }
+            else {
+                SetStatusBarMessage($"Se han guardado {success} cambios.", type: BoStatusBarMessageType.smt_Success);
             }
         }
 
