@@ -765,6 +765,8 @@ namespace SAPUtils.Enums {
         DefineWithholdingTaxCodes = 65015,
 
         UpdateParentItemPricesSelectionCriteria = 65018,
+
+        PurchaseRequest = 1470000200,
     }
 
     public static class FormTypesExtensions {

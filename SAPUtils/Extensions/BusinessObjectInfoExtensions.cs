@@ -53,5 +53,35 @@ namespace SAPUtils.Extensions {
             return null;
 
         }
+        public static int? GetDocEntry(this BusinessObject boInfo) {
+            try {
+                XmlDocument xml = new XmlDocument();
+                xml.LoadXml(boInfo.Key);
+
+                string docEntry = xml.DocumentElement.SelectSingleNode("/DocumentParams/DocEntry").InnerText;
+
+                if (Regex.IsMatch(docEntry, @"\d+")) {
+                    return Convert.ToInt32(docEntry);
+                }
+            }
+            catch {
+                try {
+                    XmlDocument xml = new XmlDocument();
+                    xml.LoadXml(boInfo.Key);
+
+                    string docEntry = xml.DocumentElement?.SelectSingleNode("/StockTransferParams/DocEntry")?.InnerText;
+
+                    if (docEntry != null && Regex.IsMatch(docEntry, @"\d+")) {
+                        return Convert.ToInt32(docEntry);
+                    }
+                }
+                catch {
+                    // ignored
+                }
+            }
+
+            return null;
+
+        }
     }
 }
