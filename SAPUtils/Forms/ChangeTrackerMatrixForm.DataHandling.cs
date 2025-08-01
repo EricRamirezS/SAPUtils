@@ -18,6 +18,7 @@ namespace SAPUtils.Forms {
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public abstract partial class ChangeTrackerMatrixForm<T> {
 
+
         /// <summary>
         /// Loads custom data for the matrix. The implementation of this method can be overridden in derived classes
         /// to provide specific data handling logic.
@@ -66,7 +67,6 @@ namespace SAPUtils.Forms {
             _dataTable.Rows.Clear();
             foreach ((T item, Status status) in _data) {
                 AddRowToMatrix(index, item, status);
-                ;
                 index++;
             }
 
@@ -75,29 +75,36 @@ namespace SAPUtils.Forms {
 
             index = 0;
             foreach ((T data, Status status) in _data) {
-                if (IsEditable(data)) {
-                    for (int j = 1; j < _matrix.Columns.Count - 1; j++) {
-                        bool editableCol = _matrix.Columns.Item(j).Editable;
-                        _matrix.CommonSetting.SetCellEditable(index + 1, 1, editableCol);
-                    }
-                    if (_tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) {
-                        if (status == Status.New || status == Status.Discard) {
-                            _matrix.CommonSetting.SetCellEditable(index + 1, 1, true);
-                        }
-                        else {
-                            _matrix.CommonSetting.SetCellEditable(index + 1, 1, false);
-                        }
-                    }
-                }
-                else {
-                    _matrix.CommonSetting.SetRowEditable(index + 1, false);
-                }
+                SetEditablesInRow(data, status, index);
                 index++;
             }
 
 
             UpdateMatrixColors();
             Freeze(false);
+        }
+
+        private void SetEditablesInRow(T data, Status status, int index) {
+            if (IsEditable(data)) {
+                for (int j = 1; j < _matrix.Columns.Count - 1; j++) {
+                    bool editableCol = _matrix.Columns.Item(j).Editable;
+                    _matrix.CommonSetting.SetCellEditable(index + 1, 1, editableCol);
+                }
+                if (_tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) {
+                    if (status == Status.New || status == Status.Discard) {
+                        _matrix.CommonSetting.SetCellEditable(index + 1, 1, true);
+                    }
+                    else {
+                        _matrix.CommonSetting.SetCellEditable(index + 1, 1, false);
+                    }
+                }
+                else {
+                    _matrix.CommonSetting.SetCellEditable(index + 1, 1, false);
+                }
+            }
+            else {
+                _matrix.CommonSetting.SetRowEditable(index + 1, false);
+            }
         }
 
         /// <summary>
@@ -116,67 +123,8 @@ namespace SAPUtils.Forms {
         protected void UpdateMatrixColors() {
             try {
                 Freeze(true);
-                bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
-                int rowCount = _data.Count;
-                int columnCount = _matrix.Columns.Count;
-
-                int grayColor = SapColors.ColorToInt(SapColors.DisabledCellGray);
-                int whiteColor = SapColors.ColorToInt(Color.WhiteSmoke);
-                int khakiColor = SapColors.ColorToInt(Color.Khaki);
-                int blueColor = SapColors.ColorToInt(Color.LightBlue);
-                int greenColor = SapColors.ColorToInt(Color.PaleGreen);
-                int salmonColor = SapColors.ColorToInt(Color.LightSalmon);
-                int redColor = SapColors.ColorToInt(Color.IndianRed);
-                int softDeletedColor = SapColors.ColorToInt(Color.LightSlateGray);
-                for (int i = 0; i < rowCount; i++) {
-                    (T Item, Status Status) row = _data[i];
-                    int rowIndex = i + 1;
-
-                    if (!IsEditable(row.Item)) {
-                        _matrix.CommonSetting.SetRowBackColor(rowIndex, grayColor);
-                        continue;
-                    }
-
-                    int color;
-                    switch (row.Status) {
-                        case Status.Normal:
-                            if (row.Item is ISoftDeletable sd && !sd.Active)
-                                color = softDeletedColor;
-                            else
-                                color = whiteColor;
-                            break;
-                        case Status.Modified: color = khakiColor; break;
-                        case Status.ModifiedRestored: color = blueColor; break;
-                        case Status.New: color = greenColor; break;
-                        case Status.Discard: color = salmonColor; break;
-                        case Status.Delete: color = redColor; break;
-                        default: throw new ArgumentOutOfRangeException();
-                    }
-
-                    _matrix.CommonSetting.SetRowBackColor(rowIndex, color);
-
-                    // Solo si hay más de 2 columnas vale la pena entrar aquí
-                    if (columnCount <= 2) continue;
-                    for (int j = 1; j < columnCount - 1; j++) {
-                        if (!_matrix.CommonSetting.GetCellEditable(rowIndex, j)) {
-                            _matrix.CommonSetting.SetCellBackColor(rowIndex, j, grayColor);
-                        }
-                    }
-                }
-
-                for (int i = 0; i < rowCount; i++) {
-                    int rowIndex = i + 1;
-
-                    bool cellEditable = _matrix.CommonSetting.GetCellEditable(rowIndex, 1);
-
-                    if (manualCode && cellEditable) {
-                        Status status = _data[i].Status;
-                        if (status == Status.New || status == Status.Discard)
-                            continue;
-                    }
-
-                    _matrix.CommonSetting.SetCellBackColor(rowIndex, 1, grayColor);
-                    _matrix.CommonSetting.SetCellFontStyle(rowIndex, 1, BoFontStyle.fs_Bold);
+                for (int i = 0; i < _data.Count; i++) {
+                    UpdateMatrixColors(i, freeze: false);
                 }
             }
             catch (Exception e) {
@@ -187,6 +135,71 @@ namespace SAPUtils.Forms {
             }
         }
 
+        /// <summary>
+        /// Updates the visual colors of the matrix rows and cells based on their current data and status.
+        /// This method is particularly useful for providing visual feedback on editable or non-editable rows
+        /// or indicating specific statuses through color coding.
+        /// </summary>
+        /// <param name="rowIndex">The index of the matrix row to be updated.</param>
+        /// <param name="freeze">A boolean indicating whether the matrix should be frozen during the update
+        /// process to prevent UI flickering and improve performance. Defaults to true.</param>
+        /// <seealso cref="SAPbouiCOM.Matrix"/>
+        /// <seealso cref="SAPbouiCOM.CommonSetting"/>
+        protected void UpdateMatrixColors(int rowIndex, bool freeze = true) {
+            try {
+                if (rowIndex < 0 || rowIndex >= _data.Count) return;
+                if (freeze) Freeze(true);
+
+                bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
+                int matrixRow = rowIndex + 1;
+                int columnCount = _matrix.Columns.Count;
+
+                (T item, Status status) = _data[rowIndex];
+
+                if (!IsEditable(item)) {
+                    _matrix.CommonSetting.SetRowBackColor(matrixRow, MatrixColors.GrayColor);
+                }
+                else {
+                    (int rowColor, int rowDisabledColor) = GetRowColors(status, item);
+
+                    // Skip "#" (0) and "_S_T_A_T_E" (last)
+                    for (int j = 1; j < columnCount - 1; j++) {
+                        int cellColor = !_matrix.CommonSetting.GetCellEditable(matrixRow, j)
+                            ? rowDisabledColor
+                            : rowColor;
+
+                        _matrix.CommonSetting.SetCellBackColor(matrixRow, j, cellColor);
+                    }
+
+
+                    bool cellEditable = _matrix.CommonSetting.GetCellEditable(matrixRow, 1);
+                    if (manualCode && cellEditable) {
+                        if (status == Status.New || status == Status.Discard)
+                            return;
+                    }
+
+                    _matrix.CommonSetting.SetCellBackColor(matrixRow, 1, rowDisabledColor);
+                    _matrix.CommonSetting.SetCellFontStyle(matrixRow, 1, BoFontStyle.fs_Bold);
+                }
+            }
+            catch (Exception e) {
+                Logger.Error(e);
+            }
+            finally {
+                if (freeze) Freeze(false);
+            }
+        }
+
+        private static (int normal, int dark) GetRowColors(Status status, T item) {
+            if (status != Status.Normal)
+                return MatrixColors.StatusColors.TryGetValue(status, out (int Normal, int Dark) colors)
+                    ? colors
+                    : throw new ArgumentOutOfRangeException();
+            if (item is ISoftDeletable sd && !sd.Active)
+                return (MatrixColors.SoftDeletedColor, MatrixColors.DarkSoftDeletedColor);
+            return (MatrixColors.WhiteColor, MatrixColors.GrayColor);
+
+        }
         private void LoadData() {
             _dataReload = true;
             _observableData.Clear();
@@ -199,7 +212,7 @@ namespace SAPUtils.Forms {
             }
 
             foreach ((T Item, Status Status) failed in _failedUpdate.Concat(_failedDelete)) {
-                int observableIndex = _observableData.ToList().FindIndex(item => item.Code == failed.Item.Code);
+                int observableIndex = _observableData.IndexOf(_observableData.FirstOrDefault(x => x.Code == failed.Item.Code));
                 if (observableIndex < 0) continue;
 
                 _observableData[observableIndex] = failed.Item;
@@ -214,7 +227,6 @@ namespace SAPUtils.Forms {
             _failedAdd.Clear();
             _failedUpdate.Clear();
             _failedDelete.Clear();
-            _matrix.AutoResizeColumns();
             _dataReload = false;
         }
 
@@ -223,46 +235,41 @@ namespace SAPUtils.Forms {
 
             List<(T Item, Status Status)> modifiedData = _data.Where(x => x.Status != Status.Normal).ToList();
 
-            T[] updateItems = modifiedData.Where(x => x.Status == Status.Modified).Select(x => x.Item).ToArray();
-            T[] restoredItems = modifiedData.Where(x => x.Status == Status.ModifiedRestored).Select(x => x.Item).ToArray();
-            T[] deleteItems = modifiedData.Where(x => x.Status == Status.Delete).Select(x => x.Item).ToArray();
-            T[] addItems = modifiedData.Where(x => x.Status == Status.New).Select(x => x.Item).ToArray();
-
 
             int success = 0;
             int failed = 0;
-            foreach (T item in updateItems) {
-                if (item.Update()) {
-                    success++;
-                    continue;
+            foreach (Status status in new[] {
+                         Status.Modified,
+                         Status.ModifiedRestored,
+                         Status.Delete,
+                         Status.New,
+                     }) {
+
+                T[] items = modifiedData
+                    .Where(x => x.Status == status)
+                    .Select(x => x.Item)
+                    .ToArray();
+                foreach (T i in items) {
+                    bool ok = false;
+                    switch (status) {
+                        case Status.Modified: ok = i.Update(); break;
+                        case Status.ModifiedRestored: ok = i.Update(true); break;
+                        case Status.Delete: ok = i.Delete(); break;
+                        case Status.New: ok = i.Add(); break;
+                    }
+                    if (ok) success++;
+                    else {
+                        failed++;
+                        switch (status) {
+                            case Status.Modified:
+                            case Status.ModifiedRestored: _failedUpdate.Add((i, status)); break;
+                            case Status.Delete: _failedDelete.Add((i, status)); break;
+                            case Status.New: _failedAdd.Add((i, status)); break;
+                        }
+                    }
                 }
-                failed++;
-                _failedUpdate.Add((item, Status.Modified));
             }
-            foreach (T item in restoredItems) {
-                if (item.Update(true)) {
-                    success++;
-                    continue;
-                }
-                failed++;
-                _failedUpdate.Add((item, Status.ModifiedRestored));
-            }
-            foreach (T item in deleteItems) {
-                if (item.Delete()) {
-                    success++;
-                    continue;
-                }
-                failed++;
-                _failedDelete.Add((item, Status.Delete));
-            }
-            foreach (T item in addItems) {
-                if (item.Add()) {
-                    success++;
-                    continue;
-                }
-                failed++;
-                _failedAdd.Add((item, Status.New));
-            }
+
             if (failed > 0 && success == 0) {
                 SetStatusBarMessage($"No se han podido guardar los cambios.", type: BoStatusBarMessageType.smt_Error);
             }
@@ -282,6 +289,13 @@ namespace SAPUtils.Forms {
                             T newItem = (T)e.NewItems[i];
                             int insertIndex = e.NewStartingIndex + i;
                             _data.Insert(insertIndex, (newItem, Status.New));
+                            if (_dataReload) continue;
+                            Freeze(true);
+                            AddRowToMatrix(insertIndex, newItem, Status.New);
+                            _matrix.LoadFromDataSourceEx();
+                            SetEditablesInRow(newItem, Status.New, insertIndex);
+                            UpdateMatrixColors(insertIndex, false);
+                            Freeze(false);
                         }
                     }
                     break;
@@ -289,8 +303,10 @@ namespace SAPUtils.Forms {
                     if (e.OldItems != null) {
                         foreach (T oldItem in e.OldItems) {
                             int index = _data.FindIndex(x => EqualityComparer<T>.Default.Equals(x.Item, oldItem));
-                            if (index >= 0)
-                                _data.RemoveAt(index);
+                            if (index < 0) continue;
+                            _data.RemoveAt(index);
+                            if (_dataReload) continue;
+                            UpdateMatrix();
                         }
                     }
                     break;
@@ -303,6 +319,8 @@ namespace SAPUtils.Forms {
                             Status oldStatus = _data[index].Status;
 
                             _data[index] = (newItem, oldStatus);
+                            if (_dataReload) continue;
+                            UpdateMatrixColors(index);
                         }
                     }
                     break;
@@ -315,18 +333,45 @@ namespace SAPUtils.Forms {
                             (T Item, Status Status) tuple = _data.First(x => EqualityComparer<T>.Default.Equals(x.Item, item));
                             _data.Remove(tuple);
                             _data.Insert(newIndex, tuple);
+                            if (_dataReload) continue;
+                            UpdateMatrix();
                         }
                     }
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     _data.Clear();
+                    if (_dataReload) return;
+                    UpdateMatrix();
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            if (!_dataReload) {
-                UpdateMatrix();
-            }
+
         }
+    }
+
+    internal static class MatrixColors {
+        public static readonly int WhiteColor = SapColors.ColorToInt(Color.WhiteSmoke);
+        public static readonly int GrayColor = SapColors.ColorToInt(SapColors.DisabledCellGray);
+        public static readonly int KhakiColor = SapColors.ColorToInt(Color.Khaki);
+        public static readonly int DarkKhakiColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.Khaki));
+        public static readonly int BlueColor = SapColors.ColorToInt(Color.LightBlue);
+        public static readonly int DarkBlueColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightBlue));
+        public static readonly int GreenColor = SapColors.ColorToInt(Color.PaleGreen);
+        public static readonly int DarkGreenColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.PaleGreen));
+        public static readonly int SalmonColor = SapColors.ColorToInt(Color.LightSalmon);
+        public static readonly int DarkSalmonColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSalmon));
+        public static readonly int RedColor = SapColors.ColorToInt(Color.IndianRed);
+        public static readonly int DarkRedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.IndianRed));
+        public static readonly int SoftDeletedColor = SapColors.ColorToInt(Color.LightSlateGray);
+        public static readonly int DarkSoftDeletedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSlateGray));
+
+        internal static readonly Dictionary<Status, (int Normal, int Dark)> StatusColors = new Dictionary<Status, (int Normal, int Dark)>() {
+            [Status.Modified] = (KhakiColor, DarkKhakiColor),
+            [Status.ModifiedRestored] = (BlueColor, DarkBlueColor),
+            [Status.New] = (GreenColor, DarkGreenColor),
+            [Status.Discard] = (SalmonColor, DarkSalmonColor),
+            [Status.Delete] = (RedColor, DarkRedColor),
+        };
     }
 }

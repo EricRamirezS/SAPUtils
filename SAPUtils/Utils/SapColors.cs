@@ -37,5 +37,19 @@ namespace SAPUtils.Utils {
         /// <param name="blue">The blue component of the color, ranging from 0 to 255.</param>
         /// <returns>Returns an integer representation of the RGB color.</returns>
         public static int RgbToInt(byte red, byte green, byte blue) => red | green << 8 | blue << 16;
+
+        public static Color DarkenColor(Color color, double factor = 0.7) {
+            factor = factor < 0
+                ? 0
+                : factor > 1
+                    ? 1
+                    : factor;
+            return Color.FromArgb(
+                color.A,
+                (int)(color.R * factor),
+                (int)(color.G * factor),
+                (int)(color.B * factor)
+            );
+        }
     }
 }
