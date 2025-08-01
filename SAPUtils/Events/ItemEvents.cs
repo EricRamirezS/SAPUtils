@@ -171,6 +171,7 @@ namespace SAPUtils.Events {
         internal static void Handle(string formUid, ref ItemEvent pVal, out bool bubbleEvent) {
             bubbleEvent = true;
             if (pVal.BeforeAction) {
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (pVal.EventType) {
                     case BoEventTypes.et_FORM_LOAD:
                         FormLoadBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
@@ -187,6 +188,7 @@ namespace SAPUtils.Events {
                 }
             }
             else {
+                // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
                 switch (pVal.EventType) {
                     case BoEventTypes.et_FORM_LOAD:
                         FormLoadAfter?.Invoke(formUid, ref pVal);

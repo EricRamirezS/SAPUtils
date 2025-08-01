@@ -10,7 +10,7 @@ namespace SAPUtils.__Internal.Query {
 
         internal WhereBuilder(LogicalOperator op = LogicalOperator.And) {
             WhereGroup root = new WhereGroup {
-                Operator = op
+                Operator = op,
             };
             _groupStack.Push(root);
         }
@@ -18,7 +18,7 @@ namespace SAPUtils.__Internal.Query {
 
         public IWhereBuilder Group(LogicalOperator op, Action<IWhereBuilder> groupAction) {
             WhereGroup subgroup = new WhereGroup {
-                Operator = op
+                Operator = op,
             };
             _groupStack.Peek().SubGroups.Add(subgroup);
             _groupStack.Push(subgroup);

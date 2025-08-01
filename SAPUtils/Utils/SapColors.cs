@@ -17,6 +17,15 @@ namespace SAPUtils.Utils {
         /// disabled states need a visual distinction.
         public static Color DisabledCellGray { get; } = Color.FromArgb(0xE7, 0xE7, 0xE7);
 
+        /// Represents a predefined color, converted to an integer, used to indicate disabled cells in SAP forms.
+        /// The `DisabledCellSapGray` property is specifically utilized to standardize the background color
+        /// of disabled cells within SAP environments, ensuring consistent visual representation. Internally,
+        /// it relies on the color value defined by `DisabledCellGray`.
+        /// This property is read-only and provides the integer equivalent of the light gray shade. The color
+        /// is defined with an RGB value of (231, 231, 231).
+        /// See Also: <see cref="SAPUtils.Utils.SapColors.DisabledCellGray"/>
+        public static int DisabledCellSapGray { get; } = ColorToInt(DisabledCellGray);
+
         /// Represents a transparent color specific to the SAP environment.
         /// This property returns a `Color` object with ARGB values set to (255, 192, 220, 192).
         /// Typically used for rendering transparent elements in compliance with SAP-specific design styles or requirements.
@@ -38,6 +47,20 @@ namespace SAPUtils.Utils {
         /// <returns>Returns an integer representation of the RGB color.</returns>
         public static int RgbToInt(byte red, byte green, byte blue) => red | green << 8 | blue << 16;
 
+        /// <summary>
+        /// Darkens a specified <see cref="Color"/> by applying a reduction factor to its RGB components.
+        /// </summary>
+        /// <param name="color">The <see cref="Color"/> to darken.</param>
+        /// <param name="factor">
+        /// A double value between 0 and 1 that determines the amount to darken the color.
+        /// A value of 0 results in black, and 1 leaves the color unchanged.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="Color"/> object with its RGB components darkened by the specified factor.
+        /// The alpha component remains unchanged.
+        /// </returns>
+        /// <seealso cref="Color"/>
+        /// <seealso cref="SapColors"/>
         public static Color DarkenColor(Color color, double factor = 0.7) {
             factor = factor < 0
                 ? 0

@@ -28,7 +28,9 @@ namespace SAPUtils.Extensions {
                 XmlDocument xml = new XmlDocument();
                 xml.LoadXml(boInfo.ObjectKey);
 
+                // ReSharper disable PossibleNullReferenceException
                 string docEntry = xml.DocumentElement.SelectSingleNode("/DocumentParams/DocEntry").InnerText;
+                // ReSharper restore PossibleNullReferenceException
 
                 if (Regex.IsMatch(docEntry, @"\d+")) {
                     return Convert.ToInt32(docEntry);
@@ -53,12 +55,30 @@ namespace SAPUtils.Extensions {
             return null;
 
         }
+        /// <summary>
+        /// Extracts the document entry (DocEntry) from the given <see cref="SAPbouiCOM.BusinessObject"/> instance.
+        /// </summary>
+        /// <param name="boInfo">
+        /// An instance of <see cref="SAPbouiCOM.BusinessObject"/> containing the object key XML string to parse.
+        /// </param>
+        /// <returns>
+        /// The document entry (DocEntry) as an integer if successfully extracted; otherwise, null.
+        /// </returns>
+        /// <remarks>
+        /// This method attempts to parse the "DocEntry" node from the "ObjectKey" XML provided by
+        /// <paramref name="boInfo"/>. If the node does not exist in the primary path (/DocumentParams/DocEntry),
+        /// it will attempt a secondary path (/StockTransferParams/DocEntry). If parsing fails in both cases,
+        /// the method returns null.
+        /// </remarks>
+        /// <seealso cref="SAPbouiCOM.BusinessObject"/>
         public static int? GetDocEntry(this BusinessObject boInfo) {
             try {
                 XmlDocument xml = new XmlDocument();
                 xml.LoadXml(boInfo.Key);
 
+                // ReSharper disable PossibleNullReferenceException
                 string docEntry = xml.DocumentElement.SelectSingleNode("/DocumentParams/DocEntry").InnerText;
+                // ReSharper restore PossibleNullReferenceException
 
                 if (Regex.IsMatch(docEntry, @"\d+")) {
                     return Convert.ToInt32(docEntry);

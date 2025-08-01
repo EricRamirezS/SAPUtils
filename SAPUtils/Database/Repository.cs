@@ -99,7 +99,7 @@ namespace SAPUtils.Database {
                         }
 
                         object result = getAllMethod.Invoke(null, new object[] {
-                            where
+                            where,
                         });
                         IEnumerable<object> items = (IEnumerable<object>)result;
                         foreach (object item in items) {
@@ -152,7 +152,7 @@ namespace SAPUtils.Database {
                     BindingFlags.Public | BindingFlags.Static,
                     null,
                     new[] {
-                        typeof(IWhere)
+                        typeof(IWhere),
                     },
                     null
                 );

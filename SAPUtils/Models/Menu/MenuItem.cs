@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using SAPbouiCOM;
 
 // ReSharper disable UnusedType.Global
@@ -53,6 +54,7 @@ namespace SAPUtils.Models.Menu {
     }
 
     /// <inheritdoc />
+    [SuppressMessage("ReSharper", "MemberCanBeProtected.Global")]
     public class MenuItem : IMenuItem {
 
         private string _imageUrl;

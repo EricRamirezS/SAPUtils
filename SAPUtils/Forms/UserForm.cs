@@ -156,7 +156,7 @@ namespace SAPUtils.Forms {
         /// Displays a custom message box using the SAP Business One UI API with configurable buttons and default option.
         /// </summary>
         /// <param name="text">The message text to display in the message box.</param>
-        /// <param name="defaultButtonn">The button to be set as default (e.g., 1 for the first button, 2 for the second, etc.).</param>
+        /// <param name="defaultButton">The button to be set as default (e.g., 1 for the first button, 2 for the second, etc.).</param>
         /// <param name="btn1Caption">Caption for the first button. Defaults to "OK".</param>
         /// <param name="btn2Caption">Optional caption for the second button. If empty, the button is hidden.</param>
         /// <param name="btn3Caption">Optional caption for the third button. If empty, the button is hidden.</param>
@@ -164,8 +164,8 @@ namespace SAPUtils.Forms {
         /// The value of the pressed button (e.g., 1 for the first button, 2 for the second, etc.).
         /// </returns>
         /// <seealso cref="SAPbouiCOM.Application"/>
-        public int ShowMessageBox(string text, int defaultButtonn = 1, string btn1Caption = "OK", string btn2Caption = "", string btn3Caption = "") {
-            return Application.MessageBox(text, defaultButtonn, btn1Caption, btn2Caption, btn3Caption);
+        protected int ShowMessageBox(string text, int defaultButton = 1, string btn1Caption = "OK", string btn2Caption = "", string btn3Caption = "") {
+            return Application.MessageBox(text, defaultButton, btn1Caption, btn2Caption, btn3Caption);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace SAPUtils.Forms {
         /// <param name="seconds">The duration (in enumeration format) for which the message will appear on the screen.</param>
         /// <param name="type">The type of status message, such as error, warning, or success.</param>
         /// <seealso cref="SAPbouiCOM.Application"/>
-        public void SetStatusBarMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium, BoStatusBarMessageType type = BoStatusBarMessageType.smt_Error) {
+        protected void SetStatusBarMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium, BoStatusBarMessageType type = BoStatusBarMessageType.smt_Error) {
             Application.StatusBar.SetText(text, seconds, type);
         }
     }

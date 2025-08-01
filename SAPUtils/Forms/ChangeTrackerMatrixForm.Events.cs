@@ -62,11 +62,10 @@ namespace SAPUtils.Forms {
                 }
                 if (!changed) return;
                 _dataTable.SetValue(coluid, rowIndex, value);
-                if (status == Status.Normal) {
-                    _data[rowIndex] = (item, Status.Modified);
-                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
-                    UpdateMatrixColors(pVal.Row - 1);
-                }
+                if (status != Status.Normal) return;
+                _data[rowIndex] = (item, Status.Modified);
+                ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                UpdateMatrixColors(pVal.Row - 1);
             }
             else if (coluid.EndsWith("D") || coluid.EndsWith("T")) {
                 // DateTimeUserTableField Handler
@@ -94,10 +93,9 @@ namespace SAPUtils.Forms {
                     );
                     propertyField.Property.SetValue(item, newFinalValue);
                     _dataTable.SetValue(coluid, rowIndex, dtf.DateToColumnData(newDate));
-                    if (status == Status.Normal) {
-                        _data[rowIndex] = (item, Status.Modified);
-                        ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
-                    }
+                    if (status != Status.Normal) return;
+                    _data[rowIndex] = (item, Status.Modified);
+                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
                     UpdateMatrixColors(pVal.Row - 1);
                 }
                 else if (coluid.EndsWith("T")) {
@@ -113,11 +111,10 @@ namespace SAPUtils.Forms {
                     );
                     propertyField.Property.SetValue(item, newFinalValue);
                     _dataTable.SetValue(coluid, rowIndex, dtf.TimeToColumnData(newTime));
-                    if (status == Status.Normal) {
-                        _data[rowIndex] = (item, Status.Modified);
-                        ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
-                        UpdateMatrixColors(pVal.Row - 1);
-                    }
+                    if (status != Status.Normal) return;
+                    _data[rowIndex] = (item, Status.Modified);
+                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                    UpdateMatrixColors(pVal.Row - 1);
                 }
             }
             else {
@@ -135,11 +132,10 @@ namespace SAPUtils.Forms {
                 propertyField.Property.SetValue(item, newValue);
                 _dataTable.SetValue(coluid, rowIndex, propertyField.Field.ToColumnData(newValue));
 
-                if (status == Status.Normal) {
-                    _data[rowIndex] = (item, Status.Modified);
-                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
-                    UpdateMatrixColors(pVal.Row - 1);
-                }
+                if (status != Status.Normal) return;
+                _data[rowIndex] = (item, Status.Modified);
+                ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                UpdateMatrixColors(pVal.Row - 1);
             }
         }
         private void Application_MenuEvent(ref MenuEvent pVal, out bool bubbleEvent) {

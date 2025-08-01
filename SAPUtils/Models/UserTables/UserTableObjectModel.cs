@@ -629,6 +629,7 @@ namespace SAPUtils.Models.UserTables {
                 int result = exist ? table.Update() : table.Add();
 
                 if (result == 0) {
+                    OriginalCode = Code;
                     Log.Info("{0} from table {1} with Code {2} saved successfully.", GetType().Name, _userTableAttribute.Name, Code);
                     return true;
                 }

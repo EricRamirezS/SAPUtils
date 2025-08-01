@@ -157,7 +157,7 @@ namespace SAPUtils.Forms {
                 (T item, Status status) = _data[rowIndex];
 
                 if (!IsEditable(item)) {
-                    _matrix.CommonSetting.SetRowBackColor(matrixRow, MatrixColors.GrayColor);
+                    _matrix.CommonSetting.SetRowBackColor(matrixRow, SapColors.DisabledCellSapGray);
                 }
                 else {
                     (int rowColor, int rowDisabledColor) = GetRowColors(status, item);
@@ -191,13 +191,18 @@ namespace SAPUtils.Forms {
         }
 
         private static (int normal, int dark) GetRowColors(Status status, T item) {
-            if (status != Status.Normal)
+            if (status != Status.Normal) {
                 return MatrixColors.StatusColors.TryGetValue(status, out (int Normal, int Dark) colors)
                     ? colors
                     : throw new ArgumentOutOfRangeException();
-            if (item is ISoftDeletable sd && !sd.Active)
-                return (MatrixColors.SoftDeletedColor, MatrixColors.DarkSoftDeletedColor);
-            return (MatrixColors.WhiteColor, MatrixColors.GrayColor);
+            }
+            if (item is ISoftDeletable sd && !sd.Active) {
+                return MatrixColors.InactiveColors;
+            }
+            return MatrixColors.StatusColors.TryGetValue(Status.Normal, out (int Normal, int Dark) normalColors)
+                ? normalColors
+                : throw new ArgumentOutOfRangeException();
+
 
         }
         private void LoadData() {
@@ -251,6 +256,7 @@ namespace SAPUtils.Forms {
                     .ToArray();
                 foreach (T i in items) {
                     bool ok = false;
+                    // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
                     switch (status) {
                         case Status.Modified: ok = i.Update(); break;
                         case Status.ModifiedRestored: ok = i.Update(true); break;
@@ -260,6 +266,7 @@ namespace SAPUtils.Forms {
                     if (ok) success++;
                     else {
                         failed++;
+                        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
                         switch (status) {
                             case Status.Modified:
                             case Status.ModifiedRestored: _failedUpdate.Add((i, status)); break;
@@ -271,7 +278,7 @@ namespace SAPUtils.Forms {
             }
 
             if (failed > 0 && success == 0) {
-                SetStatusBarMessage($"No se han podido guardar los cambios.", type: BoStatusBarMessageType.smt_Error);
+                SetStatusBarMessage("No se han podido guardar los cambios.", type: BoStatusBarMessageType.smt_Error);
             }
             if (failed > 0) {
                 SetStatusBarMessage($"Se han guardado {success} cambios. Han fallado {failed} cambios.", type: BoStatusBarMessageType.smt_Warning);
@@ -351,27 +358,30 @@ namespace SAPUtils.Forms {
     }
 
     internal static class MatrixColors {
-        public static readonly int WhiteColor = SapColors.ColorToInt(Color.WhiteSmoke);
-        public static readonly int GrayColor = SapColors.ColorToInt(SapColors.DisabledCellGray);
-        public static readonly int KhakiColor = SapColors.ColorToInt(Color.Khaki);
-        public static readonly int DarkKhakiColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.Khaki));
-        public static readonly int BlueColor = SapColors.ColorToInt(Color.LightBlue);
-        public static readonly int DarkBlueColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightBlue));
-        public static readonly int GreenColor = SapColors.ColorToInt(Color.PaleGreen);
-        public static readonly int DarkGreenColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.PaleGreen));
-        public static readonly int SalmonColor = SapColors.ColorToInt(Color.LightSalmon);
-        public static readonly int DarkSalmonColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSalmon));
-        public static readonly int RedColor = SapColors.ColorToInt(Color.IndianRed);
-        public static readonly int DarkRedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.IndianRed));
-        public static readonly int SoftDeletedColor = SapColors.ColorToInt(Color.LightSlateGray);
-        public static readonly int DarkSoftDeletedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSlateGray));
+        private static readonly int WhiteColor = SapColors.ColorToInt(Color.WhiteSmoke);
+        private static readonly int GrayColor = SapColors.ColorToInt(SapColors.DisabledCellGray);
+        private static readonly int KhakiColor = SapColors.ColorToInt(Color.Khaki);
+        private static readonly int DarkKhakiColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.Khaki));
+        private static readonly int BlueColor = SapColors.ColorToInt(Color.LightBlue);
+        private static readonly int DarkBlueColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightBlue));
+        private static readonly int GreenColor = SapColors.ColorToInt(Color.PaleGreen);
+        private static readonly int DarkGreenColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.PaleGreen));
+        private static readonly int SalmonColor = SapColors.ColorToInt(Color.LightSalmon);
+        private static readonly int DarkSalmonColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSalmon));
+        private static readonly int RedColor = SapColors.ColorToInt(Color.IndianRed);
+        private static readonly int DarkRedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.IndianRed));
+        private static readonly int SoftDeletedColor = SapColors.ColorToInt(Color.LightSlateGray);
+        private static readonly int DarkSoftDeletedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSlateGray));
 
-        internal static readonly Dictionary<Status, (int Normal, int Dark)> StatusColors = new Dictionary<Status, (int Normal, int Dark)>() {
+        internal static (int Normal, int Dark) InactiveColors = (SoftDeletedColor, DarkSoftDeletedColor);
+
+        internal static readonly Dictionary<Status, (int Normal, int Dark)> StatusColors = new Dictionary<Status, (int Normal, int Dark)> {
             [Status.Modified] = (KhakiColor, DarkKhakiColor),
             [Status.ModifiedRestored] = (BlueColor, DarkBlueColor),
             [Status.New] = (GreenColor, DarkGreenColor),
             [Status.Discard] = (SalmonColor, DarkSalmonColor),
             [Status.Delete] = (RedColor, DarkRedColor),
+            [Status.Normal] = (WhiteColor, GrayColor),
         };
     }
 }
