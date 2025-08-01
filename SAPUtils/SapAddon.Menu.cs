@@ -16,7 +16,7 @@ namespace SAPUtils {
         /// Creates a menu in the SAP Business One application with the provided menu items.
         /// </summary>
         /// <param name="menuItems">A list of menu items to be added to the menu structure.</param>
-        public void CreateMenu(List<UtilsMenuItem> menuItems) {
+        public void CreateMenu(params UtilsMenuItem[] menuItems) {
             Logger.Debug("Creating menu");
             try {
                 Application.SetStatusBarMessage("Cargando menus", BoMessageTime.bmt_Medium, false);
@@ -30,7 +30,7 @@ namespace SAPUtils {
                 Menus menus = sapMenuItem.SubMenus;
 
                 Logger.Trace("Setting new Menus ItemPosition to last index if no position is set");
-                menuItems.ForEach(e => e.ItemPosition = e.ItemPosition ?? -1);
+                Array.ForEach(menuItems, e => e.ItemPosition = e.ItemPosition ?? -1);
                 AddMenuItems(mainMenu, creationPackage, menus, menuItems);
 
                 Logger.Trace("Subscribing to Application.MenuEvent");
