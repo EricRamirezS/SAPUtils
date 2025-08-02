@@ -38,7 +38,7 @@ namespace SAPUtils.__Internal.Utils {
         /// </remarks>
         /// <seealso cref="System.IO.Stream"/>
         /// <seealso cref="System.Convert"/>
-        internal static readonly Stream HitchIcon = new MemoryStream(Convert.FromBase64String(HitchIconData));
+        internal static Stream HitchIcon => new MemoryStream(Convert.FromBase64String(HitchIconData));
 
         /// <summary>
         /// Gets the file system path of the resized Hitch icon as a bitmap image.
