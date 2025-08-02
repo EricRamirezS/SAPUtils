@@ -210,8 +210,9 @@ namespace SAPUtils.__Internal.Extensions {
                     .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
                     ?.MakeGenericMethod(type);
                 if (method != null) {
-                    object result = method.Invoke(null, new object[] { null });
-                    // Si quieres convertirlo a IEnumerable
+                    object result = method.Invoke(null, new object[] {
+                        null
+                    });
                     IEnumerable enumerable = result as IEnumerable;
                     List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
 
@@ -230,6 +231,9 @@ namespace SAPUtils.__Internal.Extensions {
                         data.ForEach(e => vv.Add(new UserFieldValidValue(
                             e.Code, e.DisplayName
                         )));
+                        if (field.Mandatory == false) {
+                            vv.Insert(0, new UserFieldValidValue("", ""));
+                        }
                     }
                 }
             }
@@ -297,6 +301,9 @@ namespace SAPUtils.__Internal.Extensions {
         private static Column AddComboBoxColumn(Matrix matrix, string uid, IUserTableField field) {
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_COMBO_BOX);
 
+            if (field.Mandatory == false) {
+                column.ValidValues.Add("", "");
+            }
             foreach (IUserFieldValidValue validValue in field.ValidValues) {
                 column.ValidValues.Add(validValue.Value, validValue.Description);
             }
