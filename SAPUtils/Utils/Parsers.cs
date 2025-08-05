@@ -24,8 +24,18 @@ namespace SAPUtils.Utils {
         /// </remarks>
         /// <seealso cref="DateTime"/>
         public static DateTime ParseDate(object value) {
-            if (value is DateTime dt)
-                return dt;
+            switch (value) {
+                case DateTime dt:
+                    return dt;
+                case double doubleDate:
+                    try {
+                        return DateTime.FromOADate(doubleDate);
+                    }
+                    catch {
+                        // ignored
+                    }
+                    break;
+            }
 
             if (DateTime.TryParseExact(
                     value?.ToString(),

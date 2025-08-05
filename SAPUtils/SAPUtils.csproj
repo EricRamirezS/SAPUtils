@@ -103,6 +103,9 @@
       <Compile Include="Forms\ChangeTrackerMatrixForm.Events.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
+      <Compile Include="Forms\ChangeTrackerMatrixForm.Excel.cs">
+          <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
+      </Compile>
       <Compile Include="Forms\ChangeTrackerMatrixForm.Initialize.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
@@ -130,6 +133,7 @@
       <Compile Include="Query\LogicalOperator.cs"/>
       <Compile Include="Query\SqlComparison.cs"/>
       <Compile Include="Query\Where.cs"/>
+      <Compile Include="Utils\DisplayInfo.cs"/>
       <Compile Include="Utils\FormUtils.cs"/>
       <Compile Include="Utils\ILogger.cs"/>
       <Compile Include="Utils\Parsers.cs"/>
@@ -146,6 +150,7 @@
       <Compile Include="__Internal\Events\EventSubscriber.cs"/>
       <Compile Include="__Internal\Extensions\MatrixExtensions.cs"/>
       <Compile Include="__Internal\Models\AuditableField.cs"/>
+      <Compile Include="__Internal\Models\FormatInfo.cs"/>
       <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
       <Compile Include="__Internal\Models\UserTableMetadataCache.cs"/>
       <Compile Include="__Internal\Query\SqlWhereBuilder.cs"/>
@@ -206,6 +211,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.24.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.24.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="NPOI" Version="2.7.4"/>
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />

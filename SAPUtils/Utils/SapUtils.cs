@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
+using SAPbobsCOM;
 
 namespace SAPUtils.Utils {
     /// <summary>
@@ -90,10 +91,10 @@ namespace SAPUtils.Utils {
         /// </remarks>
         /// <seealso cref="System.Collections.Generic.Dictionary{TKey, TValue}"/>
         private static readonly Dictionary<string, string> ReadableColumns = new Dictionary<string, string> {
-            ["OACT"] = "AcctCode", // Codigo de la cuenta
-            ["OCRD"] = "CardCode", // Codigo del socio de negocios
+            ["OACT"] = "AcctName", // Codigo de la cuenta
+            ["OCRD"] = "CardName", // Codigo del socio de negocios
             ["ODSC"] = "BankName", // Codigo del banco
-            ["OITM"] = "ItemCode", // Codigo del ítem
+            ["OITM"] = "ItemName", // Codigo del ítem
             ["OUSR"] = "USER_CODE", // Nombre del usuario
             ["OINV"] = "DocNum", // Número de factura
             ["ORIN"] = "DocNum", // Número de nota de crédito
@@ -117,7 +118,7 @@ namespace SAPUtils.Utils {
             ["OWHS"] = "WhsCode", // Nombre del almacén
             ["OITT"] = "Code", // Nombre del producto terminado
             ["OWTR"] = "DocNum", // Número de transferencia de stock
-            ["OOPR"] = "OpprId", // Nombre de la oportunidad
+            ["OOPR"] = "Name\t", // Nombre de la oportunidad
             ["ODRF"] = "DocNum", // Número de borrador
             ["OMRV"] = "DocNum", // Número de reconciliación
             ["OHEM"] = "firstName", // Nombre del empleado
@@ -130,6 +131,49 @@ namespace SAPUtils.Utils {
             ["OPRR"] = "DocNum", // Nombre del recordatorio
             ["OWTQ"] = "DocNum", // Número de solicitud de traslado
             ["OOAT"] = "AbsID", // Nombre del activo
+        };
+
+        private static readonly Dictionary<string, string> ObjectTypeToTable = new Dictionary<string, string> {
+            ["1"] = "OACT", // Chart of Accounts
+            ["2"] = "OCRD", // Business Partners
+            ["3"] = "ODSC", // Banks (DSC1: bank accounts, ODSC: header)
+            ["4"] = "OITM", // Items
+            ["33"] = "OCLG", // Contacts
+            ["12"] = "OUSR", // Users
+            ["13"] = "OINV", // A/R Invoices
+            ["14"] = "ORIN", // A/R Credit Notes
+            ["15"] = "ODLN", // Delivery Notes
+            ["16"] = "ORDN", // Returns
+            ["17"] = "ORDR", // Sales Orders
+            ["18"] = "OPCH", // A/P Invoices
+            ["19"] = "ORPC", // A/P Credit Notes
+            ["20"] = "OPDN", // Goods Receipt PO (Purchase Delivery Notes)
+            ["21"] = "ORPD", // Goods Return PO (Purchase Returns)
+            ["22"] = "OPOR", // Purchase Orders
+            ["23"] = "OQUT", // Sales Quotations
+            ["24"] = "ORCT", // Incoming Payments
+            ["25"] = "ODPS", // Deposits (Service layer only, varies)
+            ["30"] = "OJDT", // Journal Entries
+            ["46"] = "OVPM", // Outgoing Payments (Vendor Payments)
+            ["57"] = "OCHO", // Checks for Payment (usually via outgoing payments)
+            ["59"] = "OIGN", // Inventory Goods Receipt
+            ["60"] = "OIGE", // Inventory Goods Issue
+            ["64"] = "OWHS", // Warehouses
+            ["66"] = "OITT", // Bill of Materials (Product Trees)
+            ["67"] = "OWTR", // Stock Transfers
+            ["97"] = "OOPR", // Sales Opportunities
+            ["112"] = "ODRF", // Drafts
+            ["162"] = "OMRV", // Material Revaluation
+            ["171"] = "OHEM", // Employees Info
+            ["176"] = "OINS", // Customer Equipment Cards
+            ["190"] = "OCTR", // Service Contracts
+            ["191"] = "OSCL", // Service Calls
+            ["202"] = "OWOR", // Production Orders
+            ["234000021"] = "OPMG", // Project Management
+            ["234000031"] = "ORRR", // Return Request
+            ["234000032"] = "OPRR", // Goods Return Request
+            ["1250000001"] = "OWTQ", // Inventory Transfer Request
+            ["1250000025"] = "OOAT", // Blanket Agreements
         };
 
         /// <summary>
@@ -164,6 +208,27 @@ namespace SAPUtils.Utils {
                 return key;
 
             throw new ArgumentException($"Clave primaria no conocida para la tabla '{tableName}'.");
+        }
+        /// <summary>
+        /// Retrieves the SAP table name associated with a given object type string representation.
+        /// </summary>
+        /// <param name="objType">The string representation of the SAP object type for which the associated table name is to be retrieved.</param>
+        /// <returns>The SAP table name associated with the specified object type.</returns>
+        /// <exception cref="ArgumentException">Thrown when the provided object type is null, empty, or does not have a known table mapping.</exception>
+        /// <seealso cref="Dictionary{TKey, TValue}" />
+        public static string GetTableNameFromObjectType(UDFLinkedSystemObjectTypesEnum objType) => GetTableNameFromObjectType(((int)objType).ToString());
+        /// <summary>
+        /// Retrieves the corresponding SAP table name for a given object type.
+        /// </summary>
+        /// <param name="objType">The object type as a string for which the associated table name is to be retrieved. Typically, the object type represents a system-defined integer identifier in string format.</param>
+        /// <returns>The SAP table name associated with the specified object type.</returns>
+        /// <exception cref="ArgumentException">Thrown when the provided object type is null, empty, or does not match any known mappings in the internal dictionary.</exception>
+        /// <seealso cref="Dictionary{TKey, TValue}" />
+        public static string GetTableNameFromObjectType(string objType) {
+            if (objType != null && ObjectTypeToTable.TryGetValue(objType, out string key))
+                return key;
+
+            throw new ArgumentException($"Tabla no conocida para Object Type: '{objType}'.");
         }
 
         /// <summary>

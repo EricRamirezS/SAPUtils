@@ -21,6 +21,12 @@ namespace SAPUtils.Forms {
             if (_saveButton != null) {
                 _saveButton.ClickAfter += SaveButtonOnClickAfter;
             }
+            if (_exportButton != null) {
+                _exportButton.ClickAfter += ExportToExcel;
+            }
+            if (_importButton != null) {
+                _importButton.ClickAfter += ImportFromExcel;
+            }
         }
         private void EventUnsubscriber() {
             Application.RightClickEvent -= ApplicationOnRightClickEvent;

@@ -65,6 +65,11 @@ namespace SAPUtils.Models.UserTables {
         /// <inheritdoc />
         public abstract string GetNextAvailableCode();
 
+        /// <inheritdoc />
+        public object Clone() {
+            return MemberwiseClone();
+        }
+
         /// <summary>
         /// Retrieves all records from the specified user table and maps them to instances of the given type.
         /// </summary>
@@ -80,7 +85,7 @@ namespace SAPUtils.Models.UserTables {
             Type type = typeof(T);
             ILogger log = Logger.Instance;
             where = where ?? Where.Builder().Build();
-            log.Debug("Fetching All {0} with Code: {1}", type.FullName);
+            log.Debug("Fetching All {0}", type.FullName);
 
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
             if (userTable == null) {
@@ -95,7 +100,9 @@ namespace SAPUtils.Models.UserTables {
             try {
                 rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
                 tableName = SapAddon.Instance().IsHana ? $"\"@{tableName}\"" : $"[@{tableName}]";
-                string query = $"SELECT T0.* FROM {tableName} T0 {new SqlWhereBuilder(where).Build()}";
+                string whereString = new SqlWhereBuilder(where).Build();
+                string query = $"SELECT T0.* FROM {tableName} T0 {whereString}";
+                log.Trace("Executing query: {0}", query);
                 rs.DoQuery(query);
 
                 while (!rs.EoF) {

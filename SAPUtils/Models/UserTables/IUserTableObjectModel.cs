@@ -1,13 +1,15 @@
 // ReSharper disable UnusedMemberInSuper.Global
 // ReSharper disable UnusedMethodReturnValue.Global
 
+using System;
+
 namespace SAPUtils.Models.UserTables {
     /// <summary>
     /// Defines the base contract for user-defined table objects in SAP.  
     /// <br/>
     /// Implementing classes should manage their own persistence within SAP B1.  
     /// </summary>
-    public interface IUserTableObjectModel {
+    public interface IUserTableObjectModel : ICloneable {
         /// <summary>
         /// The unique code identifier for the record.  
         /// </summary>

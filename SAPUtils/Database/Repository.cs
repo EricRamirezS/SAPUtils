@@ -144,6 +144,26 @@ namespace SAPUtils.Database {
             Recordset.DoQuery(_queries.GetNextCodeUserTableQuery(tableName));
             return Convert.ToInt32(Recordset.Fields.Item("Code").Value);
         }
+        internal FormatInfo GetFormatInformation() {
+            Recordset.DoQuery(_queries.GetFormatInformationQuery());
+            FormatInfo formatInfo = new FormatInfo {
+                SumDec = Convert.ToInt32(Recordset.Fields.Item("SumDec").Value),
+                PriceDec = Convert.ToInt32(Recordset.Fields.Item("PriceDec").Value),
+                RateDec = Convert.ToInt32(Recordset.Fields.Item("RateDec").Value),
+                QtyDec = Convert.ToInt32(Recordset.Fields.Item("QtyDec").Value),
+                PercentDec = Convert.ToInt32(Recordset.Fields.Item("PercentDec").Value),
+                MeasureDec = Convert.ToInt32(Recordset.Fields.Item("MeasureDec").Value),
+                QueryDec = Convert.ToInt32(Recordset.Fields.Item("QueryDec").Value),
+                DecSep = Convert.ToString(Recordset.Fields.Item("DecSep").Value),
+                ThousSep = Convert.ToString(Recordset.Fields.Item("ThousSep").Value),
+                TimeFormat = Convert.ToInt32(Recordset.Fields.Item("TimeFormat").Value),
+                DateFormat = Convert.ToInt32(Recordset.Fields.Item("DateFormat").Value),
+                DateSep = Convert.ToString(Recordset.Fields.Item("DateSep").Value),
+            };
+
+            return formatInfo;
+
+        }
 
         private static MethodInfo FindStaticGetAllMethod(Type type) {
             while (type != null) {

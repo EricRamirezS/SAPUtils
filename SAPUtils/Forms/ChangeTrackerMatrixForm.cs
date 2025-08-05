@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using SAPbouiCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Enums;
@@ -128,6 +129,22 @@ namespace SAPUtils.Forms {
             new Dictionary<string, (DataColumn DataTableColumn, Column MatrixColumn)>();
 
         /// <summary>
+        /// Maps SAP B1 UI matrix columns to their corresponding property definitions within the type <typeparamref name="T"/>.
+        /// This mapping facilitates data binding between the UI column and the underlying user table property.
+        /// </summary>
+        /// <remarks>
+        /// The mapping is used to synchronize changes made in the UI matrix columns with their associated properties
+        /// of the underlying <see cref="IUserTableObjectModel"/> implementation, ensuring consistency between the user interface and data layer.
+        /// </remarks>
+        /// <typeparam name="T">
+        /// The type parameter representing the user table object model, constrained to objects implementing <see cref="IUserTableObjectModel"/>.
+        /// </typeparam>
+        /// <seealso cref="Column"/>
+        /// <seealso cref="PropertyInfo"/>
+        /// <seealso cref="IUserTableObjectModel"/>
+        protected readonly Dictionary<string, PropertyInfo> ColumnToProperty = new Dictionary<string, PropertyInfo>();
+
+        /// <summary>
         /// Indicates whether the data reload operation is currently in progress.
         /// </summary>
         /// <remarks>
@@ -152,7 +169,10 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPUtils.Models.UserTables.IUserTableObjectModel"/>
         private DataTable _dataTable;
 
+        private Button _exportButton;
+
         private EditText _helper;
+        private Button _importButton;
 
         /// <summary>
         /// Stores the <see cref="Matrix"/> that is utilized in the form to display and manage data.
@@ -243,6 +263,18 @@ namespace SAPUtils.Forms {
         }
 
         /// <summary>
+        /// Represents the name of the property used as the unique object code in the implementation of <see cref="IUserTableObjectModel"/>.
+        /// This property is typically used to identify the key column in the user table or matrix forms that tracks object changes.
+        /// </summary>
+        /// <remarks>
+        /// The value of this property corresponds to the "Code" property of objects implementing <see cref="IUserTableObjectModel"/>.
+        /// </remarks>
+        /// <seealso cref="IUserTableObjectModel"/>
+        // ReSharper disable once ReplaceAutoPropertyWithComputedProperty
+        // ReSharper disable once VirtualMemberNeverOverridden.Global
+        virtual protected string ObjectCodePropertyName { get; } = nameof(IUserTableObjectModel.Code);
+
+        /// <summary>
         /// Provides a collection representing the data bound to the matrix in the form.
         /// This collection is observable and is updated based on data manipulations in the form.
         /// </summary>
@@ -267,6 +299,30 @@ namespace SAPUtils.Forms {
         /// <returns>The <see cref="SAPbouiCOM.Button"/> instance representing the save button in the form.</returns>
         /// <seealso cref="SAPbouiCOM.Button"/>
         abstract protected Button GetSaveButton();
+
+        /// <summary>
+        /// Retrieves the button control used for exporting data to Excel.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended to return an instance of the button associated with the export-to-Excel functionality.
+        /// The specific implementation of how the button is retrieved or created is left to derived classes.
+        /// </remarks>
+        /// <returns>
+        /// A <see cref="Button"/> object representing the export-to-Excel button.
+        /// </returns>
+        abstract protected Button GetExportToExcelButton();
+
+        /// <summary>
+        /// Retrieves the button control responsible for importing data from an Excel file.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="SAPbouiCOM.Button"/> instance representing the "Import From Excel" button.
+        /// </returns>
+        /// <remarks>
+        /// The returned button is used in the form for triggering the import functionality from an Excel file.
+        /// </remarks>
+        /// <seealso cref="SAPbouiCOM.Button"/>
+        abstract protected Button GetImportFromExcelButton();
 
         /// <summary>
         /// Determines whether a specific item of type <typeparamref name="T"/> is editable.

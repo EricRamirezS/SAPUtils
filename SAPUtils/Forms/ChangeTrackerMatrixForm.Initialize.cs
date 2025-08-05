@@ -16,6 +16,8 @@ namespace SAPUtils.Forms {
         public override void OnInitializeComponent() {
             _saveButton = GetSaveButton();
             _matrix = GetMatrix();
+            _exportButton = GetExportToExcelButton();
+            _importButton = GetImportFromExcelButton();
 
             _dataTable = DataSources.DataTables.Add("_DataTable");
 
@@ -51,6 +53,8 @@ namespace SAPUtils.Forms {
             ColumnInfo.Add("#", (indexDataColumn, indexColumn));
             ColumnInfo.Add("Code", (codeDataColumn, codeColumn));
             ColumnInfo.Add("Name", (nameDataColumn, nameColumn));
+            ColumnToProperty.Add("Code", typeof(T).GetProperty("Code", BindingFlags.Public | BindingFlags.Instance));
+            ColumnToProperty.Add("Name", typeof(T).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance));
 
             List<(PropertyInfo Property, IUserTableField Field)> itemInfo = UserTableMetadataCache.GetUserFields(typeof(T));
 
@@ -72,6 +76,8 @@ namespace SAPUtils.Forms {
 
                     ColumnInfo.Add(fieldName + "Date", (dateColumn, date));
                     ColumnInfo.Add(fieldName + "Time", (timeColumn, time));
+                    ColumnToProperty.Add(time.UniqueID, property);
+                    ColumnToProperty.Add(date.UniqueID, property);
 
                 }
                 else {
@@ -83,6 +89,8 @@ namespace SAPUtils.Forms {
                     column.DataBind.Bind(_dataTable.UniqueID, columnId);
 
                     ColumnInfo.Add(fieldName, (dataColumn, column));
+                    ColumnToProperty.Add(column.UniqueID, property);
+
                     string cflId = $"_CFL{columnId}";
                     ChooseFromList cfl = null;
                     try {

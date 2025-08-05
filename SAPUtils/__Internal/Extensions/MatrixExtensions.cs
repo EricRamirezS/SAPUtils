@@ -211,7 +211,7 @@ namespace SAPUtils.__Internal.Extensions {
                     ?.MakeGenericMethod(type);
                 if (method != null) {
                     object result = method.Invoke(null, new object[] {
-                        null
+                        null,
                     });
                     IEnumerable enumerable = result as IEnumerable;
                     List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
