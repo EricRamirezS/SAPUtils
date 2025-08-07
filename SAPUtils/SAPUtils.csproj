@@ -137,6 +137,7 @@
       <Compile Include="Utils\FormUtils.cs"/>
       <Compile Include="Utils\ILogger.cs"/>
       <Compile Include="Utils\Parsers.cs"/>
+    <Compile Include="Utils\SapClass.cs"/>
       <Compile Include="Utils\SapColors.cs"/>
       <Compile Include="Utils\SapUtils.cs"/>
       <Compile Include="Utils\TopMostDialog.cs"/>
