@@ -103,7 +103,7 @@ pause
 EXIT /b 1
 ";
 
-            File.WriteAllText(batPath, batContent.Trim(), Encoding.UTF8);
+            File.WriteAllText(batPath, batContent.Trim(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
             string filesSection = string.Join("\n", addonInformation.Files.Select(f => $"Source: {f.Source}; DestDir: {{app}}{f.DestinationDir}"));
             string dirsSection = string.Join("\n", addonInformation.Dirs.Select(d => $"Name: \"{{app}}\\{d}\""));
@@ -125,19 +125,16 @@ AppPublisherURL={addonInformation.AppPublisherUrl}
 AppSupportURL={addonInformation.AppSupportUrl}
 AppUpdatesURL={addonInformation.AppUpdatesUrl}
 DefaultDirName={{code:GetDefaultAddOnDir}}
+;OutputBaseFileName={{code:GetSetupName}}
 OutputBaseFileName=Setup
 DisableDirPage=true
-DisableProgramGroupPage=yes
 Compression=lzma
 SolidCompression=true
 UsePreviousAppDir=false
 AppendDefaultDirName=true
 PrivilegesRequired=admin
 WindowVisible=false
-WizardSmallImageFile=compiler:WizModernSmallImage-IS.bmp
-WizardImageFile=compiler:WizModernImage-IS.bmp
 AppContact={addonInformation.ContactData}
-SetupLogging=true
 
 [Messages]
 BeveledLabel={addonInformation.BeveledLabel}
@@ -167,11 +164,11 @@ type
 
 const
    {{ $EXTERNALSYM FO_COPY }}
-   FO_COPY           = $0002;
+   FO_COPY = $0002;
    {{ $EXTERNALSYM FOF_SILENT }}
-   FOF_SILENT                 = $0004;
+   FOF_SILENT = $0004;
    {{ $EXTERNALSYM FOF_NOCONFIRMATION }}
-   FOF_NOCONFIRMATION         = $0010;
+   FOF_NOCONFIRMATION = $0010;
 
 var
 CurrentLocation : string;
@@ -185,20 +182,20 @@ function SHFileOperation(const lpFileOp: TSHFileOpStruct):Integer; external 'SHF
 
 
 //SAP B1
-function EndInstallEx(Dir:String;Ok:Boolean): integer; external 'EndInstallEx@files:AddOnInstallAPI.dll stdcall';
-function EndUninstall(path: string; succeed: boolean): integer; external 'EndUninstall@files:AddOnInstallAPI.dll stdcall';
-function SetAddOnFolder(srcPath : string): integer; external 'SetAddOnFolder@files:AddOnInstallAPI.dll stdcall';
+function EndInstallEx(Dir : String; Ok:Boolean): integer; external 'EndInstallEx@files:AddOnInstallAPI.dll stdcall';
+function EndUninstall(path: string; succeed: Boolean): integer; external 'EndUninstall@files:AddOnInstallAPI.dll stdcall';
+function SetAddOnFolder(srcPath : string): Integer; external 'SetAddOnFolder@files:AddOnInstallAPI.dll stdcall';
 function RestartNeeded :integer; external 'RestartNeeded@files:AddOnInstallAPI.dll stdcall delayload ';
 
-Function ExistStrInParam(StrInParam:string) : boolean;
+function ExistStrInParam(StrInParam:string) : boolean;
 var
- j: integer;
+ j : integer;
 begin
 result:=false;
-  for j:=0 to ParamCount do
-  if UpperCase(ParamStr(j))=UpperCase(StrInParam) then
+  for j := 0 to ParamCount do
+  if UpperCase(ParamStr(j)) = UpperCase(StrInParam) then
   begin
-   result:=true;
+   result := true;
    break;
   end;
 end;
@@ -238,7 +235,7 @@ begin
    begin
      //result:=True;
      MsgBox('El Instalador debe ser ejecutado desde SAP Business One.', mbInformation, MB_OK);
-     EndInstallEx('',false);//Avisa a Sap B1 que se aborto la instalacion
+     EndInstallEx('',false); //Avisa a Sap B1 que se aborto la instalacion
      Result := False;
    end;
 end;
@@ -251,18 +248,18 @@ end;
 
 function InitializeSetup(): Boolean;
 var
- ResultCode      : Integer;
+ i, ResultCode      : Integer;
  UninstallerPath : String;
 begin
-   Params:='';
+   Params := '';
    for i:=0 to ParamCount do
-   Params:=Params+' Param'+inttoStr(i)+' = '+paramstr(i)+#13;
+   Params:=Params + ' Param' + inttoStr(i) + ' = ' + paramstr(i) + #13;
    //MsgBox(Params, mbInformation, MB_OK);
 
    if ExistStrInParam('/U') then
    begin
     if RegQueryStringValue(HKEY_LOCAL_MACHINE, '{addonInformation.Registry}\'+GetAddOnName(''),'InstallDir', CurrentLocation) then
-    UninstallerPath:=CurrentLocation + '\unins000.exe';
+    UninstallerPath := CurrentLocation + '\unins000.exe';
     //MsgBox('UninstallerPath '+UninstallerPath, mbInformation, MB_OK);
     Exec(UninstallerPath, '/SILENT', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
     EndUninstall('', true);
@@ -274,12 +271,9 @@ begin
    end;
 end;
 
-procedure DeinitializeSetup();
-begin
-
-end;
-
-function NextButtonClick(CurPageID: Integer): Boolean;
+function NextButtonClick(CurPageID : Integer): Boolean;
+var
+ LRes : Integer;
 begin
    Result := True;
    case CurPageID of
@@ -292,22 +286,25 @@ begin
           if FinishedInstall then
           begin
              SetAddOnFolder(AddOnDir);
-             EndInstallEx('',True);
+             LRes := EndInstallEx('', True);
+			 if LRes <> 0 then
+			  MsgBox('EndInstallEx Value : ' + IntToStr(LRes), mbInformation, MB_OK);
+			   
           end;
        end;
    end;
 end;
 
-Function ExtractFileNameParam(StrParam:string) : string;
+Function ExtractFileNameParam(StrParam : string) : string;
 var
  j: integer;
 begin
- result:=StrParam;
- j:=1;
+ Result := StrParam;
+ j := 1;
  repeat
-  result:=Copy(StrParam,j,Length(StrParam));
-  j:=j+1;
- until FileExists(result) or (j>=Length(StrParam));
+  Result := Copy(StrParam, j, Length(StrParam));
+  j := j + 1;
+ until FileExists(Result) or (j >= Length(StrParam));
 end;
 
 procedure CopyFile(FromFileName, ToFileName: string);
@@ -315,11 +312,11 @@ var
   ShellInfo: TSHFileOpStruct;
   Files    : String;
 begin
-  Files:=FromFileName+#0+#0;
-  ShellInfo.wFunc:=FO_COPY;
-  ShellInfo.pFrom:=PChar(Files);
-  ShellInfo.pTo:=PChar(ToFileName);
-  ShellInfo.fFlags:=FOF_NOCONFIRMATION or FOF_SILENT;
+  Files := FromFileName+#0+#0;
+  ShellInfo.wFunc := FO_COPY;
+  ShellInfo.pFrom := PChar(Files);
+  ShellInfo.pTo   := PChar(ToFileName);
+  ShellInfo.fFlags := FOF_NOCONFIRMATION or FOF_SILENT;
   SHFileOperation(shellinfo);
 end;
 
@@ -329,24 +326,26 @@ SetupFile : string;
 begin
    if CurStep = ssPostInstall then
    begin
-    SetupFile:=ExtractFileNameParam(ParamStr(1));
-    DeleteFile(AddOnDir+'\'+GetSetupName('')+'.exe');
-    CopyFile(SetupFile,AddOnDir+'\'+GetSetupName('')+'.exe');
+    SetupFile := ExtractFileNameParam(ParamStr(1));
+    DeleteFile(AddOnDir + '\' + GetSetupName('') + '.exe');
+    CopyFile(SetupFile, AddOnDir + '\' + GetSetupName('') + '.exe');
     FinishedInstall := True;
    end;
 end;
+
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
 {{ no se usa por el momento debido a que el instalador llama al unist000.exe
 	case CurUninstallStep of
-		ssDone : EndUninstall('',true);
+		ssDone : EndUninstall('', true);
 	end;
 }}
 end;
+
 ";
 
-            File.WriteAllText(issPath, issContent.Trim(), Encoding.UTF8);
+            File.WriteAllText(issPath, issContent.Trim(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
             Console.WriteLine($"Archivos generados:\n{batPath}\n{issPath}");
         }
