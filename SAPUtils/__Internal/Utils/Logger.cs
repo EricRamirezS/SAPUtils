@@ -72,8 +72,21 @@ namespace SAPUtils.__Internal.Utils {
 
         private string GetLogFilePath() {
             string date = DateTime.Now.ToString("yyyyMMdd");
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _logDirectory,
-                $"LOG_{_company.CompanyName}_{_company.UserName}_{date}.log");
+
+            string safeCompany = SanitizeFileName(_company?.CompanyName ?? "Empresa");
+            string safeUser = SanitizeFileName(_company?.UserName ?? "Usuario");
+
+            string fileName = $"LOG_{safeCompany}_{safeUser}_{date}.log";
+            fileName = SanitizeFileName(fileName);
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string logsDir = Path.Combine(baseDir, "Logs");
+
+            string fullPath = Path.Combine(logsDir, fileName);
+            if (fullPath.IndexOfAny(Path.GetInvalidPathChars()) >= 0) {
+                ConsoleLogger.Error(new Exception("La ruta contiene caracteres inválidos: " + fullPath));
+            }
+            return fullPath;
         }
 
         private void Log(
@@ -264,6 +277,16 @@ namespace SAPUtils.__Internal.Utils {
             string callerFile = frame.GetFileName();
             int callerLine = frame.GetFileLineNumber();
             return (callerName, callerFile, callerLine);
+        }
+
+        public static string SanitizeFileName(string input, char replacementChar = '_') {
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+
+            var invalidChars = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).Distinct();
+
+            var sanitized = new string(input.Select(c => invalidChars.Contains(c) ? replacementChar : c).ToArray());
+            return sanitized;
         }
 
         [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
