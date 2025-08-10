@@ -2,10 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -31,6 +31,8 @@ using ValidValue = SAPbouiCOM.ValidValue;
 
 namespace SAPUtils.Forms {
     public abstract partial class ChangeTrackerMatrixForm<T> {
+
+        #region Exportar
 
         private void ExportToExcel(object sboObject, SBOItemEventArg pVal) {
             try {
@@ -85,7 +87,6 @@ namespace SAPUtils.Forms {
             ISheet sheet = workbook.CreateSheet(Title);
 
             Dictionary<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)> comboBoxValidations = new Dictionary<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)>();
-            HashSet<int> checkboxColumns = new HashSet<int>();
 
             IDataFormat dataFormat = workbook.CreateDataFormat();
 
@@ -96,8 +97,21 @@ namespace SAPUtils.Forms {
                 return decimals <= 0 ? $"{prefix}#,##0{suffix}" : $"{prefix}#,##0.{new string('0', decimals)}{suffix}";
             }
 
+            string CreateMoneyFormat(int decimales) {
+                if (decimales < 0 || decimales > 6)
+                    throw new ArgumentOutOfRangeException(nameof(decimales), "La cantidad de decimales debe estar entre 0 y 6.");
+
+                string parteEntera = "#,##0";
+                string parteDecimal = decimales > 0 ? "," + new string('0', decimales) : "";
+                string patronNumero = parteEntera + parteDecimal;
+
+                string formato = $@"_($* {patronNumero}_);_($* ({patronNumero});_($* ""-""{new string('?', decimales)}_);_(@_)";
+
+                return formato;
+            }
+
             ICellStyle priceStyle = workbook.CreateCellStyle();
-            priceStyle.DataFormat = dataFormat.GetFormat(CreateNumberFormat(DisplayInfo.FormatInfo.PriceDec, "$"));
+            priceStyle.DataFormat = dataFormat.GetFormat(CreateMoneyFormat(DisplayInfo.FormatInfo.PriceDec));
 
             ICellStyle sumStyle = workbook.CreateCellStyle();
             sumStyle.DataFormat = dataFormat.GetFormat(CreateNumberFormat(DisplayInfo.FormatInfo.SumDec));
@@ -150,8 +164,16 @@ namespace SAPUtils.Forms {
                         break;
                     }
                     case BoFormItemTypes.it_CHECK_BOX:
-                        checkboxColumns.Add(excelColIndex);
+                    {
+                        List<(string Value, string Desc)> items = new List<(string Value, string Desc)> {
+                            ("N", "No"),
+                            ("Y", "Sí"),
+                        };
+
+                        string rangeName = $"ComboVals_{excelColIndex}";
+                        comboBoxValidations[excelColIndex] = (items, rangeName, BoExpandType.et_DescriptionOnly);
                         break;
+                    }
                     case BoFormItemTypes.it_LINKED_BUTTON:
                         ChooseFromList cfl = ChooseFromLists.Item(column.ChooseFromListUID);
                         try {
@@ -288,45 +310,77 @@ namespace SAPUtils.Forms {
             if (_dataTable.Rows.Count == 0) {
                 IRow excelRow = sheet.CreateRow(1);
                 foreach ((int matrixCol, int excelCol) in visibleCols) {
-                    ICell cell = excelRow.CreateCell(excelCol);
                     string columnUid = _matrix.Columns.Item(matrixCol).UniqueID;
                     BoFieldsType fieldType = _dataTable.Columns.Item(columnUid).Type;
 
-                    //Setting Style
-                    switch (fieldType) {
-                        case BoFieldsType.ft_ShortNumber:
-                        case BoFieldsType.ft_Integer:
-                            cell.CellStyle = intStyle;
-                            break;
-                        case BoFieldsType.ft_Date:
-                            cell.CellStyle = dateStyle;
-                            break;
-                        case BoFieldsType.ft_Float:
-                            cell.CellStyle = floatStyle;
-                            break;
-                        case BoFieldsType.ft_Quantity:
-                            cell.CellStyle = qtyStyle;
-                            break;
-                        case BoFieldsType.ft_Price:
-                            cell.CellStyle = priceStyle;
-                            break;
-                        case BoFieldsType.ft_Rate:
-                            cell.CellStyle = rateStyle;
-                            break;
-                        case BoFieldsType.ft_Measure:
-                            cell.CellStyle = measureStyle;
-                            break;
-                        case BoFieldsType.ft_Sum:
-                            cell.CellStyle = sumStyle;
-                            break;
-                        case BoFieldsType.ft_Percent:
-                            cell.CellStyle = percentStyle;
-                            break;
-                        case BoFieldsType.ft_NotDefined:
-                        case BoFieldsType.ft_AlphaNumeric:
-                        case BoFieldsType.ft_Text:
-                        default:
-                            break;
+                    if (comboBoxValidations.TryGetValue(excelCol, out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) comboInfo)) {
+                        (string Value, string Desc) match = comboInfo.items.FirstOrDefault();
+                        string valueToSet = "";
+                        if (match != default) {
+                            switch (comboInfo.expandType) {
+                                case BoExpandType.et_ValueOnly:
+                                    valueToSet = match.Value;
+                                    break;
+                                case BoExpandType.et_DescriptionOnly:
+                                    valueToSet = match.Desc;
+                                    break;
+                                case BoExpandType.et_ValueDescription:
+                                    valueToSet = $"{match.Value} — {match.Desc}";
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
+                        }
+                        excelRow.CreateCell(excelCol).SetCellValue(valueToSet);
+                    }
+                    else {
+                        ICell cell = excelRow.CreateCell(excelCol);
+                        //Setting Style
+                        switch (fieldType) {
+                            case BoFieldsType.ft_ShortNumber:
+                            case BoFieldsType.ft_Integer:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = intStyle;
+                                break;
+                            case BoFieldsType.ft_Date:
+                                cell.SetCellValue(DateTime.Today);
+                                cell.CellStyle = dateStyle;
+                                break;
+                            case BoFieldsType.ft_Float:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = floatStyle;
+                                break;
+                            case BoFieldsType.ft_Quantity:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = qtyStyle;
+                                break;
+                            case BoFieldsType.ft_Price:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = priceStyle;
+                                break;
+                            case BoFieldsType.ft_Rate:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = rateStyle;
+                                break;
+                            case BoFieldsType.ft_Measure:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = measureStyle;
+                                break;
+                            case BoFieldsType.ft_Sum:
+                                cell.SetCellValue(0);
+                                cell.CellStyle = sumStyle;
+                                break;
+                            case BoFieldsType.ft_Percent:
+                                cell.CellStyle = percentStyle;
+                                cell.SetCellValue(0);
+                                break;
+                            case BoFieldsType.ft_NotDefined:
+                            case BoFieldsType.ft_AlphaNumeric:
+                            case BoFieldsType.ft_Text:
+                            default:
+                                cell.SetCellValue("");
+                                break;
+                        }
                     }
                 }
             }
@@ -338,16 +392,10 @@ namespace SAPUtils.Forms {
                     foreach ((int matrixCol, int excelCol) in visibleCols) {
                         string rawValue = _dataTable.GetValue(matrixCol, row)?.ToString() ?? "";
 
-                        if (checkboxColumns.Contains(excelCol)) {
-                            rawValue = rawValue.Trim().ToUpper();
-                            rawValue = rawValue == "Y" ? "Y" : "N";
-                            excelRow.CreateCell(excelCol).SetCellValue(rawValue);
-                        }
-                        else if (comboBoxValidations.TryGetValue(excelCol, out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) comboInfo)) {
+                        if (comboBoxValidations.TryGetValue(excelCol, out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) comboInfo)) {
                             string valueToSet = rawValue;
                             (string Value, string Desc) match = comboInfo.items.FirstOrDefault(x => x.Value == rawValue || x.Desc == rawValue);
                             if (!string.IsNullOrEmpty(match.Value)) {
-
                                 switch (comboInfo.expandType) {
                                     case BoExpandType.et_ValueOnly:
                                         valueToSet = match.Value;
@@ -472,12 +520,11 @@ namespace SAPUtils.Forms {
                 (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) = kvp.Value;
 
                 ISheet hiddenSheet = workbook.GetSheet("ValidationSheet");
-                int rowIndex = hiddenSheet.PhysicalNumberOfRows;
-                for (int i = 0; i < items.Count; i++) {
-                    IRow row = hiddenSheet.GetRow(rowIndex + i) ?? hiddenSheet.CreateRow(rowIndex + i);
-                    row.CreateCell(colIndex * 3 + 0).SetCellValue(items[i].Value);
-                    row.CreateCell(colIndex * 3 + 1).SetCellValue(items[i].Desc);
-                    row.CreateCell(colIndex * 3 + 2).SetCellValue($"{items[i].Value} — {items[i].Desc}");
+                for (int i = 2; i < items.Count + 2; i++) {
+                    IRow row = hiddenSheet.GetRow(i - 2) ?? hiddenSheet.CreateRow(i - 2);
+                    row.CreateCell(colIndex * 3 + 0).SetCellValue(items[i - 2].Value);
+                    row.CreateCell(colIndex * 3 + 1).SetCellValue(items[i - 2].Desc);
+                    row.CreateCell(colIndex * 3 + 2).SetCellValue($"{items[i - 2].Value} — {items[i - 2].Desc}");
                 }
 
                 string colLetter;
@@ -494,8 +541,7 @@ namespace SAPUtils.Forms {
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-                string formulaRange = $"ValidationSheet!${colLetter}${rowIndex + 1}:${colLetter}${rowIndex + items.Count}";
-
+                string formulaRange = $"ValidationSheet!${colLetter}${1}:${colLetter}${items.Count}";
                 XSSFName name = (XSSFName)workbook.CreateName();
                 name.NameName = rangeName;
                 name.RefersToFormula = formulaRange;
@@ -514,39 +560,20 @@ namespace SAPUtils.Forms {
             workbook.SetSheetHidden(valSheetIx, SheetVisibility.VeryHidden);
 #pragma warning restore CS0612 // Type or member is obsolete
 
-            // Validación para checkbox
-            ISheet cbSheet = workbook.GetSheet("ValidationSheet");
-            cbSheet.GetRow(0)?.CreateCell(1000)?.SetCellValue("Y");
-            cbSheet.GetRow(0)?.CreateCell(1001)?.SetCellValue("N");
-            string colLetterY = CellReference.ConvertNumToColString(1000);
-            string colLetterN = CellReference.ConvertNumToColString(1001);
-
-            XSSFName cbRange = (XSSFName)workbook.CreateName();
-            cbRange.NameName = "ValidYN";
-            cbRange.RefersToFormula = $"ValidationSheet!${colLetterY}$1:${colLetterN}$1";
-
-
-            foreach (IDataValidation validation in from colIndex in checkboxColumns select new CellRangeAddressList(1, Math.Max(_dataTable.Rows.Count, 1), colIndex, colIndex) into addressList let constraint = dvHelper.CreateFormulaListConstraint("ValidYN") select dvHelper.CreateValidation(constraint, addressList)) {
-                validation.ShowErrorBox = true;
-                validation.CreateErrorBox("Valor inválido", "Solo se permite 'Y' o 'N'");
-                sheet.AddValidationData(validation);
-            }
-
-
             XSSFSheet xssfSheet = (XSSFSheet)sheet;
             XSSFTable table = xssfSheet.CreateTable();
-            table.Name = "DataTable";
-            table.DisplayName = "DataTable";
+
+            CT_Table ctTable = table.GetCTTable();
+            ctTable.tableType = ST_TableType.worksheet;
+            ctTable.id = (uint)(workbook.GetAllPictures().Count + 1);
+
+            ctTable.name = Regex.Replace(Title, @"[^\w]", "_");
+            ctTable.displayName = Regex.Replace(Title, @"[^\w]", "_");
 
             CellReference topLeft = new CellReference(0, 0);
             CellReference bottomRight = new CellReference(Math.Max(_dataTable.Rows.Count, 1), visibleCols.Count - 1);
             AreaReference area = new AreaReference(topLeft, bottomRight, SpreadsheetVersion.EXCEL2007);
 
-            CT_Table ctTable = table.GetCTTable();
-            ctTable.tableType = ST_TableType.queryTable;
-            ctTable.id = 1;
-            ctTable.name = "DataTable";
-            ctTable.displayName = "DataTable";
             ctTable.@ref = area.FormatAsString();
             ctTable.headerRowCount = 1;
 
@@ -567,7 +594,6 @@ namespace SAPUtils.Forms {
                 showRowStripes = true,
                 showColumnStripes = false,
             };
-
 
             foreach ((int matrixCol, int excelCol) in visibleCols) {
                 string columnUid = _matrix.Columns.Item(matrixCol).UniqueID;
@@ -592,7 +618,7 @@ namespace SAPUtils.Forms {
                     case BoFieldsType.ft_Sum:
                     case BoFieldsType.ft_Percent:
                         constraint = dvHelper.CreateDecimalConstraint(
-                            OperatorType.BETWEEN, double.MinValue.ToString(CultureInfo.InvariantCulture), double.MaxValue.ToString(CultureInfo.InvariantCulture));
+                            OperatorType.BETWEEN, "-99999999999", "99999999999");
                         break;
                     case BoFieldsType.ft_Date:
                         constraint = dvHelper.CreateDateConstraint(
@@ -640,6 +666,10 @@ namespace SAPUtils.Forms {
                 return token.IsCancellationRequested ? null : new MemoryStream(ms.ToArray());
             }
         }
+
+        #endregion
+
+        #region Importar
 
         private void ImportFromExcel(object sboObject, SBOItemEventArg pVal) {
 
@@ -856,7 +886,8 @@ namespace SAPUtils.Forms {
                         string desc = row.GetCell(colIndex * 3 + 1)?.ToString().Trim();
                         string combo = row.GetCell(colIndex * 3 + 2)?.ToString().Trim();
 
-                        // Ingreso explícito para evitar colisiones de valores repetidos
+                        if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(desc) && string.IsNullOrEmpty(combo)) break;
+
                         if (!string.IsNullOrEmpty(value)) valueMappings[colIndex]["__VAL__" + value] = value;
                         if (!string.IsNullOrEmpty(desc)) valueMappings[colIndex]["__DESC__" + desc] = value;
                         if (!string.IsNullOrEmpty(combo)) valueMappings[colIndex]["__COMBO__" + combo] = value;
@@ -958,6 +989,9 @@ namespace SAPUtils.Forms {
                 return result;
             }
         }
+
+        #endregion
+
     }
 
     internal static class ObjectComparer {
