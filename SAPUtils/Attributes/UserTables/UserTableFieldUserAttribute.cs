@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
+using SAPUtils.Exceptions;
 using SAPUtils.Models.UserTables;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 
@@ -15,9 +16,10 @@ using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 namespace SAPUtils.Attributes.UserTables {
     /// <inheritdoc cref="IUserTableField" />
     public abstract class UserTableFieldAttributeBase : Attribute, IUserTableField {
+        private string _description;
 
         private string _linkedTable;
-
+        private string _name;
         private string[] _validValuePairs;
 
         /// <summary>
@@ -37,10 +39,28 @@ namespace SAPUtils.Attributes.UserTables {
         public Type LinkedTableType { get; set; }
 
         /// <inheritdoc cref="IUserTableField.Name" />
-        public virtual string Name { get; set; }
+        public virtual string Name
+        {
+            get => _name;
+            set
+            {
+                if (value != null && value.Length > 50)
+                    throw new NameTooLongException($"Name cannot exceed 50 characters. Provided length: {value.Length}.");
+                _name = value;
+            }
+        }
 
         /// <inheritdoc cref="IUserTableField.Description" />
-        public virtual string Description { get; set; }
+        public virtual string Description
+        {
+            get => _description;
+            set
+            {
+                if (value != null && value.Length > 80)
+                    throw new DescriptionTooLongException($"Description cannot exceed 80 characters. Provided length: {value.Length}.");
+                _description = value;
+            }
+        }
 
         /// <inheritdoc />
         public abstract BoFieldTypes FieldType { get; }

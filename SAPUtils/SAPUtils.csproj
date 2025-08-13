@@ -86,8 +86,10 @@
       <Compile Include="Events\WidgetEvents.cs"/>
       <Compile Include="Exceptions\AddontNotInitializedException.cs"/>
       <Compile Include="Exceptions\CodeNotSetException.cs"/>
+      <Compile Include="Exceptions\DescriptionTooLongException.cs"/>
       <Compile Include="Exceptions\ItemAlreadyExistException.cs"/>
       <Compile Include="Exceptions\ItemDoNotExistException.cs"/>
+      <Compile Include="Exceptions\NameTooLongException.cs"/>
       <Compile Include="Exceptions\UserTableAttributeNotFound.cs"/>
       <Compile Include="Extensions\BusinessObjectInfoExtensions.cs"/>
       <Compile Include="Extensions\CellExtension.cs"/>

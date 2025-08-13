@@ -26,4 +26,5 @@ namespace SAPUtils.Exceptions {
         /// <seealso cref="SAPUtils.Attributes.UserTables.UserTableAttribute"/>
         public UserTableAttributeNotFound(string name) : base($"{name} is not decorated with UserTableAttribute") { }
     }
+
 }

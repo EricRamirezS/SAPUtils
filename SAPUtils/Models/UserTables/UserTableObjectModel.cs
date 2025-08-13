@@ -67,7 +67,13 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public object Clone() {
-            return MemberwiseClone();
+            UserTableObjectModel clone = (UserTableObjectModel)MemberwiseClone();
+            clone.Code = null;
+            clone.OriginalCode = null;
+            clone.OriginalActive = null;
+            clone.OriginalCreatedAt = default;
+            clone.OriginalCreatedBy = 0;
+            return clone;
         }
 
         /// <summary>
@@ -549,6 +555,9 @@ namespace SAPUtils.Models.UserTables {
                 if (Code == null && OriginalCode == null) {
                     PrimaryKeyStrategy primaryKeyStrategy = _userTableAttribute.PrimaryKeyStrategy;
                     GenerateCode(primaryKeyStrategy, table);
+                }
+                else if (OriginalCode != null) {
+                    Code = OriginalCode;
                 }
                 Log.Debug("Saving {0} into table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
                 bool exist = table.GetByKey(Code);
