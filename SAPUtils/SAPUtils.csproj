@@ -93,6 +93,7 @@
       <Compile Include="Exceptions\UserTableAttributeNotFound.cs"/>
       <Compile Include="Extensions\BusinessObjectInfoExtensions.cs"/>
       <Compile Include="Extensions\CellExtension.cs"/>
+      <Compile Include="Extensions\DataTableExtension.cs"/>
       <Compile Include="Extensions\StringExtension.cs"/>
       <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs"/>
       <Compile Include="Forms\ChangeTrackerMatrixForm.ContextMenu.cs">

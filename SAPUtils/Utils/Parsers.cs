@@ -131,5 +131,42 @@ namespace SAPUtils.Utils {
                 }
             }
         }
+
+        public static class ColumnParser {
+            public static string FormatDate(DateTime date) {
+                return date.Year < 1900 ? "" : date.ToString("yyyyMMdd");
+            }
+            public static string FormatNumber(int number) {
+                return number == 0 ? "0" : number.ToString();
+            }
+            public static string FormatNumber(long number) {
+                return number == 0 ? "0" : number.ToString();
+            }
+            public static string FormatNumber(double number) {
+                return Math.Abs(number) < 0.000001 ? "0" : number.ToString("0.######", CultureInfo.InvariantCulture);
+            }
+            public static string FormatNumber(float number) {
+                return Math.Abs(number) < 0.000001 ? "0" : number.ToString("0.######", CultureInfo.InvariantCulture);
+            }
+            public static string FormatNumber(decimal number) {
+                return Math.Abs(number) < (decimal)0.000001 ? "0" : number.ToString("0.######", CultureInfo.InvariantCulture);
+            }
+            public static string FormatString(string str) {
+                return str ?? "";
+            }
+            public static string FormatDtValue(object val) {
+                switch (val) {
+                    case string str: return FormatString(str);
+                    case decimal dec: return FormatNumber(dec);
+                    case double d: return FormatNumber(d);
+                    case float f: return FormatNumber(f);
+                    case long l: return FormatNumber(l);
+                    case int i: return FormatNumber(i);
+                    case DateTime dt: return FormatDate(dt);
+                }
+                SapAddon.Instance().Logger.Warning("Unkown Parsing");
+                return "";
+            }
+        }
     }
 }
