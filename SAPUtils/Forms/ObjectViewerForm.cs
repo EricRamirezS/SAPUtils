@@ -275,7 +275,6 @@ namespace SAPUtils.Forms {
         }
 
         private void AddButtonClickAfter(object sboObject, SBOItemEventArg pVal) {
-            //TODO: No hacer nada si solo se abrio el Combobox, pero nada se seleccionó, actualmente llama a la opción ya seleccionada
             bool validationSuccess = ValidateForm();
             if (!validationSuccess) return;
             int option = ShowMessageBox("Este documento no puede modificarse tras la creación. ¿Continuar?", 1, "Sí", "No");
