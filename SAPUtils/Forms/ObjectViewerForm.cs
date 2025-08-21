@@ -295,7 +295,7 @@ namespace SAPUtils.Forms {
                     Close();
                     break;
                 default:
-                    throw new NotImplementedException();
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "Opción no válida.");
             }
         }
 

@@ -160,7 +160,7 @@ namespace SAPUtils.__Internal.Models {
                 case 6:
                     return $"yy{DateSep}MM{DateSep}dd";
                 default:
-                    throw new NotImplementedException();
+                    throw new ArgumentOutOfRangeException(nameof(DateFormat), DateFormat, "Formato de fecha no reconocido.");
             }
         }
     }
