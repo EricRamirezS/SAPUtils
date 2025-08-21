@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using SAPbouiCOM;
+using SAPUtils.Database;
+using SAPUtils.Models.UserTables;
 
 namespace SAPUtils.Extensions {
     public static class ValidValuesExtension {
@@ -50,6 +52,23 @@ namespace SAPUtils.Extensions {
 
             for (int i = vv.Count - 1; i >= 0; i--) {
                 vv.Remove(i, BoSearchKey.psk_Index);
+            }
+        }
+        /// <summary>
+        /// Clears all values from the specified <see cref="SAPbouiCOM.ValidValues"/> collection.
+        /// </summary>
+        /// <param name="vv">
+        /// The <see cref="SAPbouiCOM.ValidValues"/> collection to be cleared.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if the <paramref name="vv"/> parameter is null.
+        /// </exception>
+        /// <see cref="SAPbouiCOM.ValidValues"/>
+        public static void LoadFromUserTable(this ValidValues vv, string userTableName, bool addEmpty = false) {
+            if (vv == null) throw new ArgumentNullException(nameof(vv));
+            using (IRepository repository = Repository.Get()) {
+                IList<IUserFieldValidValue> data = repository.GetValidValuesFromUserTable(userTableName);
+                vv.AddRange(data, clear: true, addEmpty: addEmpty);
             }
         }
     }

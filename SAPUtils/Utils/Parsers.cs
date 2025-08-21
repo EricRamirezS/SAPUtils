@@ -108,20 +108,20 @@ namespace SAPUtils.Utils {
         /// </remarks>
         /// <seealso cref="double"/>
         /// <seealso cref="CultureInfo"/>
-        public static object ParseDouble(object value) {
+        public static double ParseDouble(object value) {
             switch (value) {
                 case null:
                     return 0;
                 case double d:
                     return d;
                 case float f:
-                    return (double)f;
+                    return f;
                 case decimal dec:
                     return (double)dec;
                 case int i:
-                    return (double)i;
+                    return i;
                 case long l:
-                    return (double)l;
+                    return l;
                 default:
                 {
                     string str = value.ToString();

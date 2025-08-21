@@ -812,7 +812,7 @@ namespace SAPUtils.Models.UserTables {
         /// </exception>
         /// <seealso cref="SAPUtils.Models.UserTables.PrimaryKeyStrategy" />
         public static string GetNewCode() {
-            switch (_userTableAttribute.PrimaryKeyStrategy) {
+            switch (UserTableAttribute.PrimaryKeyStrategy) {
                 case PrimaryKeyStrategy.Manual:
                     return "";
                 case PrimaryKeyStrategy.Guid:
