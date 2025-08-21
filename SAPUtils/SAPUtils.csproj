@@ -96,6 +96,7 @@
       <Compile Include="Extensions\DataTableExtension.cs"/>
       <Compile Include="Extensions\StringExtension.cs"/>
       <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs"/>
+      <Compile Include="Extensions\ValidValuesExtension.cs"/>
       <Compile Include="Forms\ChangeTrackerMatrixForm.ContextMenu.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>

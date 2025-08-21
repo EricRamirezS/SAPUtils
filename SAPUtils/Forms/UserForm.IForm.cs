@@ -27,6 +27,9 @@ namespace SAPUtils.Forms {
         public void Refresh() {
             Logger.Debug("Refreshing form with UID: {0}", UniqueID);
             UIAPIRawForm?.Refresh();
+            int originalPane = PaneLevel;
+            PaneLevel = originalPane == 1 ? 2 : 1; // Pane arbitrario
+            PaneLevel = originalPane;
         }
 
         /// <summary>

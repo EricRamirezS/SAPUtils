@@ -303,17 +303,32 @@ namespace SAPUtils.Forms {
             Freeze(true);
             _item = item;
             _helper.Click();
-            _addButtonCombo.Item.Visible = false;
-            _cancelButton.Item.Visible = true;
-            _searchButton.Item.Visible = false;
-            _okButton.Item.Visible = true;
-            _updateButton.Item.Visible = false;
-            UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
-            UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
-            ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
-            _cancelButton.Item.Enabled = true;
-            _okButton.Item.Enabled = true;
-            OnEditMode();
+            if (IsEditable(item)) {
+                _addButtonCombo.Item.Visible = false;
+                _cancelButton.Item.Visible = true;
+                _searchButton.Item.Visible = false;
+                _okButton.Item.Visible = true;
+                _updateButton.Item.Visible = false;
+                UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
+                UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
+                ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
+                _cancelButton.Item.Enabled = true;
+                _okButton.Item.Enabled = true;
+                OnEditMode();
+            }
+            else {
+                _addButtonCombo.Item.Visible = false;
+                _cancelButton.Item.Visible = true;
+                _searchButton.Item.Visible = false;
+                _okButton.Item.Visible = true;
+                _updateButton.Item.Visible = false;
+                UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
+                UIAPIRawForm.Mode = BoFormMode.fm_VIEW_MODE;
+                ChangeFormMode(BoFormMode.fm_VIEW_MODE);
+                _cancelButton.Item.Enabled = true;
+                _okButton.Item.Enabled = true;
+                OnViewMode();
+            }
             LoadFoundItem(_item);
             Freeze(false);
         }
@@ -360,9 +375,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPbouiCOM.BoFormMode"/>
         virtual protected void ChangeFormMode(BoFormMode mode) {
             UIAPIRawForm.Mode = mode;
-            int originalPane = PaneLevel;
-            PaneLevel = originalPane == 1 ? 2 : 1; // Pane arbitrario
-            PaneLevel = originalPane;
+            Refresh();
         }
 
         private void SaveButtonOnClickBefore(object sboObject, SBOItemEventArg pVal, out bool bubbleEvent) {
@@ -412,6 +425,16 @@ namespace SAPUtils.Forms {
         /// It allows customization of the behavior or appearance of the form when it enters edit mode.
         /// </summary>
         abstract protected void OnEditMode();
+
+        /// <summary>
+        /// Triggered when the form enters view mode. This method provides an extension point for defining custom behavior
+        /// that should occur specifically when the form is switched to view mode.
+        /// </summary>
+        /// <remarks>
+        /// View mode is typically used for reviewing or displaying information with edits disabled.
+        /// This method must be implemented by derived classes to handle any additional functionality required.
+        /// </remarks>
+        abstract protected void OnViewMode();
         /// <summary>
         /// Invoked during the find mode activation in the form.
         /// Allows customizing the behavior for enabling/disabling UI components,
@@ -481,5 +504,7 @@ namespace SAPUtils.Forms {
         /// </remarks>
         /// <seealso cref="Button" />
         abstract protected Button GetUpdateButton();
+
+        abstract protected bool IsEditable(T item);
     }
 }

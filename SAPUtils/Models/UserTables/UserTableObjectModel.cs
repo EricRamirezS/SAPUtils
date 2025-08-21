@@ -373,7 +373,7 @@ namespace SAPUtils.Models.UserTables {
     /// </remarks>
     public class UserTableObjectModel<T> : UserTableObjectModel where T : UserTableObjectModel<T>, new() {
 
-        private readonly IUserTable _userTableAttribute;
+        private static IUserTable _userTableAttribute;
 
         /// <summary>
         /// Initializes a new instance of <see cref="UserTableObjectModel{T}"/>, validating the presence of <see cref="UserTableAttribute"/>.
@@ -384,15 +384,19 @@ namespace SAPUtils.Models.UserTables {
         protected UserTableObjectModel() {
             Log.Trace("Initializing UserTableObjectModel...");
             try {
-                _userTableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
+                if (UserTableAttribute == null)
+                    throw new UserTableAttributeNotFound(typeof(T).Name);
             }
             catch (Exception ex) {
                 Log.Error(ex);
                 throw new UserTableAttributeNotFound(typeof(T).Name);
             }
+            _userTableAttribute = UserTableAttribute;
 
             Log.Debug("UserTableAttribute initialized: {0}", _userTableAttribute.Name);
         }
+
+        private static IUserTable UserTableAttribute => _userTableAttribute ?? (_userTableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T)));
 
         /// <inheritdoc />
         public override string Code { get; set; }
@@ -783,6 +787,31 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public override string GetNextAvailableCode() {
+            switch (_userTableAttribute.PrimaryKeyStrategy) {
+                case PrimaryKeyStrategy.Manual:
+                    return "";
+                case PrimaryKeyStrategy.Guid:
+                    return Guid.NewGuid().ToString();
+                case PrimaryKeyStrategy.Serie:
+                    using (Repository repository = (Repository)Repository.Get())
+                        return repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(PrimaryKeyStrategy));
+            }
+        }
+
+        /// <summary>
+        /// Generates a new code based on the primary key strategy defined in the user table attribute.
+        /// </summary>
+        /// <returns>
+        /// A new code as a string based on the selected primary key strategy. It could be an empty string (for manual strategy),
+        /// a GUID (for Guid strategy), or the next code in a sequence (for Serie strategy).
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if the primary key strategy is not recognized or supported.
+        /// </exception>
+        /// <seealso cref="SAPUtils.Models.UserTables.PrimaryKeyStrategy" />
+        public static string GetNewCode() {
             switch (_userTableAttribute.PrimaryKeyStrategy) {
                 case PrimaryKeyStrategy.Manual:
                     return "";

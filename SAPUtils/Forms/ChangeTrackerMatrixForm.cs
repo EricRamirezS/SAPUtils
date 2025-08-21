@@ -220,45 +220,51 @@ namespace SAPUtils.Forms {
             bool userDeleteContextButton = true,
             string uid = null) : base(uid) {
             if (!Alive) return;
-            _useAddContextButton = useAddContextButton;
-            _userDeleteContextButton = userDeleteContextButton;
-            _tableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
+            try {
+                Freeze(true);
+                _useAddContextButton = useAddContextButton;
+                _userDeleteContextButton = userDeleteContextButton;
+                _tableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
 
-            _addRowMenuUid = $"{typeof(T).Name}{UniqueID}AddRow)";
-            _deleteRowMenuUid = $"{typeof(T).Name}{UniqueID}DelRow)";
-            CustomInitializeComponent();
+                _addRowMenuUid = $"{typeof(T).Name}{UniqueID}AddRow)";
+                _deleteRowMenuUid = $"{typeof(T).Name}{UniqueID}DelRow)";
+                CustomInitializeComponent();
 
-            EventSubscriber();
+                EventSubscriber();
 
-            LoadData();
+                LoadData();
 
-            UpdateMatrix();
+                UpdateMatrix();
 
-            EnableMenu("1281", false); // find button
-            EnableMenu("1282", _useAddContextButton); // add button
-            EnableMenu("1304", true); //Enable Refresh
+                EnableMenu("1281", false); // find button
+                EnableMenu("1282", _useAddContextButton); // add button
+                EnableMenu("1304", true); //Enable Refresh
 
-            (DataColumn DataTableColumn, Column MatrixColumn) value;
-            if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Editable = false;
+                (DataColumn DataTableColumn, Column MatrixColumn) value;
+                if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T))) {
+                    if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Editable = false;
+                }
+                if (typeof(IAuditableDate).IsAssignableFrom(typeof(T))) {
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
+                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
+                }
+                // ReSharper disable once InvertIf, Kept for Readability
+                if (typeof(IAuditableUser).IsAssignableFrom(typeof(T))) {
+                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Visible = false;
+                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Editable = false;
+                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Editable = false;
+                }
             }
-            if (typeof(IAuditableDate).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
-                if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
-            }
-            // ReSharper disable once InvertIf, Kept for Readability
-            if (typeof(IAuditableUser).IsAssignableFrom(typeof(T))) {
-                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Visible = false;
-                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Editable = false;
-                if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Editable = false;
+            finally {
+                Freeze(false);
             }
         }
 
