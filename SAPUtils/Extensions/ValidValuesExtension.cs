@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using SAPbouiCOM;
-using SAPUtils.Models.UserTables;
 
 namespace SAPUtils.Extensions {
     public static class ValidValuesExtension {
@@ -25,7 +24,7 @@ namespace SAPUtils.Extensions {
         /// </exception>
         /// <see cref="SAPbouiCOM.ValidValues"/>
         /// <see cref="SAPUtils.Models.UserTables.IUserFieldValidValue"/>
-        public static void AddRange(this ValidValues vv, IEnumerable<IUserFieldValidValue> data, bool clear = false, bool addEmpty = false) {
+        public static void AddRange(this ValidValues vv, IEnumerable<IValidValue> data, bool clear = false, bool addEmpty = false) {
             if (vv == null) throw new ArgumentNullException(nameof(vv));
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -33,7 +32,7 @@ namespace SAPUtils.Extensions {
 
             if (addEmpty) vv.Add("", "");
 
-            foreach (IUserFieldValidValue line in data) vv.Add(line.Value, line.Description);
+            foreach (IValidValue line in data) vv.Add(line.Value, line.Description);
         }
 
         /// <summary>

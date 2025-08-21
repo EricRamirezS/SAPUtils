@@ -17,6 +17,7 @@ using SAPUtils.Utils;
 using ChooseFromList = SAPbouiCOM.ChooseFromList;
 using IChooseFromList = SAPbouiCOM.IChooseFromList;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
+using IValidValue = SAPbouiCOM.IValidValue;
 
 namespace SAPUtils.__Internal.Extensions {
     internal static class MatrixExtensions {
@@ -241,7 +242,7 @@ namespace SAPUtils.__Internal.Extensions {
                 using (IRepository repository = Repository.Get())
                     vv = repository.GetValidValuesFromUserTable(field.LinkedTable);
             }
-            foreach (IUserFieldValidValue userFieldValidValue in vv) {
+            foreach (IValidValue userFieldValidValue in vv) {
                 bool add = true;
                 for (int i = 0; i < column.ValidValues.Count; i++)
                     if (column.ValidValues.Item(i).Value == userFieldValidValue.Value) {
@@ -304,7 +305,7 @@ namespace SAPUtils.__Internal.Extensions {
             if (field.Mandatory == false) {
                 column.ValidValues.Add("", "");
             }
-            foreach (IUserFieldValidValue validValue in field.ValidValues) {
+            foreach (IValidValue validValue in field.ValidValues) {
                 column.ValidValues.Add(validValue.Value, validValue.Description);
             }
             return column;

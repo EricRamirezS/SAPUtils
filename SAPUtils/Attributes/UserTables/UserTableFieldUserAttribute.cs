@@ -4,8 +4,8 @@ using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Exceptions;
-using SAPUtils.Models.UserTables;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
+using IValidValue = SAPbouiCOM.IValidValue;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable UnusedMember.Global
@@ -92,7 +92,7 @@ namespace SAPUtils.Attributes.UserTables {
         public abstract Type Type { get; }
 
         /// <inheritdoc />
-        public virtual IList<IUserFieldValidValue> ValidValues { get; internal set; }
+        public virtual IList<IValidValue> ValidValues { get; internal set; }
 
         /// <inheritdoc />
         public virtual string[] ValidValuePairs

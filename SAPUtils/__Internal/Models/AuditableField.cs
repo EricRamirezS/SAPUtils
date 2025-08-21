@@ -6,6 +6,7 @@ using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Models.UserTables;
+using IValidValue = SAPbouiCOM.IValidValue;
 
 namespace SAPUtils.__Internal.Models {
     internal static class AuditableField {
@@ -18,7 +19,10 @@ namespace SAPUtils.__Internal.Models {
 
         private static readonly Dictionary<string, Type> AuditableFieldSources =
             AuditableInterfaces
-                .SelectMany(t => t.GetProperties().Select(p => new { p.Name, DeclaringInterface = t }))
+                .SelectMany(t => t.GetProperties().Select(p => new {
+                    p.Name,
+                    DeclaringInterface = t
+                }))
                 .GroupBy(x => x.Name)
                 .ToDictionary(g => g.Key, g => g.First().DeclaringInterface);
 
@@ -36,7 +40,7 @@ namespace SAPUtils.__Internal.Models {
                         Name = propertyInfo.Name,
                         DefaultValue = true,
                         Mandatory = true,
-                        ValidValues = new List<IUserFieldValidValue> {
+                        ValidValues = new List<IValidValue> {
                             new UserFieldValidValue("Y", "Activo"),
                             new UserFieldValidValue("N", "Inactivo"),
                         },

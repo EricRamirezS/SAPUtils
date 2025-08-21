@@ -11,6 +11,7 @@ using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Models.UserTables;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
+using IValidValue = SAPbouiCOM.IValidValue;
 
 namespace SAPUtils {
     /// <summary>
@@ -193,7 +194,7 @@ namespace SAPUtils {
             bool mandatory,
             int? size,
             string defaultValue,
-            IList<IUserFieldValidValue> validValues,
+            IList<IValidValue> validValues,
             UDFLinkedSystemObjectTypesEnum? linkedSystemObject = null,
             string linkedTable = null,
             string linkedUdo = null,
@@ -225,7 +226,7 @@ namespace SAPUtils {
                 }
 
                 if (validValues != null && validValues.Count > 0) {
-                    foreach (IUserFieldValidValue validValue in validValues) {
+                    foreach (IValidValue validValue in validValues) {
                         userFieldsMd.ValidValues.Value = validValue.Value;
                         userFieldsMd.ValidValues.Description = validValue.Description;
                         userFieldsMd.ValidValues.Add();

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using SAPbobsCOM;
-using SAPUtils.Models.UserTables;
+using IValidValue = SAPbouiCOM.IValidValue;
 
 namespace SAPUtils.Attributes.UserTables {
     /// <summary>
@@ -73,7 +73,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// Gets a list of valid values for the field.
         /// Used for fields with predefined value sets.
         /// </summary>
-        IList<IUserFieldValidValue> ValidValues { get; }
+        IList<IValidValue> ValidValues { get; }
 
         /// <summary>
         /// Parses a given object value into a format compatible with the SAP Business One field type.
