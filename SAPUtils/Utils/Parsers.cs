@@ -132,6 +132,51 @@ namespace SAPUtils.Utils {
             }
         }
 
+        /// <summary>
+        /// Parses an object into an <see cref="int"/>. If the object is a numeric type, it is converted safely;
+        /// otherwise, attempts to parse the object as an integer from its string representation.
+        /// </summary>
+        /// <param name="value">The object to be parsed into an <see cref="int"/>. Supported types include numeric types
+        /// (e.g., <see cref="double"/>, <see cref="decimal"/>, <see cref="float"/>, etc.) and strings parsable by
+        /// TryParse using <see cref="CultureInfo.InvariantCulture"/>.</param>
+        /// <returns>The parsed <see cref="int"/> value if the input can be converted or parsed successfully;
+        /// otherwise, returns 0.</returns>
+        /// <remarks>
+        /// This method standardizes the parsing of various input types into an <see cref="int"/>,
+        /// ensuring graceful handling of invalid formats or overflow by returning 0.
+        /// </remarks>
+        /// <seealso cref="int"/>
+        /// <seealso cref="CultureInfo"/>
+        public static int ParseInteger(object value) {
+            if (value == null)
+                return 0;
+
+            try {
+                switch (value) {
+                    case int i:
+                        return i;
+                    case long l:
+                    case short s:
+                    case byte b:
+                    case double d:
+                    case float f:
+                    case decimal dec:
+                        return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                    default:
+                    {
+                        string str = value.ToString();
+                        return int.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out int result)
+                            ? result
+                            : 0;
+                    }
+                }
+            }
+            catch (OverflowException) {
+                // Si no cabe en un int, devolvemos 0 en lugar de reventar
+                return 0;
+            }
+        }
+
         public static class ColumnParser {
             public static string FormatDate(DateTime date) {
                 return date.Year < 1900 ? "" : date.ToString("yyyyMMdd");

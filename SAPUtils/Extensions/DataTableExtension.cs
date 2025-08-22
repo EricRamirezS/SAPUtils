@@ -8,6 +8,10 @@ namespace SAPUtils.Extensions {
             string value = dt.GetValue(column, row)?.ToString();
             return string.IsNullOrWhiteSpace(value) ? "" : value.Trim();
         }
+        public static bool GetBoolean(this DataTable dt, string column, int row) {
+            string value = dt.GetValue(column, row)?.ToString();
+            return (string.IsNullOrWhiteSpace(value) ? "N" : value.Trim()) == "Y";
+        }
         public static int GetInt(this DataTable dt, string column, int row) {
             string val = dt.GetValue(column, row)?.ToString();
             return int.TryParse(val, out int result) ? result : 0;
