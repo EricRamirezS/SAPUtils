@@ -7,9 +7,51 @@ using System.Runtime.CompilerServices;
 
 namespace SAPUtils.Utils {
     /// <summary>
-    /// This interface provides methods to log messages at various log levels such as Trace, Debug, Info, Warn, Error, and Critical.
-    /// It also supports logging exception details when errors or critical failures occur.
+    /// Provides methods for logging messages and exceptions at different severity levels.
+    /// <br/>
+    /// Log levels:
+    /// <list type="bullet">
+    ///   <item>
+    ///     <term>Trace</term>
+    ///     <description>
+    ///     The most detailed level, used for low-level debugging and tracing program flow.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Debug</term>
+    ///     <description>
+    ///     For diagnostic information that is useful during development and debugging.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Info</term>
+    ///     <description>
+    ///     General application events that describe normal operations (e.g., service start/stop).
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Warning</term>
+    ///     <description>
+    ///     Potential issues or unexpected events that are not necessarily errors, but may require attention.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Error</term>
+    ///     <description>
+    ///     Errors that prevent normal execution of a particular operation. Typically indicates an exception or failure.
+    ///     </description>
+    ///   </item>
+    ///   <item>
+    ///     <term>Critical</term>
+    ///     <description>
+    ///     Severe errors that require immediate attention, often leading to application or system failure.
+    ///     </description>
+    ///   </item>
+    /// </list>
     /// </summary>
+    /// <remarks>
+    /// Each level supports logging messages, objects, or exceptions, with optional caller information for context.
+    /// </remarks>
     public interface ILogger {
         /// <summary>
         /// Logs a trace-level message with optional formatting arguments.
