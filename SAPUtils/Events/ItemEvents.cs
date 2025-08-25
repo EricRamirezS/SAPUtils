@@ -72,6 +72,8 @@ namespace SAPUtils.Events {
         /// <see cref="SAPUtils.Events.ItemEvents"/>
         public static event ItemBeforeHandler FormLoadBefore;
 
+        public static event ItemBeforeHandler FormCloseBefore;
+
         /// <summary>
         /// Event raised before the "Item Pressed" action occurs in the SAP Business One application interface.
         /// </summary>
@@ -134,6 +136,8 @@ namespace SAPUtils.Events {
         /// <see cref="SAPUtils.Events.FormEvents"/>
         public static event ItemAfterHandler FormLoadAfter;
 
+        public static event ItemAfterHandler FormCloseAfter;
+
         /// <summary>
         /// Event raised after an ItemPress action is performed within the SAP Business One application interface.
         /// </summary>
@@ -176,6 +180,9 @@ namespace SAPUtils.Events {
                     case BoEventTypes.et_FORM_LOAD:
                         FormLoadBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
                         break;
+                    case BoEventTypes.et_FORM_CLOSE:
+                        FormCloseBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
+                        break;
                     case BoEventTypes.et_ITEM_PRESSED:
                         ItemPressedBefore?.Invoke(formUid, ref pVal, out bubbleEvent);
                         break;
@@ -192,6 +199,9 @@ namespace SAPUtils.Events {
                 switch (pVal.EventType) {
                     case BoEventTypes.et_FORM_LOAD:
                         FormLoadAfter?.Invoke(formUid, ref pVal);
+                        break;
+                    case BoEventTypes.et_FORM_CLOSE:
+                        FormCloseAfter?.Invoke(formUid, ref pVal);
                         break;
                     case BoEventTypes.et_ITEM_PRESSED:
                         ItemPressedAfter?.Invoke(formUid, ref pVal);
