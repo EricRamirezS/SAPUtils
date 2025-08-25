@@ -96,6 +96,8 @@ namespace SAPUtils.__Internal.Query {
             switch (value) {
                 case null:
                     return "NULL";
+                case char c:
+                    return $"'{c.ToString().Replace("'", "''")}'";
                 case string s:
                     return $"'{s.Replace("'", "''")}'";
                 case bool b:
@@ -104,14 +106,13 @@ namespace SAPUtils.__Internal.Query {
                     return $"'{g}'";
                 case DateTime dt:
                     return $"'{dt:yyyyMMdd}'";
+                case TimeSpan ts:
+                    return $"'{ts:HHmm}'";
                 case Enum e:
                     return Convert.ToInt32(e).ToString(CultureInfo.InvariantCulture);
-                case float f:
-                    return f.ToString(CultureInfo.InvariantCulture);
-                case double d:
-                    return d.ToString(CultureInfo.InvariantCulture);
-                case decimal m:
-                    return m.ToString(CultureInfo.InvariantCulture);
+                case float _:
+                case double _:
+                case decimal _:
                 case sbyte _:
                 case byte _:
                 case short _:

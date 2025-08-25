@@ -75,20 +75,20 @@ namespace SAPUtils.__Internal.Query {
             return this;
         }
 
-        public IWhereBuilder In(string column, IEnumerable<object> values, bool isSystemColumn = false) {
+        public IWhereBuilder In<T>(string column, IEnumerable<T> values, bool isSystemColumn = false) {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 ColumnName = isSystemColumn ? column : $"U_{column}",
                 Comparison = SqlComparison.In,
-                ComparingIn = values,
+                ComparingIn = values.Cast<object>(),
             });
             return this;
         }
 
-        public IWhereBuilder NotIn(string column, IEnumerable<object> values, bool isSystemColumn = false) {
+        public IWhereBuilder NotIn<T>(string column, IEnumerable<T> values, bool isSystemColumn = false) {
             _groupStack.Peek().Conditions.Add(new WhereCondition {
                 ColumnName = isSystemColumn ? column : $"U_{column}",
                 Comparison = SqlComparison.NotIn,
-                ComparingIn = values,
+                ComparingIn = values.Cast<object>(),
             });
             return this;
         }

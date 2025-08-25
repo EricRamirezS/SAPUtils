@@ -148,7 +148,7 @@ namespace SAPUtils.Query {
         /// <param name="values">A collection of values to check against.</param>
         /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder In(string column, IEnumerable<object> values, bool isSystemColumn = false);
+        IWhereBuilder In<T>(string column, IEnumerable<T> values, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds a NOT IN condition (column NOT IN (values)) to the WHERE clause.
@@ -157,7 +157,7 @@ namespace SAPUtils.Query {
         /// <param name="values">A collection of values to not check against.</param>
         /// <param name="isSystemColumn">If true, the column name is exactly as in database, otherwise <c>U_</c> prefix will be added to column name.</param>
         /// <returns>The current <see cref="IWhereBuilder"/> instance for fluent chaining.</returns>
-        IWhereBuilder NotIn(string column, IEnumerable<object> values, bool isSystemColumn = false);
+        IWhereBuilder NotIn<T>(string column, IEnumerable<T> values, bool isSystemColumn = false);
 
         /// <summary>
         /// Adds an EXISTS condition (EXISTS (subquery)) to the WHERE clause.
