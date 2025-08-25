@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Models;
+using SAPUtils.__Internal.Query;
 using SAPUtils.__Internal.SQL;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Query;
@@ -125,6 +126,9 @@ namespace SAPUtils.Database {
             }
             return data;
         }
+        public string BuildWhere(IWhere where) {
+            return new SqlWhereBuilder(where).Build();
+        }
 
 
         /// <summary>
@@ -216,5 +220,6 @@ namespace SAPUtils.Database {
         /// </remarks>
         /// <seealso cref="IUserFieldValidValue"/>
         IList<IUserFieldValidValue> GetValidValuesFromUserTable(string userTableName);
+        string BuildWhere(IWhere where);
     }
 }

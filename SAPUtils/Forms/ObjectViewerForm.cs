@@ -300,71 +300,83 @@ namespace SAPUtils.Forms {
         }
 
         private void EditMode(T item) {
-            Freeze(true);
-            _item = item;
-            _helper.Click();
-            if (IsEditable(item)) {
-                _addButtonCombo.Item.Visible = false;
-                _cancelButton.Item.Visible = true;
-                _searchButton.Item.Visible = false;
-                _okButton.Item.Visible = true;
-                _updateButton.Item.Visible = false;
-                UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
-                UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
-                ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
-                _cancelButton.Item.Enabled = true;
-                _okButton.Item.Enabled = true;
-                OnEditMode();
+            try {
+                Freeze(true);
+                _item = item;
+                _helper.Click();
+                if (IsEditable(item)) {
+                    _addButtonCombo.Item.Visible = false;
+                    _cancelButton.Item.Visible = true;
+                    _searchButton.Item.Visible = false;
+                    _okButton.Item.Visible = true;
+                    _updateButton.Item.Visible = false;
+                    UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
+                    UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
+                    ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
+                    _cancelButton.Item.Enabled = true;
+                    _okButton.Item.Enabled = true;
+                    OnEditMode();
+                }
+                else {
+                    _addButtonCombo.Item.Visible = false;
+                    _cancelButton.Item.Visible = true;
+                    _searchButton.Item.Visible = false;
+                    _okButton.Item.Visible = true;
+                    _updateButton.Item.Visible = false;
+                    UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
+                    UIAPIRawForm.Mode = BoFormMode.fm_VIEW_MODE;
+                    ChangeFormMode(BoFormMode.fm_VIEW_MODE);
+                    _cancelButton.Item.Enabled = true;
+                    _okButton.Item.Enabled = true;
+                    OnViewMode();
+                }
+                LoadFoundItem(_item);
             }
-            else {
-                _addButtonCombo.Item.Visible = false;
-                _cancelButton.Item.Visible = true;
-                _searchButton.Item.Visible = false;
-                _okButton.Item.Visible = true;
-                _updateButton.Item.Visible = false;
-                UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
-                UIAPIRawForm.Mode = BoFormMode.fm_VIEW_MODE;
-                ChangeFormMode(BoFormMode.fm_VIEW_MODE);
-                _cancelButton.Item.Enabled = true;
-                _okButton.Item.Enabled = true;
-                OnViewMode();
+            finally {
+                Freeze(false);
             }
-            LoadFoundItem(_item);
-            Freeze(false);
         }
 
         private void NewMode() {
-            Freeze(true);
-            _item = null;
-            _helper.Click();
-            _addButtonCombo.Item.Visible = true;
-            _cancelButton.Item.Visible = true;
-            _searchButton.Item.Visible = false;
-            _okButton.Item.Visible = false;
-            _updateButton.Item.Visible = false;
-            UIAPIRawForm.DefButton = _addButton.Item.UniqueID;
-            UIAPIRawForm.Mode = BoFormMode.fm_ADD_MODE;
-            ChangeFormMode(BoFormMode.fm_ADD_MODE);
-            _addButtonCombo.Item.Enabled = true;
-            _cancelButton.Item.Enabled = true;
-            OnNewMode();
-            Freeze(false);
+            try {
+                Freeze(true);
+                _item = null;
+                _helper.Click();
+                _addButtonCombo.Item.Visible = true;
+                _cancelButton.Item.Visible = true;
+                _searchButton.Item.Visible = false;
+                _okButton.Item.Visible = false;
+                _updateButton.Item.Visible = false;
+                UIAPIRawForm.DefButton = _addButton.Item.UniqueID;
+                UIAPIRawForm.Mode = BoFormMode.fm_ADD_MODE;
+                ChangeFormMode(BoFormMode.fm_ADD_MODE);
+                _addButtonCombo.Item.Enabled = true;
+                _cancelButton.Item.Enabled = true;
+                OnNewMode();
+            }
+            finally {
+                Freeze(false);
+            }
         }
         private void SearchMode() {
-            Freeze(true);
-            _item = null;
-            _helper.Click();
-            _addButtonCombo.Item.Visible = false;
-            _cancelButton.Item.Visible = true;
-            _searchButton.Item.Visible = true;
-            _okButton.Item.Visible = false;
-            _updateButton.Item.Visible = false;
-            UIAPIRawForm.DefButton = _searchButton.Item.UniqueID;
-            ChangeFormMode(BoFormMode.fm_FIND_MODE);
-            _cancelButton.Item.Enabled = true;
-            _searchButton.Item.Enabled = true;
-            OnFindMode();
-            Freeze(false);
+            try {
+                Freeze(true);
+                _item = null;
+                _helper.Click();
+                _addButtonCombo.Item.Visible = false;
+                _cancelButton.Item.Visible = true;
+                _searchButton.Item.Visible = true;
+                _okButton.Item.Visible = false;
+                _updateButton.Item.Visible = false;
+                UIAPIRawForm.DefButton = _searchButton.Item.UniqueID;
+                ChangeFormMode(BoFormMode.fm_FIND_MODE);
+                _cancelButton.Item.Enabled = true;
+                _searchButton.Item.Enabled = true;
+                OnFindMode();
+            }
+            finally {
+                Freeze(false);
+            }
         }
 
 
