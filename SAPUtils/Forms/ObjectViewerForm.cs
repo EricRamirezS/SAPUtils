@@ -45,6 +45,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="UserForm" />
         /// <seealso cref="UserTableObjectModel" />
         protected ObjectViewerForm(string uid = null, T item = null) : base(uid) {
+            if (!Alive) return;
             EnableMenu(SearchRecordMenuUid, true);
             EnableMenu(NewRecordMenuUid, true);
             EnableMenu(NextRecordMenuUid, true);
