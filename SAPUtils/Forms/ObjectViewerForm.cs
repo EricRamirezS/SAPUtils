@@ -307,27 +307,27 @@ namespace SAPUtils.Forms {
                 _helper.Click();
                 if (IsEditable(item)) {
                     _addButtonCombo.Item.Visible = false;
-                    _cancelButton.Item.Visible = true;
                     _searchButton.Item.Visible = false;
-                    _okButton.Item.Visible = true;
                     _updateButton.Item.Visible = false;
                     UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
                     UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
                     ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
                     _cancelButton.Item.Enabled = true;
                     _okButton.Item.Enabled = true;
+                    _okButton.Item.Visible = true;
+                    _cancelButton.Item.Visible = true;
                     OnEditMode();
                 }
                 else {
                     _addButtonCombo.Item.Visible = false;
-                    _cancelButton.Item.Visible = true;
                     _searchButton.Item.Visible = false;
-                    _okButton.Item.Visible = true;
                     _updateButton.Item.Visible = false;
                     UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
                     UIAPIRawForm.Mode = BoFormMode.fm_VIEW_MODE;
                     ChangeFormMode(BoFormMode.fm_VIEW_MODE);
+                    _cancelButton.Item.Visible = true;
                     _cancelButton.Item.Enabled = true;
+                    _okButton.Item.Visible = true;
                     _okButton.Item.Enabled = true;
                     OnViewMode();
                 }
@@ -343,14 +343,14 @@ namespace SAPUtils.Forms {
                 Freeze(true);
                 _item = null;
                 _helper.Click();
-                _addButtonCombo.Item.Visible = true;
-                _cancelButton.Item.Visible = true;
                 _searchButton.Item.Visible = false;
                 _okButton.Item.Visible = false;
                 _updateButton.Item.Visible = false;
                 UIAPIRawForm.DefButton = _addButton.Item.UniqueID;
                 UIAPIRawForm.Mode = BoFormMode.fm_ADD_MODE;
                 ChangeFormMode(BoFormMode.fm_ADD_MODE);
+                _addButtonCombo.Item.Visible = true;
+                _cancelButton.Item.Visible = true;
                 _addButtonCombo.Item.Enabled = true;
                 _cancelButton.Item.Enabled = true;
                 OnNewMode();
@@ -365,12 +365,12 @@ namespace SAPUtils.Forms {
                 _item = null;
                 _helper.Click();
                 _addButtonCombo.Item.Visible = false;
-                _cancelButton.Item.Visible = true;
-                _searchButton.Item.Visible = true;
                 _okButton.Item.Visible = false;
                 _updateButton.Item.Visible = false;
-                UIAPIRawForm.DefButton = _searchButton.Item.UniqueID;
                 ChangeFormMode(BoFormMode.fm_FIND_MODE);
+                UIAPIRawForm.DefButton = _searchButton.Item.UniqueID;
+                _cancelButton.Item.Visible = true;
+                _searchButton.Item.Visible = true;
                 _cancelButton.Item.Enabled = true;
                 _searchButton.Item.Enabled = true;
                 OnFindMode();
