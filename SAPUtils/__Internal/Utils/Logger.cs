@@ -51,6 +51,17 @@ namespace SAPUtils.__Internal.Utils {
             _jsonSerializerSettings = new JsonSerializerSettings {
                 NullValueHandling = NullValueHandling.Include,
                 Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                DefaultValueHandling = DefaultValueHandling.Include,
+                TypeNameHandling = TypeNameHandling.Auto,
+                MissingMemberHandling = MissingMemberHandling.Ignore,
+                Error = (sender, args) =>
+                {
+                    Debug($"JSON error: {args.ErrorContext.Error.Message}");
+                    args.ErrorContext.Handled = true;
+                },
             };
         }
 
