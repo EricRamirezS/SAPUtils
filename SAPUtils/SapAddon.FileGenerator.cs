@@ -1,21 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace SAPUtils {
-    public partial class SapAddon {
+namespace SAPUtils
+{
+    public partial class SapAddon
+    {
         /// <summary>
         /// Generates the necessary setup files for the specified SAP addon based on the provided addon information.
         /// </summary>
         /// <param name="addonInformation">An object containing details about the SAP addon for which the setup files need to be generated.</param>
-        public static void GenerateSetupFiles(AddonInformation addonInformation) {
+        public static void GenerateSetupFiles(AddonInformation addonInformation)
+        {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string csprojPath = Directory.GetFiles(baseDir, "*.csproj", SearchOption.AllDirectories)
-                                    .FirstOrDefault()
-                                ?? SearchCsprojUpwards(baseDir);
+                    .FirstOrDefault()
+                ?? SearchCsprojUpwards(baseDir);
             if (csprojPath == null)
                 throw new FileNotFoundException("No se encontró ningún archivo .csproj en la ruta del ejecutable o carpetas superiores.");
 
@@ -24,9 +28,9 @@ namespace SAPUtils {
 
             XDocument csprojXml = XDocument.Load(csprojPath);
             string assemblyName = csprojXml
-                                      .Descendants("AssemblyName")
-                                      .FirstOrDefault()?.Value
-                                  ?? Path.GetFileNameWithoutExtension(csprojPath);
+                    .Descendants("AssemblyName")
+                    .FirstOrDefault()?.Value
+                ?? Path.GetFileNameWithoutExtension(csprojPath);
 
             string binFileName = $"{assemblyName}.exe";
             string platformFlag = addonInformation.X64 ? "X" : "N";
@@ -57,7 +61,7 @@ set ContactData=""{addonInformation.ContactData}""
 
 call ""C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat""
 
-msbuild %BaseDir%\%csproj% /t:Clean,Build /p:Configuration=Release;Platform=AnyCPU
+msbuild %BaseDir%\%csproj% /t:Clean,Build /p:Configuration=Release;Platform={addonInformation.Platform.ToString()}
 set BUILD_STATUS=%ERRORLEVEL%
 if %BUILD_STATUS%==0 GOTO INNO
 pause
@@ -350,9 +354,11 @@ end;
             Console.WriteLine($"Archivos generados:\n{batPath}\n{issPath}");
         }
 
-        private static string SearchCsprojUpwards(string startDir) {
+        private static string SearchCsprojUpwards(string startDir)
+        {
             DirectoryInfo dir = new DirectoryInfo(startDir);
-            while (dir != null) {
+            while (dir != null)
+            {
                 FileInfo csproj = dir.GetFiles("*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
                 if (csproj != null)
                     return csproj.FullName;
@@ -366,7 +372,8 @@ end;
     /// <summary>
     /// Represents metadata and configuration information required for an SAP add-on setup process.
     /// </summary>
-    public class AddonInformation {
+    public class AddonInformation
+    {
         /// <summary>
         /// Gets or sets the name of the partner associated with the add-on.
         /// </summary>
@@ -393,6 +400,15 @@ end;
         /// It can be utilized to track changes or updates within the addon functionality.
         /// </remarks>
         public string Version { get; set; }
+
+        /// <summary>
+        /// Gets or sets the platform architecture for which the SAP add-on is intended to run.
+        /// </summary>
+        /// <remarks>
+        /// The platform can be specified as AnyCPU, x86, or x64 to ensure compatibility with the target system.
+        /// </remarks>
+        /// <seealso cref="SAPUtils.Platform"/>
+        public Platform Platform { get; set; }
 
         /// <summary>
         /// Represents a property indicating whether the add-on is built for a 64-bit architecture.
@@ -460,5 +476,37 @@ end;
         /// essential for managing configuration and integration.
         /// </summary>
         public string Registry { get; set; }
+    }
+
+    /// <summary>
+    /// Specifies the platform architecture for which the MSBUILD is intended to run.
+    /// </summary>
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    public enum Platform
+    {
+        /// <summary>
+        /// Represents a platform configuration that allows the output of a build to run on any CPU architecture.
+        /// This setting is commonly used to create applications that can run on both x86 (32-bit) and x64 (64-bit) systems.
+        /// </summary>
+        /// <remarks>
+        /// When targeting this platform, the application will dynamically adapt to the architecture of the host machine at runtime.
+        /// </remarks>
+        /// <seealso cref="Platform"/>
+        AnyCPU,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        x86,
+
+        /// <summary>
+        /// Represents a platform configuration targeting the 64-bit architecture (x64).
+        /// This setting is optimized for applications designed to run on systems utilizing x64 instruction sets.
+        /// </summary>
+        /// <remarks>
+        /// Use this platform setting when building applications specifically for 64-bit environments, ensuring compatibility and taking full advantage of the 64-bit architecture's capabilities.
+        /// </remarks>
+        /// <seealso cref="Platform"/>
+        x64
     }
 }
