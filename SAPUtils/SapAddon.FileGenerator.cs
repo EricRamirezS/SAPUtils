@@ -6,16 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 
-namespace SAPUtils
-{
-    public partial class SapAddon
-    {
+namespace SAPUtils {
+    public partial class SapAddon {
         /// <summary>
         /// Generates the necessary setup files for the specified SAP addon based on the provided addon information.
         /// </summary>
         /// <param name="addonInformation">An object containing details about the SAP addon for which the setup files need to be generated.</param>
-        public static void GenerateSetupFiles(AddonInformation addonInformation)
-        {
+        public static void GenerateSetupFiles(AddonInformation addonInformation) {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string csprojPath = Directory.GetFiles(baseDir, "*.csproj", SearchOption.AllDirectories)
                     .FirstOrDefault()
@@ -110,7 +107,7 @@ EXIT /b 1
             File.WriteAllText(batPath, batContent.Trim(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
             string filesSection = string.Join("\n", addonInformation.Files.Select(f => $"Source: {f.Source}; DestDir: {{app}}{f.DestinationDir}"));
-            string dirsSection = string.Join("\n", addonInformation.Dirs.Select(d => $"Name: \"{{app}}\\{d}\""));
+            string dirsSection = string.Join("\n", addonInformation.Dirs.Select(d => d.ToInnoSetupLine()));
 
             string issContent = $@"
 [Files]
@@ -354,11 +351,9 @@ end;
             Console.WriteLine($"Archivos generados:\n{batPath}\n{issPath}");
         }
 
-        private static string SearchCsprojUpwards(string startDir)
-        {
+        private static string SearchCsprojUpwards(string startDir) {
             DirectoryInfo dir = new DirectoryInfo(startDir);
-            while (dir != null)
-            {
+            while (dir != null) {
                 FileInfo csproj = dir.GetFiles("*.csproj", SearchOption.TopDirectoryOnly).FirstOrDefault();
                 if (csproj != null)
                     return csproj.FullName;
@@ -372,8 +367,7 @@ end;
     /// <summary>
     /// Represents metadata and configuration information required for an SAP add-on setup process.
     /// </summary>
-    public class AddonInformation
-    {
+    public class AddonInformation {
         /// <summary>
         /// Gets or sets the name of the partner associated with the add-on.
         /// </summary>
@@ -437,7 +431,7 @@ end;
         /// <summary>
         /// Gets or sets an array of directory paths.
         /// </summary>
-        public string[] Dirs { get; set; } = Array.Empty<string>();
+        public InnoDir[] Dirs { get; set; } = Array.Empty<InnoDir>();
 
         /// <summary>
         /// Gets or sets the URL of the application publisher.
@@ -482,8 +476,7 @@ end;
     /// Specifies the platform architecture for which the MSBUILD is intended to run.
     /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public enum Platform
-    {
+    public enum Platform {
         /// <summary>
         /// Represents a platform configuration that allows the output of a build to run on any CPU architecture.
         /// This setting is commonly used to create applications that can run on both x86 (32-bit) and x64 (64-bit) systems.
@@ -508,5 +501,272 @@ end;
         /// </remarks>
         /// <seealso cref="Platform"/>
         x64
+    }
+
+    /// <summary>
+    /// Represents a directory entry for an Inno Setup script.
+    /// </summary>
+    public class InnoDir {
+
+        /// <summary>
+        /// Represents a directory entry for an Inno Setup script.
+        /// </summary>
+        public InnoDir(string name) {
+            Name = name;
+        }
+
+        /// <summary>
+        /// Gets or sets the directory path or name in the Inno Setup script.
+        /// Example: "{app}\Logs"
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the NTFS permissions for the directory.
+        /// Nullable. If null, the directory inherits default permissions.
+        /// </summary>
+        public DirPermissions? Permissions { get; set; }
+
+        /// <summary>
+        /// Gets or sets special flags for directory creation behavior.
+        /// Nullable. Flags can be combined if needed.
+        /// </summary>
+        public DirFlags? Flags { get; set; }
+
+        /// <summary>
+        /// Gets or sets the directory attributes.
+        /// Nullable. Can include hidden, readonly, system, etc.
+        /// </summary>
+        public DirAttribs? Attribs { get; set; }
+
+        /// <summary>
+        /// Gets or sets the optional component name for conditional creation.
+        /// The directory is created only if the specified component is selected.
+        /// </summary>
+        public string Components { get; set; }
+
+        /// <summary>
+        /// Gets or sets an optional condition for directory creation.
+        /// Can be a function or expression that determines whether the directory should be created.
+        /// </summary>
+        public string Check { get; set; }
+
+        /// <summary>
+        /// Gets or sets an optional comment for the directory.
+        /// Appears in the Inno Setup script but is mainly for documentation purposes.
+        /// </summary>
+        public string Comment { get; set; }
+
+        internal string ToInnoSetupLine() {
+            string line = $"Name: \"{{app}}\\{Name}\"";
+
+            if (Permissions.HasValue)
+                line += $"; Permissions: {GetInnoPermissionName(Permissions.Value)}";
+
+            if (Flags.HasValue)
+                line += $"; Flags: {FlagsToString(Flags.Value)}";
+
+            if (Attribs.HasValue)
+                line += $"; Attribs: {AttribsToString(Attribs.Value)}";
+
+            if (!string.IsNullOrEmpty(Components))
+                line += $"; Components: {Components}";
+
+            if (!string.IsNullOrEmpty(Check))
+                line += $"; Check: {Check}";
+
+            if (!string.IsNullOrEmpty(Comment))
+                line += $"; Comment: {Comment}";
+
+            return line;
+        }
+
+        private static string FlagsToString(DirFlags flags) {
+            if (flags == DirFlags.None) return "none";
+            Array values = Enum.GetValues(typeof(DirFlags));
+            string result = "";
+            foreach (DirFlags f in values) {
+                if (f == DirFlags.None || !flags.HasFlag(f)) continue;
+                if (result.Length > 0) result += " ";
+                result += f.ToString().ToLower();
+            }
+            return result;
+        }
+
+        private static string AttribsToString(DirAttribs attribs) {
+            if (attribs == DirAttribs.None) return "none";
+            Array values = Enum.GetValues(typeof(DirAttribs));
+            string result = "";
+            foreach (DirAttribs a in values) {
+                if (a == DirAttribs.None || !attribs.HasFlag(a)) continue;
+                if (result.Length > 0) result += " ";
+                result += a.ToString().ToLower();
+            }
+            return result;
+        }
+
+        private static string GetInnoPermissionName(DirPermissions perm) {
+            switch (perm) {
+                case DirPermissions.UsersFull:
+                    return "users-full";
+                case DirPermissions.EveryoneFull:
+                    return "everyone-full";
+                case DirPermissions.AdministratorsFull:
+                    return "administrators-full";
+                case DirPermissions.UsersModify:
+                    return "users-modify";
+                case DirPermissions.EveryoneModify:
+                    return "everyone-modify";
+                case DirPermissions.AdministratorsModify:
+                    return "administrators-modify";
+                case DirPermissions.UsersReadExec:
+                    return "users-readexec";
+                case DirPermissions.EveryoneReadExec:
+                    return "everyone-readexec";
+                case DirPermissions.AdministratorsReadExec:
+                    return "administrators-readexec";
+                case DirPermissions.None:
+                default:
+                    return "none";
+            }
+        }
+    }
+
+    /// <summary>
+    /// Represents NTFS permission levels for a directory in an Inno Setup script.
+    /// </summary>
+    public enum DirPermissions {
+        /// <summary>
+        /// No specific permissions are set. The directory inherits default permissions from the parent.
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// Full access for standard users.
+        /// </summary>
+        UsersFull,
+
+        /// <summary>
+        /// Full access for everyone, including guests.
+        /// </summary>
+        EveryoneFull,
+
+        /// <summary>
+        /// Full access only for administrators.
+        /// </summary>
+        AdministratorsFull,
+
+        /// <summary>
+        /// Full access for standard users.
+        /// </summary>
+        UsersModify,
+
+        /// <summary>
+        /// Full access for everyone, including guests.
+        /// </summary>
+        EveryoneModify,
+
+        /// <summary>
+        /// Full access only for administrators.
+        /// </summary>
+        AdministratorsModify,
+
+        /// <summary>
+        /// Full access for standard users.
+        /// </summary>
+        UsersReadExec,
+
+        /// <summary>
+        /// Full access for everyone, including guests.
+        /// </summary>
+        EveryoneReadExec,
+
+        /// <summary>
+        /// Full access only for administrators.
+        /// </summary>
+        AdministratorsReadExec
+    }
+
+    /// <summary>
+    /// Represents flags that modify the behavior of directory creation in Inno Setup.
+    /// Can be combined using bitwise OR since the enum has the <see cref="FlagsAttribute"/>.
+    /// </summary>
+    [Flags]
+    public enum DirFlags {
+        /// <summary>
+        /// No special behavior.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// Instructs Setup to create the directory as usual, but then delete
+        /// it once the installation is completed (or aborted) if it's empty.
+        /// This can be useful when extracting temporary data needed by a program
+        /// executed in the script's [Run] section.<br/><br/>
+        /// This flag will not cause directories that already existed before
+        /// installation to be deleted.
+        /// </summary>
+        DeleteAfterInstall = 1 << 0,
+
+        /// <summary>
+        /// Instructs Setup to enable NTFS compression on the directory. If
+        /// it fails to set the compression state for any reason (for example,
+        /// if compression is not supported by the file system), no error
+        /// message will be displayed.<br/><br/>
+        /// If the directory already exists, the compression state of any files present in the directory will not be changed.
+        /// </summary>
+        SetNtfsCompression = 1 << 1,
+
+        /// <summary>
+        /// Instructs the uninstaller to always attempt to delete the
+        /// directory if it's empty. Normally the uninstaller will only
+        /// try to delete the directory if it didn't already exist prior
+        /// to installation.
+        /// </summary>
+        UninsAlwaysUninstall = 1 << 2,
+
+        /// <summary>
+        /// Instructs the uninstaller to not attempt to delete the directory.
+        /// By default, the uninstaller deletes any directory specified in
+        /// the [Dirs] section if it is empty.
+        /// </summary>
+        UninsNeverUninstall = 1 << 3,
+
+        /// <summary>
+        /// Instructs Setup to disable NTFS compression on the directory.
+        /// If it fails to set the compression state for any reason (for
+        /// example, if compression is not supported by the file system),
+        /// no error message will be displayed.<br/><br/>
+        /// If the directory already exists, the compression state of any
+        /// files present in the directory will not be changed.
+        /// </summary>
+        UnsetNtfsCompression = 1 << 4,
+    }
+
+    /// <summary>
+    /// Represents file system attributes for a directory in Inno Setup.
+    /// Can be combined using bitwise OR since the enum has the <see cref="FlagsAttribute"/>.
+    /// </summary>
+    [Flags]
+    public enum DirAttribs {
+        /// <summary>
+        /// No attributes are set.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// The directory is read-only.
+        /// </summary>
+        ReadOnly = 1 << 0,
+
+        /// <summary>
+        /// The directory is hidden.
+        /// </summary>
+        Hidden = 1 << 1,
+
+        /// <summary>
+        /// The directory has the system attribute.
+        /// </summary>
+        System = 1 << 2
     }
 }
