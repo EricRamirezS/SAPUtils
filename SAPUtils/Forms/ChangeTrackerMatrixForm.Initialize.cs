@@ -12,6 +12,39 @@ using ChooseFromList = SAPbouiCOM.ChooseFromList;
 namespace SAPUtils.Forms {
     public abstract partial class ChangeTrackerMatrixForm<T> {
         private Column _stateColumn;
+
+        /// <summary>
+        /// Specifies whether the matrix has already been generated and attached to the form.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// By default, this property returns <c>false</c>. When set to <c>false</c>, the class will
+        /// dynamically build and configure the matrix at runtime based on the underlying 
+        /// model <typeparamref name="T"/>. This behavior is convenient during development 
+        /// and testing, since it allows modifications in the model structure to be automatically 
+        /// reflected in the generated matrix.  
+        /// </para>
+        /// <para>
+        /// However, this dynamic generation process is expensive in terms of performance 
+        /// because the matrix and its columns must be created, bound, and initialized every time 
+        /// the form is opened.  
+        /// </para>
+        /// <para>
+        /// For production environments it is strongly recommended to set this property to <c>true</c> 
+        /// and to include a pre-generated matrix definition that already contains its columns. 
+        /// Such a definition can be obtained by calling <see cref="GetAsXML()"/> on the form 
+        /// after the matrix has been built once in development.  
+        /// </para>
+        /// <para>
+        /// The key point is that in production the model should be stable and not subject to 
+        /// structural changes. Therefore, it is unnecessary and inefficient to regenerate 
+        /// the matrix dynamically at runtime. Instead, reusing the pre-generated XML provides 
+        /// consistent behavior with significantly reduced startup cost.  
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
+        virtual protected bool MatrixAlreadyGenerated => false;
+
         /// <inheritdoc />
         public override void OnInitializeComponent() {
             _saveButton = GetSaveButton();
@@ -19,9 +52,19 @@ namespace SAPUtils.Forms {
             _exportButton = GetExportToExcelButton();
             _importButton = GetImportFromExcelButton();
 
-            _dataTable = DataSources.DataTables.Add("_DataTable");
+            try {
+                _dataTable = DataSources.DataTables.Item("_DataTable");
+            }
+            catch {
+                _dataTable = DataSources.DataTables.Add("_DataTable");
+            }
 
-            _helper = (EditText)UIAPIRawForm.Items.Add("_helper", BoFormItemTypes.it_EDIT).Specific;
+            try {
+                _helper = (EditText)UIAPIRawForm.Items.Item("_helper").Specific;
+            }
+            catch {
+                _helper = (EditText)UIAPIRawForm.Items.Add("_helper", BoFormItemTypes.it_EDIT).Specific;
+            }
             _helper.Item.Top = -10000;
             _helper.Item.Left = -10000;
             _helper.Item.Enabled = true;

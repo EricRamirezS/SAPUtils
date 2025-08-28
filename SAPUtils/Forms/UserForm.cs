@@ -7,6 +7,7 @@ using SAPbouiCOM.Framework;
 using SAPUtils.Utils;
 using Application = SAPbouiCOM.Application;
 using Company = SAPbobsCOM.Company;
+using ProgressBar = SAPbouiCOM.ProgressBar;
 
 namespace SAPUtils.Forms {
     /// <summary>
@@ -15,6 +16,10 @@ namespace SAPUtils.Forms {
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public abstract partial class UserForm : FormBase {
+
+
+        private static volatile ProgressBar progressBar;
+
         /// <summary>
         /// Base class for SAP Business One user forms that provides common functionality
         /// and integration with the SAP UI API.
@@ -30,6 +35,7 @@ namespace SAPUtils.Forms {
         protected UserForm(string manualUid = null) {
             Logger.Debug("Starting UserForm construction");
             try {
+                ShowWaitCursor();
                 LoadForm(manualUid);
                 if (!Alive) return;
 
@@ -41,6 +47,9 @@ namespace SAPUtils.Forms {
             catch (Exception ex) {
                 Logger.Error("Error during UserForm initialization: {0}", ex);
                 throw;
+            }
+            finally {
+                ShowArrowCursor();
             }
 
         }
@@ -177,6 +186,30 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPbouiCOM.Application"/>
         protected void SetStatusBarMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium, BoStatusBarMessageType type = BoStatusBarMessageType.smt_Error) {
             Application.StatusBar.SetText(text, seconds, type);
+        }
+
+        protected void ShowWaitCursor() {
+            if (progressBar != null) return;
+            try {
+                progressBar = Application.StatusBar.CreateProgressBar("Cargando...", 100, false);
+                progressBar.Value = 99;
+            }
+            catch {
+                // ignored
+            }
+        }
+
+        protected void ShowArrowCursor() {
+            if (progressBar == null) return;
+            try {
+                progressBar.Value = 100;
+                progressBar.Stop();
+            }
+            catch {
+                // ignored
+            }
+            progressBar = null;
+            GC.Collect();
         }
     }
 }

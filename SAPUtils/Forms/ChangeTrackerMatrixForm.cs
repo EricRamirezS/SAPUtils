@@ -1,13 +1,24 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using SAPbobsCOM;
 using SAPbouiCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Enums;
+using SAPUtils.__Internal.Extensions;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.Database;
+using SAPUtils.Extensions;
 using SAPUtils.Models.UserTables;
+using SAPUtils.Utils;
+using ChooseFromList = SAPbouiCOM.ChooseFromList;
+using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedMember.Global
@@ -221,6 +232,8 @@ namespace SAPUtils.Forms {
             string uid = null) : base(uid) {
             if (!Alive) return;
             try {
+                Task<List<T>> dataLoadTask = PreloadDataAsync();
+                ShowWaitCursor();
                 Freeze(true);
                 _useAddContextButton = useAddContextButton;
                 _userDeleteContextButton = userDeleteContextButton;
@@ -228,13 +241,123 @@ namespace SAPUtils.Forms {
 
                 _addRowMenuUid = $"{typeof(T).Name}{UniqueID}AddRow)";
                 _deleteRowMenuUid = $"{typeof(T).Name}{UniqueID}DelRow)";
-                CustomInitializeComponent();
+                // ReSharper disable once VirtualMemberCallInConstructor
+                if (!MatrixAlreadyGenerated) {
+                    CustomInitializeComponent();
+                }
+                else {
+                    ColumnInfo.Add("#", (_dataTable.Columns.Item("#"), _matrix.Columns.Item("#")));
+                    ColumnInfo.Add("Code", (_dataTable.Columns.Item("Code"), _matrix.Columns.Item("Code")));
+                    ColumnInfo.Add("Name", (_dataTable.Columns.Item("Name"), _matrix.Columns.Item("Name")));
+                    ColumnToProperty.Add("Code", typeof(T).GetProperty("Code", BindingFlags.Public | BindingFlags.Instance));
+                    ColumnToProperty.Add("Name", typeof(T).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance));
+                    _stateColumn = _matrix.Columns.Item("_S_T_A_T_E");
+                    List<(PropertyInfo Property, IUserTableField Field)> itemInfo = UserTableMetadataCache.GetUserFields(typeof(T));
+                    int i = 1;
+                    foreach ((PropertyInfo property, IUserTableField field) in itemInfo) {
+                        string fieldName = property.Name;
 
-                EventSubscriber();
+                        if (field is DateTimeFieldAttribute dt) {
+                            string dateColumnUid = $"_C{i}D";
+                            string timeColumnUid = $"_C{i}T";
 
-                LoadData();
+                            DataColumn dateColumn = _dataTable.Columns.Item(dateColumnUid);
+                            DataColumn timeColumn = _dataTable.Columns.Item(timeColumnUid);
 
-                UpdateMatrix();
+                            Column date = _matrix.Columns.Item(dateColumnUid);
+                            Column time = _matrix.Columns.Item(timeColumnUid);
+
+                            ColumnInfo[fieldName + "Date"] = (dateColumn, date);
+                            ColumnInfo[fieldName + "Time"] = (timeColumn, time);
+
+                            ColumnToProperty[date.UniqueID] = property;
+                            ColumnToProperty[time.UniqueID] = property;
+
+                            time.ValidateBefore += FormUtils.ValidateTimeCell;
+                        }
+                        else {
+                            string columnId = $"_C{i}";
+                            DataColumn dataColumn = _dataTable.Columns.Item(columnId);
+                            Column column = _matrix.Columns.Item(columnId);
+
+                            ColumnInfo[fieldName] = (dataColumn, column);
+                            ColumnToProperty[column.UniqueID] = property;
+
+                            string cflId = $"_CFL{columnId}";
+                            ChooseFromList cfl = null;
+                            try {
+                                cfl = UIAPIRawForm.ChooseFromLists.Item(cflId);
+                                MatrixExtensions.CflSubscriber(this, cfl, column);
+                            }
+                            catch {
+                                // puede no existir
+                            }
+                            finally {
+                                ChooseFromListInfo[fieldName] = cfl;
+                            }
+                            if (field is TimeFieldAttribute) {
+                                column.ValidateBefore += FormUtils.ValidateTimeCell;
+                            }
+                            bool isCombo = MatrixExtensions.IsComboField(field);
+
+                            bool isLinked = MatrixExtensions.IsLinkedField(field);
+
+                            if (isCombo ||
+                                isLinked && (field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone && string.IsNullOrEmpty(field.LinkedUdo))) {
+                                if (isCombo) {
+                                    column.ValidValues.AddRange(
+                                        field.ValidValues,
+                                        clear: true,
+                                        addEmpty: !field.Mandatory);
+                                }
+                                else {
+                                    string fieldLinkedTable = field.LinkedTable;
+                                    Type type = UserTableMetadataCache.GetTableType(fieldLinkedTable);
+
+                                    IList<IUserFieldValidValue> vv = null;
+                                    if (type != null) {
+                                        MethodInfo method = typeof(UserTableObjectModel)
+                                            .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
+                                            ?.MakeGenericMethod(type);
+                                        if (method != null) {
+                                            object result = method.Invoke(null, new object[] { null, });
+                                            IEnumerable enumerable = result as IEnumerable;
+                                            List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
+
+                                            if (enumerable != null) {
+                                                foreach (object item in enumerable) {
+                                                    if (!(item is IUserTableObjectModel userTableObjectModel)) continue;
+                                                    if (userTableObjectModel is ISoftDeletable sd) {
+                                                        if (!sd.Active) continue;
+                                                    }
+                                                    data.Add(userTableObjectModel);
+                                                }
+                                            }
+
+                                            if (data.Any()) {
+                                                vv = new List<IUserFieldValidValue>();
+                                                data.ForEach(e => vv.Add(new UserFieldValidValue(
+                                                    e.Code, e.DisplayName
+                                                )));
+                                                if (field.Mandatory == false) {
+                                                    vv.Insert(0, new UserFieldValidValue("", ""));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (vv == null) {
+                                        using (IRepository repository = Repository.Get())
+                                            vv = repository.GetValidValuesFromUserTable(field.LinkedTable);
+                                    }
+
+                                    column.ValidValues.AddRange(vv, clear: true, addEmpty: !field.Mandatory);
+                                    ;
+                                }
+                            }
+                        }
+                        i++;
+                    }
+                }
 
                 EnableMenu("1281", false); // find button
                 EnableMenu("1282", _useAddContextButton); // add button
@@ -262,8 +385,23 @@ namespace SAPUtils.Forms {
                     if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Editable = false;
                     if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Editable = false;
                 }
+
+                EventSubscriber();
+
+                try {
+                    List<T> data = dataLoadTask.Result;
+                    LoadData(data);
+                }
+                catch (AggregateException ex) {
+                    LoadData();
+                    Logger.Error(ex);
+                }
+
+
+                UpdateMatrix();
             }
             finally {
+                ShowArrowCursor();
                 Freeze(false);
             }
         }
@@ -292,6 +430,19 @@ namespace SAPUtils.Forms {
         /// <typeparam name="T">The type of the data items, which must implement <see cref="IUserTableObjectModel"/>.</typeparam>
         protected ICollection<T> Data => _observableData;
 
+        private Task<List<T>> PreloadDataAsync() {
+            Logger.Trace("Preloading data...");
+            return Task.Factory.StartNew(() => {
+                    Logger.Debug("PreloadData Thread Started");
+                    List<T> data = LoadCustomData() ?? UserTableObjectModel.GetAll<T>();
+                    Logger.Debug("PreloadData Thread Data Loaded");
+                    return data;
+                },
+                CancellationToken.None,
+                TaskCreationOptions.None,
+                TaskScheduler.Default);
+        }
+
         /// <summary>
         /// Retrieves the matrix associated with the form. The matrix is used to display
         /// and interact with tabular data within the form context.
@@ -299,6 +450,7 @@ namespace SAPUtils.Forms {
         /// <returns>The matrix object used in the form.</returns>
         /// <seealso cref="SAPbouiCOM.Matrix"/>
         abstract protected Matrix GetMatrix();
+
         /// <summary>
         /// Retrieves the save button from the form.
         /// </summary>

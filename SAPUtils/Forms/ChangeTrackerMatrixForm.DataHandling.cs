@@ -205,10 +205,10 @@ namespace SAPUtils.Forms {
 
 
         }
-        private void LoadData() {
+
+        private void LoadData(List<T> items) {
             _dataReload = true;
             _observableData.Clear();
-            List<T> items = LoadCustomData() ?? UserTableObjectModel.GetAll<T>();
 
             items.ForEach(e => _observableData.Add(e));
             for (int i = 0; i < _data.Count; i++) {
@@ -233,6 +233,11 @@ namespace SAPUtils.Forms {
             _failedUpdate.Clear();
             _failedDelete.Clear();
             _dataReload = false;
+
+        }
+
+        private void LoadData() {
+            LoadData(LoadCustomData() ?? UserTableObjectModel.GetAll<T>());
         }
 
         private void SaveChanges() {
@@ -243,12 +248,7 @@ namespace SAPUtils.Forms {
 
             int success = 0;
             int failed = 0;
-            foreach (Status status in new[] {
-                         Status.Modified,
-                         Status.ModifiedRestored,
-                         Status.Delete,
-                         Status.New,
-                     }) {
+            foreach (Status status in new[] { Status.Modified, Status.ModifiedRestored, Status.Delete, Status.New, }) {
 
                 T[] items = modifiedData
                     .Where(x => x.Status == status)

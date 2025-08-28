@@ -49,7 +49,8 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="SAPbouiCOM.Application"/>
         /// <seealso cref="IUserTableField"/>
-        internal static Column AddColumnFromUserTableField(this Matrix matrix,
+        internal static Column AddColumnFromUserTableField(
+            this Matrix matrix,
             string uid,
             IUserTableField field,
             PropertyInfo property,
@@ -121,7 +122,8 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.Matrix"/>
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="DateTimeFieldAttribute"/>
-        internal static (Column Date, Column Time) AddDateTimeColumnsFromUserTableField(this Matrix matrix,
+        internal static (Column Date, Column Time) AddDateTimeColumnsFromUserTableField(
+            this Matrix matrix,
             ref int index,
             DateTimeFieldAttribute field,
             PropertyInfo property) {
@@ -150,7 +152,12 @@ namespace SAPUtils.__Internal.Extensions {
             return (dateColumn, timeColumn);
         }
 
-        private static void CreateChooseFromList(IUserTableField field, UserForm form, Application application, string cflId, Column column,
+        private static void CreateChooseFromList(
+            IUserTableField field,
+            UserForm form,
+            Application application,
+            string cflId,
+            Column column,
             UserDataSource userDataSource) {
             ChooseFromListCreationParams cflParams =
                 (ChooseFromListCreationParams)application.CreateObject(BoCreatableObjectType.cot_ChooseFromListCreationParams);
@@ -170,6 +177,7 @@ namespace SAPUtils.__Internal.Extensions {
 
             CflSubscriber(form, cfl, column);
         }
+
         /// <summary>
         /// Adds a combo box to a matrix column, populated with valid values from a user-defined table (UDT).
         /// </summary>
@@ -211,9 +219,7 @@ namespace SAPUtils.__Internal.Extensions {
                     .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
                     ?.MakeGenericMethod(type);
                 if (method != null) {
-                    object result = method.Invoke(null, new object[] {
-                        null,
-                    });
+                    object result = method.Invoke(null, new object[] { null, });
                     IEnumerable enumerable = result as IEnumerable;
                     List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
 
@@ -261,6 +267,7 @@ namespace SAPUtils.__Internal.Extensions {
             }
             return column;
         }
+
         /// <summary>
         /// Adds a time column to the specified <see cref="SAPbouiCOM.Matrix"/> with the given unique identifier (UID).
         /// </summary>
@@ -280,6 +287,7 @@ namespace SAPUtils.__Internal.Extensions {
             column.ValidateBefore += FormUtils.ValidateTimeCell;
             return column;
         }
+
         /// <summary>
         /// Adds a ComboBox column to the specified matrix based on the provided user table field.
         /// </summary>
@@ -310,6 +318,7 @@ namespace SAPUtils.__Internal.Extensions {
             }
             return column;
         }
+
         /// <summary>
         /// Adds a checkbox column to the specified SAP B1 Matrix with the given unique identifier (UID).
         /// </summary>
@@ -344,11 +353,12 @@ namespace SAPUtils.__Internal.Extensions {
         /// </returns>
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
         /// <seealso cref="UDFLinkedSystemObjectTypesEnum"/>
-        private static bool IsLinkedField(IUserTableField field) {
+        internal static bool IsLinkedField(IUserTableField field) {
             return field.LinkedSystemObject != UDFLinkedSystemObjectTypesEnum.ulNone ||
-                   !string.IsNullOrWhiteSpace(field.LinkedTable) ||
-                   !string.IsNullOrWhiteSpace(field.LinkedUdo);
+                !string.IsNullOrWhiteSpace(field.LinkedTable) ||
+                !string.IsNullOrWhiteSpace(field.LinkedUdo);
         }
+
         /// <summary>
         /// Determines whether the specified user table field is a combo field in the SAP Business One application.
         /// </summary>
@@ -360,9 +370,10 @@ namespace SAPUtils.__Internal.Extensions {
         /// Returns <c>true</c> if the field is a combo field; otherwise, <c>false</c>.
         /// </returns>
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
-        private static bool IsComboField(IUserTableField field) {
+        internal static bool IsComboField(IUserTableField field) {
             return !IsBooleanField(field) && field.ValidValues != null && field.ValidValues.Count > 0;
         }
+
         /// <summary>
         /// Determines whether a user table field is of type boolean based on its properties and valid values.
         /// </summary>
@@ -377,11 +388,12 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPUtils.Models.UserTables.IUserFieldValidValue"/>
         private static bool IsBooleanField(IUserTableField field) {
             return field.Type == typeof(bool) ||
-                   field.Type == typeof(bool?) ||
-                   field.ValidValues?.Count == 2 &&
-                   field.ValidValues.Any(v => v.Value == "Y") &&
-                   field.ValidValues.Any(v => v.Value == "N");
+                field.Type == typeof(bool?) ||
+                field.ValidValues?.Count == 2 &&
+                field.ValidValues.Any(v => v.Value == "Y") &&
+                field.ValidValues.Any(v => v.Value == "N");
         }
+
         /// <summary>
         /// Adds a new linked button column to the specified matrix with functionality tied to
         /// either a linked system object or a user-defined object (UDO), as defined in the provided user table field.
@@ -453,7 +465,7 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.IChooseFromList"/>
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="SAPUtils.Forms.UserForm"/>
-        private static void CflSubscriber(
+        internal static void CflSubscriber(
             UserForm form,
             IChooseFromList oChooseFromList,
             Column column) {

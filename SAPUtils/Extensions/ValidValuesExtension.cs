@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using SAPbouiCOM;
 using SAPUtils.Database;
 using SAPUtils.Models.UserTables;
+using static SAPUtils.Utils.SapClass;
 
 namespace SAPUtils.Extensions {
     public static class ValidValuesExtension {
@@ -34,7 +35,13 @@ namespace SAPUtils.Extensions {
 
             if (addEmpty) vv.Add("", "");
 
-            foreach (IValidValue line in data) vv.Add(line.Value, line.Description);
+            foreach (IValidValue line in data)
+                try {
+                    vv.Add(line.Value, line.Description);
+                }
+                catch (Exception ex) {
+                    log.Error($"Could add `{line.Value} - {line.Description}` to ValidValues", ex);
+                }
         }
 
         /// <summary>
@@ -54,6 +61,7 @@ namespace SAPUtils.Extensions {
                 vv.Remove(i, BoSearchKey.psk_Index);
             }
         }
+
         /// <summary>
         /// Clears all values from the specified <see cref="SAPbouiCOM.ValidValues"/> collection.
         /// </summary>
