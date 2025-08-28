@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Drawing;
 using System.Threading;
+using System.Windows.Forms;
 using SAPbouiCOM;
 using SAPUtils.__Internal.Events;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Utils;
 using Application = SAPbouiCOM.Framework.Application;
 using Company = SAPbobsCOM.Company;
+using Form = System.Windows.Forms.Form;
 
 // ReSharper disable MemberCanBePrivate.Global
 
@@ -146,9 +149,11 @@ namespace SAPUtils {
         public static SapAddon Instance(string[] args) {
             return _instance ?? (_instance = new SapAddon(args));
         }
+
         private void ApplicationOnThreadException(object sender, ThreadExceptionEventArgs e) {
             Logger.Critical("Unhandled Exception", e.Exception);
         }
+
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e) {
             Logger.Critical("Unhandled Exception", e.ExceptionObject as Exception);
         }
@@ -164,7 +169,50 @@ namespace SAPUtils {
             Logger.Info("Run SAP Addon");
             Application.SetStatusBarMessage(
                 "Finalizando inicializacion add-on", BoMessageTime.bmt_Medium, false);
-            MainApplication.Run();
+            System.Windows.Forms.Application.EnableVisualStyles();
+            System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
+            System.Windows.Forms.Application.Run(new FrmMain(() => MainApplication.Run(), Logger));
+        }
+    }
+
+    class FrmMain : Form {
+        private readonly ILogger _log;
+
+        internal FrmMain(Action action, ILogger logger) {
+            _log = logger;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            System.Windows.Forms.Application.ThreadException += Application_ThreadException;
+            InitializeComponent();
+            action.Invoke();
+        }
+
+        internal void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e) {
+            _log.Critical($"CurrentDomain_UnhandledException {((Exception)e.ExceptionObject).Message} Trace {((Exception)e.ExceptionObject).StackTrace}");
+
+            MessageBox.Show($"CurrentDomain_UnhandledException {((Exception)e.ExceptionObject).Message} Trace {((Exception)e.ExceptionObject).StackTrace}", "Unhandled UI Exception");
+        }
+
+        internal void Application_ThreadException(object sender, ThreadExceptionEventArgs e) {
+            _log.Critical($"Application_ThreadException {e.Exception.Message} Trace {e.Exception.StackTrace}");
+
+            MessageBox.Show($"Application_ThreadException {e.Exception.Message} Trace {e.Exception.StackTrace}", "Unhandled Thread Exception");
+        }
+
+        private void InitializeComponent() {
+            SuspendLayout();
+            AutoScaleDimensions = new SizeF(6F, 13F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(284, 262);
+            Name = "FrmMain";
+            Text = "";
+            Load += Form1_Load;
+            ResumeLayout(false);
+        }
+
+
+        private void Form1_Load(object sender, EventArgs e) {
+            ShowInTaskbar = false;
+            Hide();
         }
     }
 }
