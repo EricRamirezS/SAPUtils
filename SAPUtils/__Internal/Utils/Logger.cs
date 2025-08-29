@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -6,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,24 +18,28 @@ using Company = SAPbobsCOM.Company;
 
 namespace SAPUtils.__Internal.Utils {
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-    internal partial class Logger {
+    internal partial class Logger : IDisposable {
         private const string LogSettingFileName = "LogSettings.json";
         private static ILogger _instace;
 
-        private static readonly object LogLock = new object();
         private readonly Company _company;
         private readonly int _daysToKeep;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
         private readonly string _logDirectory;
         private readonly LogInfo _logInfo;
+
+        private readonly BlockingCollection<(string, Exception ex)> _logQueue = new BlockingCollection<(string, Exception ex)>(boundedCapacity: 10_000);
         private readonly bool _logToConsole;
+        private readonly Task _logWorker;
         private readonly LogLevel _minimumLevel;
         private readonly StringifyStrategy _stringifyStrategy;
-
 
         private Logger(Company company) {
             _company = company;
             LoggerSettings config = LoadSettings();
+
+            _logWorker = Task.Run(ProcessLogQueue);
+
 
             _logDirectory = config.LogDirectoryPath;
             _daysToKeep = config.RetentionDays;
@@ -57,8 +63,7 @@ namespace SAPUtils.__Internal.Utils {
                 DefaultValueHandling = DefaultValueHandling.Include,
                 TypeNameHandling = TypeNameHandling.Auto,
                 MissingMemberHandling = MissingMemberHandling.Ignore,
-                Error = (sender, args) =>
-                {
+                Error = (sender, args) => {
                     Debug($"JSON error: {args.ErrorContext.Error.Message}");
                     args.ErrorContext.Handled = true;
                 },
@@ -66,6 +71,22 @@ namespace SAPUtils.__Internal.Utils {
         }
 
         public static ILogger Instance => _instace ?? (_instace = new Logger(SapAddon.__Company));
+
+        public void Dispose() {
+            _logQueue?.CompleteAdding();
+            _logWorker?.Wait();
+        }
+
+        private void ProcessLogQueue() {
+            foreach ((string log, Exception e) in _logQueue.GetConsumingEnumerable()) {
+                try {
+                    WriteLogToFile(GetLogFilePath(), log, e);
+                }
+                catch (Exception ex) {
+                    Console.WriteLine($"[Logger] Error escribiendo log: {ex.Message}");
+                }
+            }
+        }
 
         internal static LoggerSettings LoadSettings() {
             if (!File.Exists(LogSettingFileName)) {
@@ -184,20 +205,17 @@ namespace SAPUtils.__Internal.Utils {
                 logEntry = $"{logEntry} - {message}";
             }
 
-            string logFilePath = GetLogFilePath();
-            lock (LogLock) {
-                try {
-                    WriteLogToFile(logFilePath, logEntry, ex);
-                    if (!_logToConsole) return;
-                    ConsoleLogger.PrintColoredLogEntry(timestamp, threadId, level, message, callerName, fileName, callerLine);
-                    if (ex != null) {
-                        ConsoleLogger.PrintExceptionToConsole(ex);
-                    }
+            try {
+                _logQueue.Add((logEntry, ex));
+                if (!_logToConsole) return;
+                ConsoleLogger.PrintColoredLogEntry(timestamp, threadId, level, message, callerName, fileName, callerLine);
+                if (ex != null) {
+                    ConsoleLogger.PrintExceptionToConsole(ex);
                 }
-                catch (IOException ioEx) {
-                    // Alternativa: intentar escribir en un archivo fallback o reintentar luego
-                    Console.WriteLine($"[Logger] Error escribiendo log: {ioEx.Message}");
-                }
+            }
+            catch (IOException ioEx) {
+                // Alternativa: intentar escribir en un archivo fallback o reintentar luego
+                Console.WriteLine($"[Logger] Error escribiendo log: {ioEx.Message}");
             }
         }
 
@@ -294,9 +312,9 @@ namespace SAPUtils.__Internal.Utils {
             if (string.IsNullOrEmpty(input))
                 return string.Empty;
 
-            var invalidChars = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).Distinct();
+            IEnumerable<char> invalidChars = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).Distinct();
 
-            var sanitized = new string(input.Select(c => invalidChars.Contains(c) ? replacementChar : c).ToArray());
+            string sanitized = new string(input.Select(c => invalidChars.Contains(c) ? replacementChar : c).ToArray());
             return sanitized;
         }
 
