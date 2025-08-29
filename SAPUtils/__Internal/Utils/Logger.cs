@@ -214,8 +214,8 @@ namespace SAPUtils.__Internal.Utils {
                 }
             }
             catch (IOException ioEx) {
-                // Alternativa: intentar escribir en un archivo fallback o reintentar luego
-                Console.WriteLine($"[Logger] Error escribiendo log: {ioEx.Message}");
+                if (!_logToConsole) return;
+                ConsoleLogger.PrintExceptionToConsole(ioEx);
             }
         }
 
