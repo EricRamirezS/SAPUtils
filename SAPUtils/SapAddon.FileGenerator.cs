@@ -551,12 +551,6 @@ end;
         /// </summary>
         public string Check { get; set; }
 
-        /// <summary>
-        /// Gets or sets an optional comment for the directory.
-        /// Appears in the Inno Setup script but is mainly for documentation purposes.
-        /// </summary>
-        public string Comment { get; set; }
-
         internal string ToInnoSetupLine() {
             string line = $"Name: \"{{app}}\\{Name}\"";
 
@@ -574,9 +568,6 @@ end;
 
             if (!string.IsNullOrEmpty(Check))
                 line += $"; Check: {Check}";
-
-            if (!string.IsNullOrEmpty(Comment))
-                line += $"; Comment: {Comment}";
 
             return line;
         }
