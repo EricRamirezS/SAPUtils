@@ -20,15 +20,15 @@ namespace SAPUtils.__Internal.Utils {
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
     internal partial class Logger : IDisposable {
         private const string LogSettingFileName = "LogSettings.json";
-        private static ILogger _instace;
+        private static ILogger _instance;
+
+        private static readonly BlockingCollection<Action> Queue = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
 
         private readonly Company _company;
         private readonly int _daysToKeep;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
         private readonly string _logDirectory;
         private readonly LogInfo _logInfo;
-
-        private readonly BlockingCollection<(string, Exception ex)> _logQueue = new BlockingCollection<(string, Exception ex)>(boundedCapacity: 10_000);
         private readonly bool _logToConsole;
         private readonly Task _logWorker;
         private readonly LogLevel _minimumLevel;
@@ -44,7 +44,7 @@ namespace SAPUtils.__Internal.Utils {
             _logDirectory = config.LogDirectoryPath;
             _daysToKeep = config.RetentionDays;
             _minimumLevel = Enum.TryParse(config.LogLevel, true, out LogLevel level) ? level : LogLevel.Info;
-            _stringifyStrategy = Enum.TryParse(config.StringifyStrategy, true, out StringifyStrategy stratety) ? stratety : StringifyStrategy.ToString;
+            _stringifyStrategy = Enum.TryParse(config.StringifyStrategy, true, out StringifyStrategy strategy) ? strategy : StringifyStrategy.ToString;
             _logToConsole = config.LogToConsole;
             _logInfo = config.LogInfo;
 
@@ -70,17 +70,17 @@ namespace SAPUtils.__Internal.Utils {
             };
         }
 
-        public static ILogger Instance => _instace ?? (_instace = new Logger(SapAddon.__Company));
+        public static ILogger Instance => _instance ?? (_instance = new Logger(SapAddon.__Company));
 
         public void Dispose() {
-            _logQueue?.CompleteAdding();
+            Queue?.CompleteAdding();
             _logWorker?.Wait();
         }
 
         private void ProcessLogQueue() {
-            foreach ((string log, Exception e) in _logQueue.GetConsumingEnumerable()) {
+            foreach (Action action in Queue.GetConsumingEnumerable()) {
                 try {
-                    WriteLogToFile(GetLogFilePath(), log, e);
+                    action();
                 }
                 catch (Exception ex) {
                     Console.WriteLine($"[Logger] Error escribiendo log: {ex.Message}");
@@ -100,6 +100,11 @@ namespace SAPUtils.__Internal.Utils {
             string json = File.ReadAllText(LogSettingFileName);
             JObject configRoot = JObject.Parse(json);
             return configRoot["Logger"]?.ToObject<LoggerSettings>();
+        }
+
+        private void Enqueue(Action action) {
+            if (_minimumLevel == LogLevel.None) return;
+            Queue.Add(action);
         }
 
         private string GetLogFilePath() {
@@ -178,45 +183,46 @@ namespace SAPUtils.__Internal.Utils {
             int callerLine = 0) {
             if (level < _minimumLevel)
                 return;
+            Enqueue(() => {
+                int threadId = Thread.CurrentThread.ManagedThreadId;
+                string timestamp = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+                string fileName = Path.GetFileName(callerFile);
 
-            int threadId = Thread.CurrentThread.ManagedThreadId;
-            string timestamp = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-            string fileName = Path.GetFileName(callerFile);
-
-            List<string> logEntryInfo = new List<string>();
-            if (_logInfo.IncludeTimeStamp) {
-                logEntryInfo.Add($"{timestamp}");
-            }
-            if (_logInfo.IncludeThreadId) {
-                logEntryInfo.Add($"[Thread {threadId}]");
-            }
-            if (_logInfo.IncludeLogLevel) {
-                logEntryInfo.Add($"[{level.ToString().ToUpperInvariant()}]");
-            }
-            if (_logInfo.IncludeCallerFile) {
-                logEntryInfo.Add($"{fileName}:{callerLine}");
-            }
-            if (_logInfo.IncludeCallerMethod) {
-                logEntryInfo.Add($"({callerName})");
-            }
-            string logEntry = message;
-            if (logEntryInfo.Any()) {
-                logEntry = string.Join(" ", logEntryInfo);
-                logEntry = $"{logEntry} - {message}";
-            }
-
-            try {
-                _logQueue.Add((logEntry, ex));
-                if (!_logToConsole) return;
-                ConsoleLogger.PrintColoredLogEntry(timestamp, threadId, level, message, callerName, fileName, callerLine);
-                if (ex != null) {
-                    ConsoleLogger.PrintExceptionToConsole(ex);
+                List<string> logEntryInfo = new List<string>();
+                if (_logInfo.IncludeTimeStamp) {
+                    logEntryInfo.Add($"{timestamp}");
                 }
-            }
-            catch (IOException ioEx) {
-                if (!_logToConsole) return;
-                ConsoleLogger.PrintExceptionToConsole(ioEx);
-            }
+                if (_logInfo.IncludeThreadId) {
+                    logEntryInfo.Add($"[Thread {threadId}]");
+                }
+                if (_logInfo.IncludeLogLevel) {
+                    logEntryInfo.Add($"[{level.ToString().ToUpperInvariant()}]");
+                }
+                if (_logInfo.IncludeCallerFile) {
+                    logEntryInfo.Add($"{fileName}:{callerLine}");
+                }
+                if (_logInfo.IncludeCallerMethod) {
+                    logEntryInfo.Add($"({callerName})");
+                }
+                string logEntry = message;
+                if (logEntryInfo.Any()) {
+                    logEntry = string.Join(" ", logEntryInfo);
+                    logEntry = $"{logEntry} - {message}";
+                }
+
+                try {
+                    WriteLogToFile(GetLogFilePath(), logEntry, ex);
+                    if (!_logToConsole) return;
+                    ConsoleLogger.PrintColoredLogEntry(timestamp, threadId, level, message, callerName, fileName, callerLine);
+                    if (ex != null) {
+                        ConsoleLogger.PrintExceptionToConsole(ex);
+                    }
+                }
+                catch (IOException ioEx) {
+                    if (!_logToConsole) return;
+                    ConsoleLogger.PrintExceptionToConsole(ioEx);
+                }
+            });
         }
 
         private static string ExceptionToString(Exception exception) {
@@ -308,7 +314,7 @@ namespace SAPUtils.__Internal.Utils {
             return (callerName, callerFile, callerLine);
         }
 
-        public static string SanitizeFileName(string input, char replacementChar = '_') {
+        private static string SanitizeFileName(string input, char replacementChar = '_') {
             if (string.IsNullOrEmpty(input))
                 return string.Empty;
 
