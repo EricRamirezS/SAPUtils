@@ -298,6 +298,12 @@ namespace SAPUtils.Forms {
                             if (field is TimeFieldAttribute) {
                                 column.ValidateBefore += FormUtils.ValidateTimeCell;
                             }
+                            // Skip valid value setting/update if column is not editable
+                            if (!column.Editable) {
+                                i++;
+                                continue;
+                            }
+
                             bool isCombo = MatrixExtensions.IsComboField(field);
 
                             bool isLinked = MatrixExtensions.IsLinkedField(field);
@@ -351,7 +357,6 @@ namespace SAPUtils.Forms {
                                     }
 
                                     column.ValidValues.AddRange(vv, clear: true, addEmpty: !field.Mandatory);
-                                    ;
                                 }
                             }
                         }
