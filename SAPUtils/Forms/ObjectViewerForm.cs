@@ -243,8 +243,7 @@ namespace SAPUtils.Forms {
             btnCancelItem.Width = 100;
             ((Button)btnCancelItem.Specific).Caption = "Cancelar";
 
-            ((Button)btnSelectItem.Specific).ClickAfter += (s, e) =>
-            {
+            ((Button)btnSelectItem.Specific).ClickAfter += (s, e) => {
                 try {
                     int selectedRow = matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
                     if (selectedRow > 0) {
@@ -270,7 +269,9 @@ namespace SAPUtils.Forms {
         private void UpdateButtonClickAfter(object sboObject, SBOItemEventArg pVal) {
             bool validationSuccess = ValidateForm();
             if (!validationSuccess) return;
+            ShowWaitCursor();
             bool success = SaveUpdate(_item);
+            ShowArrowCursor();
             if (!success) return;
             EditMode(_item);
         }
@@ -281,7 +282,9 @@ namespace SAPUtils.Forms {
             int option = ShowMessageBox("Este documento no puede modificarse tras la creación. ¿Continuar?", 1, "Sí", "No");
             if (option != 1) return;
             _item = new T();
+            ShowWaitCursor();
             bool success = SaveNew(_item);
+            ShowArrowCursor();
             if (!success) return;
 
             string value = _addButtonCombo.Selected.Value;
@@ -359,6 +362,7 @@ namespace SAPUtils.Forms {
                 Freeze(false);
             }
         }
+
         private void SearchMode() {
             try {
                 Freeze(true);
@@ -409,6 +413,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPUtils.Forms.UserForm" />
         /// <seealso cref="UserTableObjectModel" />
         abstract protected bool ValidateForm();
+
         /// <summary>
         /// Saves a new instance of the specified item, performing any necessary logic prior to persistence.
         /// </summary>
@@ -418,6 +423,7 @@ namespace SAPUtils.Forms {
         /// </returns>
         /// <seealso cref="UserTableObjectModel"/>
         abstract protected bool SaveNew(T item);
+
         /// <summary>
         /// Updates an existing item in the system.
         /// </summary>
@@ -427,12 +433,14 @@ namespace SAPUtils.Forms {
         /// </returns>
         /// <seealso cref="UserTableObjectModel"/>
         abstract protected bool SaveUpdate(T item);
+
         /// <summary>
         /// Invoked when the form enters a new mode state (Add Mode).
         /// Typically used to configure necessary fields, visibility states, or initialize information
         /// specific to creating a new record in the form.
         /// </summary>
         abstract protected void OnNewMode();
+
         /// <summary>
         /// This method is invoked during the edit mode transition for the form.
         /// It allows customization of the behavior or appearance of the form when it enters edit mode.
@@ -448,6 +456,7 @@ namespace SAPUtils.Forms {
         /// This method must be implemented by derived classes to handle any additional functionality required.
         /// </remarks>
         abstract protected void OnViewMode();
+
         /// <summary>
         /// Invoked during the find mode activation in the form.
         /// Allows customizing the behavior for enabling/disabling UI components,
@@ -458,6 +467,7 @@ namespace SAPUtils.Forms {
         /// implementation for handling the find mode activation.
         /// </remarks>
         abstract protected void OnFindMode();
+
         /// <summary>
         /// Loads the information of the specified item into the form. This method is used to populate
         /// the form fields based on the provided item's data.
@@ -468,12 +478,14 @@ namespace SAPUtils.Forms {
         /// </param>
         /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel" />
         abstract protected void LoadFoundItem(T item);
+
         /// <summary>
         /// Searches for items based on the current form's field values.
         /// </summary>
         /// <returns>A list of items of type <c>T</c> that match the search criteria.</returns>
         /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel" />
         abstract protected List<T> SearchItems();
+
         /// <summary>
         /// Retrieves the ButtonCombo control used for the "Add" actions in the form.
         /// </summary>
@@ -482,18 +494,21 @@ namespace SAPUtils.Forms {
         /// </returns>
         /// <seealso cref="ButtonCombo"/>
         abstract protected ButtonCombo GetAddButtonCombo();
+
         /// <summary>
         /// Retrieves the button used for the "Add" operation on the form.
         /// </summary>
         /// <returns>A <see cref="Button"/> object representing the "Add" button on the form.</returns>
         /// <seealso cref="Button" />
         abstract protected Button GetAddButton();
+
         /// <summary>
         /// Retrieves the cancel button associated with the form.
         /// </summary>
         /// <returns>A <see cref="Button"/> object representing the cancel button.</returns>
         /// <seealso cref="Button" />
         abstract protected Button GetCancelButton();
+
         /// <summary>
         /// Retrieves the search button for the form.
         /// </summary>
@@ -502,12 +517,14 @@ namespace SAPUtils.Forms {
         /// </returns>
         /// <seealso cref="Button" />
         abstract protected Button GetSearchButton();
+
         /// <summary>
         /// Retrieves the "OK" button instance within the form.
         /// </summary>
         /// <returns>A <see cref="SAPbouiCOM.Button"/> object representing the "OK" button.</returns>
         /// <seealso cref="Button" />
         abstract protected Button GetOkButton();
+
         /// <summary>
         /// Retrieves the update button component of the form.
         /// </summary>
