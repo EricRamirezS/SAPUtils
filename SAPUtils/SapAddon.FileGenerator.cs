@@ -15,19 +15,20 @@ namespace SAPUtils {
         public static void GenerateSetupFiles(AddonInformation addonInformation) {
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string csprojPath = Directory.GetFiles(baseDir, "*.csproj", SearchOption.AllDirectories)
-                    .FirstOrDefault()
-                ?? SearchCsprojUpwards(baseDir);
+                                    .FirstOrDefault()
+                                ?? SearchCsprojUpwards(baseDir);
             if (csprojPath == null)
-                throw new FileNotFoundException("No se encontró ningún archivo .csproj en la ruta del ejecutable o carpetas superiores.");
+                throw new FileNotFoundException(
+                    "No se encontró ningún archivo .csproj en la ruta del ejecutable o carpetas superiores.");
 
             string projectDir = Path.GetDirectoryName(csprojPath);
             string csprojFileName = Path.GetFileName(csprojPath);
 
             XDocument csprojXml = XDocument.Load(csprojPath);
             string assemblyName = csprojXml
-                    .Descendants("AssemblyName")
-                    .FirstOrDefault()?.Value
-                ?? Path.GetFileNameWithoutExtension(csprojPath);
+                                      .Descendants("AssemblyName")
+                                      .FirstOrDefault()?.Value
+                                  ?? Path.GetFileNameWithoutExtension(csprojPath);
 
             string binFileName = $"{assemblyName}.exe";
             string platformFlag = addonInformation.X64 ? "X" : "N";
@@ -106,7 +107,8 @@ EXIT /b 1
 
             File.WriteAllText(batPath, batContent.Trim(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
-            string filesSection = string.Join("\n", addonInformation.Files.Select(f => $"Source: {f.Source}; DestDir: {{app}}{f.DestinationDir}"));
+            string filesSection = string.Join("\n",
+                addonInformation.Files.Select(f => $"Source: {f.Source}; DestDir: {{app}}{f.DestinationDir}"));
             string dirsSection = string.Join("\n", addonInformation.Dirs.Select(d => d.ToInnoSetupLine()));
 
             string issContent = $@"
@@ -136,6 +138,7 @@ AppendDefaultDirName=true
 PrivilegesRequired=admin
 WindowVisible=false
 AppContact={addonInformation.ContactData}
+AppCopyright={addonInformation.Copyright}
 
 [Messages]
 BeveledLabel={addonInformation.BeveledLabel}
@@ -360,6 +363,7 @@ end;
 
                 dir = dir.Parent;
             }
+
             return null;
         }
     }
@@ -470,6 +474,8 @@ end;
         /// essential for managing configuration and integration.
         /// </summary>
         public string Registry { get; set; }
+
+        public string Copyright { get; set; }
     }
 
     /// <summary>
@@ -507,7 +513,6 @@ end;
     /// Represents a directory entry for an Inno Setup script.
     /// </summary>
     public class InnoDir {
-
         /// <summary>
         /// Represents a directory entry for an Inno Setup script.
         /// </summary>
@@ -581,6 +586,7 @@ end;
                 if (result.Length > 0) result += " ";
                 result += f.ToString().ToLower();
             }
+
             return result;
         }
 
@@ -593,6 +599,7 @@ end;
                 if (result.Length > 0) result += " ";
                 result += a.ToString().ToLower();
             }
+
             return result;
         }
 
