@@ -39,8 +39,6 @@ namespace SAPUtils.Forms {
     /// <seealso cref="Status"/>
     /// <seealso cref="UserForm"/>
     public abstract partial class ChangeTrackerMatrixForm<T> : UserForm where T : IUserTableObjectModel, new() {
-
-
         private readonly string _addRowMenuUid;
 
         /// <summary>
@@ -246,14 +244,25 @@ namespace SAPUtils.Forms {
                     CustomInitializeComponent();
                 }
                 else {
-                    ColumnInfo.Add("#", (_dataTable.Columns.Item("#"), _matrix.Columns.Item("#")));
-                    ColumnInfo.Add("Code", (_dataTable.Columns.Item("Code"), _matrix.Columns.Item("Code")));
-                    ColumnInfo.Add("Name", (_dataTable.Columns.Item("Name"), _matrix.Columns.Item("Name")));
-                    ColumnToProperty.Add("Code", typeof(T).GetProperty("Code", BindingFlags.Public | BindingFlags.Instance));
-                    ColumnToProperty.Add("Name", typeof(T).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance));
+                    Dictionary<string, DataColumn> columns = _dataTable.Columns.Cast<DataColumn>()
+                        .ToDictionary(c => c.Name);
+                    Dictionary<string, Column> matrixCols = _matrix.Columns.Cast<Column>()
+                        .ToDictionary(c => c.UniqueID);
+
+                    ColumnInfo.Add("#", (columns["#"], matrixCols["#"]));
+                    ColumnInfo.Add("Code",
+                        (columns[nameof(IUserTableObjectModel.Code)], matrixCols[nameof(IUserTableObjectModel.Code)]));
+                    ColumnInfo.Add("Name",
+                        (columns[nameof(IUserTableObjectModel.Name)], matrixCols[nameof(IUserTableObjectModel.Name)]));
+                    ColumnToProperty.Add("Code",
+                        UserTableMetadataCache.GetUserFieldPropertyInfo(typeof(T), nameof(IUserTableObjectModel.Code)));
+                    ColumnToProperty.Add("Name",
+                        UserTableMetadataCache.GetUserFieldPropertyInfo(typeof(T), nameof(IUserTableObjectModel.Name)));
                     _stateColumn = _matrix.Columns.Item("_S_T_A_T_E");
-                    List<(PropertyInfo Property, IUserTableField Field)> itemInfo = UserTableMetadataCache.GetUserFields(typeof(T));
+                    List<(PropertyInfo Property, IUserTableField Field)> itemInfo =
+                        UserTableMetadataCache.GetUserFields(typeof(T));
                     int i = 1;
+
                     foreach ((PropertyInfo property, IUserTableField field) in itemInfo) {
                         string fieldName = property.Name;
 
@@ -261,11 +270,11 @@ namespace SAPUtils.Forms {
                             string dateColumnUid = $"_C{i}D";
                             string timeColumnUid = $"_C{i}T";
 
-                            DataColumn dateColumn = _dataTable.Columns.Item(dateColumnUid);
-                            DataColumn timeColumn = _dataTable.Columns.Item(timeColumnUid);
+                            DataColumn dateColumn = columns[dateColumnUid];
+                            DataColumn timeColumn = columns[timeColumnUid];
 
-                            Column date = _matrix.Columns.Item(dateColumnUid);
-                            Column time = _matrix.Columns.Item(timeColumnUid);
+                            Column date = matrixCols[dateColumnUid];
+                            Column time = matrixCols[timeColumnUid];
 
                             ColumnInfo[fieldName + "Date"] = (dateColumn, date);
                             ColumnInfo[fieldName + "Time"] = (timeColumn, time);
@@ -277,27 +286,28 @@ namespace SAPUtils.Forms {
                         }
                         else {
                             string columnId = $"_C{i}";
-                            DataColumn dataColumn = _dataTable.Columns.Item(columnId);
-                            Column column = _matrix.Columns.Item(columnId);
+                            DataColumn dataColumn = columns[columnId];
+                            Column column = matrixCols[columnId];
 
                             ColumnInfo[fieldName] = (dataColumn, column);
                             ColumnToProperty[column.UniqueID] = property;
 
                             string cflId = $"_CFL{columnId}";
-                            ChooseFromList cfl = null;
-                            try {
-                                cfl = UIAPIRawForm.ChooseFromLists.Item(cflId);
+                            ChooseFromList cfl;
+                            cfl = UIAPIRawForm.ChooseFromLists
+                                .Cast<ChooseFromList>()
+                                .FirstOrDefault(item => item.UniqueID == cflId);
+
+                            if (cfl != null) {
                                 MatrixExtensions.CflSubscriber(this, cfl, column);
                             }
-                            catch {
-                                // puede no existir
-                            }
-                            finally {
-                                ChooseFromListInfo[fieldName] = cfl;
-                            }
+
+                            ChooseFromListInfo[fieldName] = cfl;
+
                             if (field is TimeFieldAttribute) {
                                 column.ValidateBefore += FormUtils.ValidateTimeCell;
                             }
+
                             // Skip valid value setting/update if column is not editable
                             if (!column.Editable) {
                                 i++;
@@ -308,58 +318,55 @@ namespace SAPUtils.Forms {
 
                             bool isLinked = MatrixExtensions.IsLinkedField(field);
 
+
                             if (isCombo ||
-                                isLinked && (field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone && string.IsNullOrEmpty(field.LinkedUdo))) {
-                                if (isCombo) {
-                                    column.ValidValues.AddRange(
-                                        field.ValidValues,
-                                        clear: true,
-                                        addEmpty: !field.Mandatory);
-                                }
-                                else {
-                                    string fieldLinkedTable = field.LinkedTable;
-                                    Type type = UserTableMetadataCache.GetTableType(fieldLinkedTable);
+                                isLinked && (field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone &&
+                                             string.IsNullOrEmpty(field.LinkedUdo))) {
+                                Task.Run(() => {
+                                    if (isCombo) {
+                                        column.ValidValues.AddRange(
+                                            field.ValidValues,
+                                            clear: true,
+                                            addEmpty: !field.Mandatory);
+                                    }
+                                    else {
+                                        string fieldLinkedTable = field.LinkedTable;
+                                        Type type = UserTableMetadataCache.GetTableType(fieldLinkedTable);
 
-                                    IList<IUserFieldValidValue> vv = null;
-                                    if (type != null) {
-                                        MethodInfo method = typeof(UserTableObjectModel)
-                                            .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
-                                            ?.MakeGenericMethod(type);
-                                        if (method != null) {
-                                            object result = method.Invoke(null, new object[] { null, });
-                                            IEnumerable enumerable = result as IEnumerable;
-                                            List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
+                                        IList<IUserFieldValidValue> vv = null;
+                                        if (type != null) {
+                                            MethodInfo method = UserTableMetadataCache.GetAllMethodInfo(type);
+                                            if (method != null) {
+                                                object result = method.Invoke(null, new object[] { null });
+                                                IEnumerable enumerable = result as IEnumerable;
+                                                List<IUserTableObjectModel> data = enumerable
+                                                    .OfType<IUserTableObjectModel>()
+                                                    .Where(u => !(u is ISoftDeletable sd) || sd.Active)
+                                                    .ToList();
 
-                                            if (enumerable != null) {
-                                                foreach (object item in enumerable) {
-                                                    if (!(item is IUserTableObjectModel userTableObjectModel)) continue;
-                                                    if (userTableObjectModel is ISoftDeletable sd) {
-                                                        if (!sd.Active) continue;
+                                                if (data.Count > 0) {
+                                                    vv = new List<IUserFieldValidValue>();
+                                                    data.ForEach(e => vv.Add(new UserFieldValidValue(
+                                                        e.Code, e.DisplayName
+                                                    )));
+                                                    if (field.Mandatory == false) {
+                                                        vv.Insert(0, new UserFieldValidValue("", ""));
                                                     }
-                                                    data.Add(userTableObjectModel);
-                                                }
-                                            }
-
-                                            if (data.Any()) {
-                                                vv = new List<IUserFieldValidValue>();
-                                                data.ForEach(e => vv.Add(new UserFieldValidValue(
-                                                    e.Code, e.DisplayName
-                                                )));
-                                                if (field.Mandatory == false) {
-                                                    vv.Insert(0, new UserFieldValidValue("", ""));
                                                 }
                                             }
                                         }
-                                    }
-                                    if (vv == null) {
-                                        using (IRepository repository = Repository.Get())
-                                            vv = repository.GetValidValuesFromUserTable(field.LinkedTable);
-                                    }
 
-                                    column.ValidValues.AddRange(vv, clear: true, addEmpty: !field.Mandatory);
-                                }
+                                        if (vv == null) {
+                                            using (IRepository repository = Repository.Get())
+                                                vv = repository.GetValidValuesFromUserTable(field.LinkedTable);
+                                        }
+
+                                        column.ValidValues.AddRange(vv, clear: true, addEmpty: !field.Mandatory);
+                                    }
+                                });
                             }
                         }
+
                         i++;
                     }
                 }
@@ -369,27 +376,7 @@ namespace SAPUtils.Forms {
                 EnableMenu("1304", true); //Enable Refresh
 
                 (DataColumn DataTableColumn, Column MatrixColumn) value;
-                if (typeof(ISoftDeletable).IsAssignableFrom(typeof(T))) {
-                    if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue(nameof(ISoftDeletable.Active), out value)) value.MatrixColumn.Editable = false;
-                }
-                if (typeof(IAuditableDate).IsAssignableFrom(typeof(T))) {
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Date", out value)) value.MatrixColumn.Editable = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.CreatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
-                    if (ColumnInfo.TryGetValue($"{nameof(IAuditableDate.UpdatedAt)}Time", out value)) value.MatrixColumn.Editable = false;
-                }
-                // ReSharper disable once InvertIf, Kept for Readability
-                if (typeof(IAuditableUser).IsAssignableFrom(typeof(T))) {
-                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Visible = false;
-                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.CreatedBy), out value)) value.MatrixColumn.Editable = false;
-                    if (ColumnInfo.TryGetValue(nameof(IAuditableUser.UpdatedBy), out value)) value.MatrixColumn.Editable = false;
-                }
+
 
                 EventSubscriber();
 
@@ -507,5 +494,4 @@ namespace SAPUtils.Forms {
         /// <seealso cref="Status"/>
         public bool UnsavedChanges() => _data.Any(x => x.Status != Status.Normal);
     }
-
 }

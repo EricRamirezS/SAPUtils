@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using SAPbouiCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
@@ -17,6 +19,16 @@ namespace SAPUtils.Forms {
     [SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")]
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public abstract partial class ChangeTrackerMatrixForm<T> {
+        private static readonly ConcurrentDictionary<PropertyInfo, Func<T, object>> _getterCache =
+            new ConcurrentDictionary<PropertyInfo, Func<T, object>>();
+
+        private static readonly
+            ConcurrentDictionary<Type, List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter,
+                IUserTableField Field)>> _fieldCache =
+                new ConcurrentDictionary<Type, List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter,
+                    IUserTableField Field)>>();
+
+        private Dictionary<string, (DataColumn DataColumn, Column MatrixColumn)> _columnsCache;
 
 
         /// <summary>
@@ -33,26 +45,33 @@ namespace SAPUtils.Forms {
         }
 
         private void AddRowToMatrix(int index, T item, Status status) {
-            if (index < 0) {
-                index = _dataTable.Rows.Count;
-            }
+            if (index < 0) index = _dataTable.Rows.Count;
+
             _dataTable.Rows.Add();
             _dataTable.SetValue("#", index, index + 1);
             _dataTable.SetValue("Code", index, item.Code ?? "");
             _dataTable.SetValue("Name", index, item.Name ?? "");
-            foreach ((PropertyInfo property, IUserTableField field) in UserTableMetadataCache.GetUserFields(typeof(T))) {
+
+
+            if (_columnsCache == null) PrepareColumnsCache();
+            if (_columnsCache == null) return;
+            List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter, IUserTableField Field)> fields =
+                GetCachedFields();
+
+            foreach ((string fieldKey, PropertyInfo _, Func<T, object> getter, IUserTableField field) in fields) {
                 if (field is DateTimeFieldAttribute dtf) {
-                    if (!(property.GetValue(item) is DateTime value)) continue;
-                    (DataColumn _, Column dateColumn) = ColumnInfo[$"{field.Name ?? property.Name}Date"];
-                    (DataColumn _, Column timeColumn) = ColumnInfo[$"{field.Name ?? property.Name}Time"];
+                    if (!(getter(item) is DateTime value)) continue;
+                    (DataColumn _, Column dateColumn) = _columnsCache[$"{fieldKey}Date"];
+                    (DataColumn _, Column timeColumn) = _columnsCache[$"{fieldKey}Time"];
                     _dataTable.SetValue(dateColumn.UniqueID, index, dtf.DateToColumnData(value));
                     _dataTable.SetValue(timeColumn.UniqueID, index, dtf.TimeToColumnData(value));
                 }
                 else {
-                    (DataColumn _, Column matrixColumn) = ColumnInfo[field.Name ?? property.Name];
-                    _dataTable.SetValue(matrixColumn.UniqueID, index, field.ToColumnData(property.GetValue(item)));
+                    (DataColumn _, Column matrixColumn) = _columnsCache[fieldKey];
+                    _dataTable.SetValue(matrixColumn.UniqueID, index, field.ToColumnData(getter(item)));
                 }
             }
+
             _dataTable.SetValue("_S_T_A_T_E", index, status.GetReadableName());
         }
 
@@ -90,6 +109,7 @@ namespace SAPUtils.Forms {
                     bool editableCol = _matrix.Columns.Item(j).Editable;
                     _matrix.CommonSetting.SetCellEditable(index + 1, 1, editableCol);
                 }
+
                 if (_tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) {
                     if (status == Status.New || status == Status.Discard) {
                         _matrix.CommonSetting.SetCellEditable(index + 1, 1, true);
@@ -146,41 +166,47 @@ namespace SAPUtils.Forms {
         /// <seealso cref="SAPbouiCOM.Matrix"/>
         /// <seealso cref="SAPbouiCOM.CommonSetting"/>
         protected void UpdateMatrixColors(int rowIndex, bool freeze = true) {
+            if (rowIndex < 0 || rowIndex >= _data.Count) return;
+
             try {
-                if (rowIndex < 0 || rowIndex >= _data.Count) return;
                 if (freeze) Freeze(true);
 
                 bool manualCode = _tableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual;
                 int matrixRow = rowIndex + 1;
-                int columnCount = _matrix.Columns.Count;
+                int lastColumn = _matrix.Columns.Count - 1;
 
                 (T item, Status status) = _data[rowIndex];
 
                 if (!IsEditable(item)) {
                     _matrix.CommonSetting.SetRowBackColor(matrixRow, SapColors.DisabledCellSapGray);
+                    return;
+                }
+
+                (int rowColor, int rowDisabledColor) = GetRowColors(status, item);
+
+                // Skip "#" (0) and "_S_T_A_T_E" (last)
+                var editableFlags = new bool[lastColumn + 1];
+                bool allEditable = true;
+                for (int j = 1; j < lastColumn; j++) {
+                    editableFlags[j] = _matrix.CommonSetting.GetCellEditable(matrixRow, j);
+                    if (!editableFlags[j]) allEditable = false;
+                }
+
+                if (allEditable) {
+                    _matrix.CommonSetting.SetRowBackColor(matrixRow, rowColor);
                 }
                 else {
-                    (int rowColor, int rowDisabledColor) = GetRowColors(status, item);
+                    _matrix.CommonSetting.SetRowBackColor(matrixRow, rowDisabledColor);
 
-                    // Skip "#" (0) and "_S_T_A_T_E" (last)
-                    for (int j = 1; j < columnCount - 1; j++) {
-                        int cellColor = !_matrix.CommonSetting.GetCellEditable(matrixRow, j)
-                            ? rowDisabledColor
-                            : rowColor;
-
-                        _matrix.CommonSetting.SetCellBackColor(matrixRow, j, cellColor);
+                    for (int j = 1; j < lastColumn; j++) {
+                        if (editableFlags[j])
+                            _matrix.CommonSetting.SetCellBackColor(matrixRow, j, rowColor);
                     }
-
-
-                    bool cellEditable = _matrix.CommonSetting.GetCellEditable(matrixRow, 1);
-                    if (manualCode && cellEditable) {
-                        if (status == Status.New || status == Status.Discard)
-                            return;
-                    }
-
-                    _matrix.CommonSetting.SetCellBackColor(matrixRow, 1, rowDisabledColor);
-                    _matrix.CommonSetting.SetCellFontStyle(matrixRow, 1, BoFontStyle.fs_Bold);
                 }
+
+                if (!manualCode || !editableFlags[1] || status == Status.New || status == Status.Discard) return;
+                _matrix.CommonSetting.SetCellBackColor(matrixRow, 1, rowDisabledColor);
+                _matrix.CommonSetting.SetCellFontStyle(matrixRow, 1, BoFontStyle.fs_Bold);
             }
             catch (Exception e) {
                 Logger.Error(e);
@@ -190,20 +216,15 @@ namespace SAPUtils.Forms {
             }
         }
 
+
         private static (int normal, int dark) GetRowColors(Status status, T item) {
-            if (status != Status.Normal) {
-                return MatrixColors.StatusColors.TryGetValue(status, out (int Normal, int Dark) colors)
-                    ? colors
-                    : throw new ArgumentOutOfRangeException();
-            }
-            if (item is ISoftDeletable sd && !sd.Active) {
+            if (status != Status.Normal)
+                return MatrixColors.StatusColors[status];
+
+            if (item is ISoftDeletable sd && !sd.Active)
                 return MatrixColors.InactiveColors;
-            }
-            return MatrixColors.StatusColors.TryGetValue(Status.Normal, out (int Normal, int Dark) normalColors)
-                ? normalColors
-                : throw new ArgumentOutOfRangeException();
 
-
+            return MatrixColors.NormalColors;
         }
 
         private void LoadData(List<T> items) {
@@ -217,7 +238,8 @@ namespace SAPUtils.Forms {
             }
 
             foreach ((T Item, Status Status) failed in _failedUpdate.Concat(_failedDelete)) {
-                int observableIndex = _observableData.IndexOf(_observableData.FirstOrDefault(x => x.Code == failed.Item.Code));
+                int observableIndex =
+                    _observableData.IndexOf(_observableData.FirstOrDefault(x => x.Code == failed.Item.Code));
                 if (observableIndex < 0) continue;
 
                 _observableData[observableIndex] = failed.Item;
@@ -233,7 +255,6 @@ namespace SAPUtils.Forms {
             _failedUpdate.Clear();
             _failedDelete.Clear();
             _dataReload = false;
-
         }
 
         private void LoadData() {
@@ -242,14 +263,13 @@ namespace SAPUtils.Forms {
 
         private void SaveChanges() {
             _helper.Item.Click();
-
+            ShowWaitCursor();
             List<(T Item, Status Status)> modifiedData = _data.Where(x => x.Status != Status.Normal).ToList();
 
 
             int success = 0;
             int failed = 0;
             foreach (Status status in new[] { Status.Modified, Status.ModifiedRestored, Status.Delete, Status.New, }) {
-
                 T[] items = modifiedData
                     .Where(x => x.Status == status)
                     .Select(x => x.Item)
@@ -263,6 +283,7 @@ namespace SAPUtils.Forms {
                         case Status.Delete: ok = i.Delete(); break;
                         case Status.New: ok = i.Add(); break;
                     }
+
                     if (ok) success++;
                     else {
                         failed++;
@@ -280,12 +301,16 @@ namespace SAPUtils.Forms {
             if (failed > 0 && success == 0) {
                 SetStatusBarMessage("No se han podido guardar los cambios.", type: BoStatusBarMessageType.smt_Error);
             }
+
             if (failed > 0) {
-                SetStatusBarMessage($"Se han guardado {success} cambios. Han fallado {failed} cambios.", type: BoStatusBarMessageType.smt_Warning);
+                SetStatusBarMessage($"Se han guardado {success} cambios. Han fallado {failed} cambios.",
+                    type: BoStatusBarMessageType.smt_Warning);
             }
             else {
                 SetStatusBarMessage($"Se han guardado {success} cambios.", type: BoStatusBarMessageType.smt_Success);
             }
+
+            ShowArrowCursor();
         }
 
         private void DataChanged(object sender, NotifyCollectionChangedEventArgs e) {
@@ -305,6 +330,7 @@ namespace SAPUtils.Forms {
                             Freeze(false);
                         }
                     }
+
                     break;
                 case NotifyCollectionChangedAction.Remove:
                     if (e.OldItems != null) {
@@ -316,6 +342,7 @@ namespace SAPUtils.Forms {
                             UpdateMatrix();
                         }
                     }
+
                     break;
                 case NotifyCollectionChangedAction.Replace:
                     if (e.OldItems != null && e.NewItems != null) {
@@ -330,6 +357,7 @@ namespace SAPUtils.Forms {
                             UpdateMatrixColors(index);
                         }
                     }
+
                     break;
                 case NotifyCollectionChangedAction.Move:
                     if (e.OldItems != null) {
@@ -337,13 +365,15 @@ namespace SAPUtils.Forms {
                             T item = (T)e.OldItems[i];
                             int newIndex = e.NewStartingIndex + i;
 
-                            (T Item, Status Status) tuple = _data.First(x => EqualityComparer<T>.Default.Equals(x.Item, item));
+                            (T Item, Status Status) tuple =
+                                _data.First(x => EqualityComparer<T>.Default.Equals(x.Item, item));
                             _data.Remove(tuple);
                             _data.Insert(newIndex, tuple);
                             if (_dataReload) continue;
                             UpdateMatrix();
                         }
                     }
+
                     break;
                 case NotifyCollectionChangedAction.Reset:
                     _data.Clear();
@@ -353,7 +383,39 @@ namespace SAPUtils.Forms {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
 
+        private static object GetPropertyValue(PropertyInfo prop, T item) {
+            Func<T, object> getter = _getterCache.GetOrAdd(prop,
+                p => {
+                    ParameterExpression param = Expression.Parameter(typeof(T));
+                    UnaryExpression body = Expression.Convert(Expression.Property(param, p), typeof(object));
+                    return Expression.Lambda<Func<T, object>>(body, param)
+                        .Compile();
+                });
+            return getter(item);
+        }
+
+        private void PrepareColumnsCache() {
+            _columnsCache = ColumnInfo.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        private List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter, IUserTableField Field)>
+            GetCachedFields() {
+            return _fieldCache.GetOrAdd(typeof(T), type => {
+                List<(string, PropertyInfo, Func<T, object>, IUserTableField)> list =
+                    new List<(string, PropertyInfo, Func<T, object>, IUserTableField)>();
+                foreach ((PropertyInfo prop, IUserTableField field) in UserTableMetadataCache.GetUserFields(type)) {
+                    string fieldKey = field.Name ?? prop.Name;
+                    ParameterExpression param = Expression.Parameter(typeof(T), "x");
+                    UnaryExpression body = Expression.Convert(Expression.Property(param, prop), typeof(object));
+                    Func<T, object> getter = Expression.Lambda<Func<T, object>>(body, param).Compile();
+
+                    list.Add((fieldKey, prop, getter, field));
+                }
+
+                return list;
+            });
         }
     }
 
@@ -371,17 +433,21 @@ namespace SAPUtils.Forms {
         private static readonly int RedColor = SapColors.ColorToInt(Color.IndianRed);
         private static readonly int DarkRedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.IndianRed));
         private static readonly int SoftDeletedColor = SapColors.ColorToInt(Color.LightSlateGray);
-        private static readonly int DarkSoftDeletedColor = SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSlateGray));
+
+        private static readonly int DarkSoftDeletedColor =
+            SapColors.ColorToInt(SapColors.DarkenColor(Color.LightSlateGray));
 
         internal static (int Normal, int Dark) InactiveColors = (SoftDeletedColor, DarkSoftDeletedColor);
+        internal static readonly (int Normal, int Dark) NormalColors = (WhiteColor, GrayColor);
 
-        internal static readonly Dictionary<Status, (int Normal, int Dark)> StatusColors = new Dictionary<Status, (int Normal, int Dark)> {
-            [Status.Modified] = (KhakiColor, DarkKhakiColor),
-            [Status.ModifiedRestored] = (BlueColor, DarkBlueColor),
-            [Status.New] = (GreenColor, DarkGreenColor),
-            [Status.Discard] = (SalmonColor, DarkSalmonColor),
-            [Status.Delete] = (RedColor, DarkRedColor),
-            [Status.Normal] = (WhiteColor, GrayColor),
-        };
+        internal static readonly Dictionary<Status, (int Normal, int Dark)> StatusColors =
+            new Dictionary<Status, (int Normal, int Dark)> {
+                [Status.Modified] = (KhakiColor, DarkKhakiColor),
+                [Status.ModifiedRestored] = (BlueColor, DarkBlueColor),
+                [Status.New] = (GreenColor, DarkGreenColor),
+                [Status.Discard] = (SalmonColor, DarkSalmonColor),
+                [Status.Delete] = (RedColor, DarkRedColor),
+                [Status.Normal] = (WhiteColor, GrayColor),
+            };
     }
 }

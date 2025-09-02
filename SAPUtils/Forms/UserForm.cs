@@ -16,8 +16,6 @@ namespace SAPUtils.Forms {
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public abstract partial class UserForm : FormBase {
-
-
         private static volatile ProgressBar progressBar;
 
         /// <summary>
@@ -51,7 +49,6 @@ namespace SAPUtils.Forms {
             finally {
                 ShowArrowCursor();
             }
-
         }
 
         /// <summary>
@@ -108,6 +105,7 @@ namespace SAPUtils.Forms {
                     if (uidValue == null) {
                         uidValue = formNode.Attributes["uid"].Value;
                     }
+
                     if (!string.IsNullOrEmpty(uidValue) && FormUtils.ExistForm(uidValue, Application)) {
                         Logger.Trace("Closing existing form with UID: {0}", uidValue);
                         Application.Forms.Item(uidValue).Close();
@@ -123,7 +121,6 @@ namespace SAPUtils.Forms {
                     }
                 }
                 else if (uidValue != null) {
-
                     if (!string.IsNullOrEmpty(uidValue) && FormUtils.ExistForm(uidValue, Application)) {
                         Logger.Trace("Closing existing form with UID: {0}", uidValue);
                         Application.Forms.Item(uidValue).Close();
@@ -132,11 +129,13 @@ namespace SAPUtils.Forms {
                             return;
                         }
                     }
+
                     attrb = xmlDoc.CreateAttribute("uid");
                     attrb.Value = uidValue;
                     formNode.Attributes?.Append(attrb);
                     Logger.Debug("Created and assigned new UID attribute: {0}", uidValue);
                 }
+
                 Logger.Trace("Loading batch actions into application");
                 Application.LoadBatchActions(xmlDoc.InnerXml);
                 Logger.Info("Form loaded successfully");
@@ -157,6 +156,7 @@ namespace SAPUtils.Forms {
                 Logger.Warning("Cannot show form because it is not alive");
                 return;
             }
+
             UIAPIRawForm.Visible = true;
             Logger.Trace("Form displayed successfully");
         }
@@ -173,7 +173,8 @@ namespace SAPUtils.Forms {
         /// The value of the pressed button (e.g., 1 for the first button, 2 for the second, etc.).
         /// </returns>
         /// <seealso cref="SAPbouiCOM.Application"/>
-        protected int ShowMessageBox(string text, int defaultButton = 1, string btn1Caption = "OK", string btn2Caption = "", string btn3Caption = "") {
+        protected int ShowMessageBox(string text, int defaultButton = 1, string btn1Caption = "OK",
+            string btn2Caption = "", string btn3Caption = "") {
             return Application.MessageBox(text, defaultButton, btn1Caption, btn2Caption, btn3Caption);
         }
 
@@ -184,7 +185,8 @@ namespace SAPUtils.Forms {
         /// <param name="seconds">The duration (in enumeration format) for which the message will appear on the screen.</param>
         /// <param name="type">The type of status message, such as error, warning, or success.</param>
         /// <seealso cref="SAPbouiCOM.Application"/>
-        protected void SetStatusBarMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium, BoStatusBarMessageType type = BoStatusBarMessageType.smt_Error) {
+        protected void SetStatusBarMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium,
+            BoStatusBarMessageType type = BoStatusBarMessageType.smt_Error) {
             Application.StatusBar.SetText(text, seconds, type);
         }
 
@@ -208,6 +210,7 @@ namespace SAPUtils.Forms {
             catch {
                 // ignored
             }
+
             progressBar = null;
             GC.Collect();
         }

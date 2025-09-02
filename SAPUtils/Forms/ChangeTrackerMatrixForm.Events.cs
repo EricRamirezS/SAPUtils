@@ -21,26 +21,29 @@ namespace SAPUtils.Forms {
             if (_saveButton != null) {
                 _saveButton.ClickAfter += SaveButtonOnClickAfter;
             }
+
             if (_exportButton != null) {
                 _exportButton.ClickAfter += ExportToExcel;
             }
+
             if (_importButton != null) {
                 _importButton.ClickAfter += ImportFromExcel;
             }
         }
+
         private void EventUnsubscriber() {
             Application.RightClickEvent -= ApplicationOnRightClickEvent;
             Application.MenuEvent -= Application_MenuEvent;
             _observableData.CollectionChanged -= DataChanged;
             Application.ItemEvent -= Application_ItemEvent;
-
         }
 
         private void Application_ItemEvent(string formUid, ref ItemEvent pVal, out bool bubbleEvent) {
             bubbleEvent = true;
             if (pVal.FormUID != UniqueID) return;
 
-            if (pVal.EventType != BoEventTypes.et_VALIDATE || pVal.BeforeAction || pVal.ItemUID != _matrix.Item.UniqueID || _dataReload) return;
+            if (pVal.EventType != BoEventTypes.et_VALIDATE || pVal.BeforeAction ||
+                pVal.ItemUID != _matrix.Item.UniqueID || _dataReload) return;
 
             int rowIndex = pVal.Row - 1;
             string coluid = pVal.ColUID;
@@ -66,6 +69,7 @@ namespace SAPUtils.Forms {
                         item.Name = value;
                         break;
                 }
+
                 if (!changed) return;
                 _dataTable.SetValue(coluid, rowIndex, value);
                 if (status != Status.Normal) return;
@@ -79,7 +83,8 @@ namespace SAPUtils.Forms {
                     ColumnInfo.FirstOrDefault(e => e.Value.MatrixColumn.UniqueID == coluid);
                 if (columnInfo.Key == null) return;
                 string propertyName = columnInfo.Key.Substring(0, columnInfo.Key.Length - 4);
-                (PropertyInfo Property, IUserTableField Field) propertyField = UserTableMetadataCache.GetUserField(typeof(T), propertyName);
+                (PropertyInfo Property, IUserTableField Field) propertyField =
+                    UserTableMetadataCache.GetUserField(typeof(T), propertyName);
                 if (propertyField == default) return;
                 if (!(propertyField.Field is DateTimeFieldAttribute dtf)) return;
                 object cellValue = cell.GetValue();
@@ -127,7 +132,8 @@ namespace SAPUtils.Forms {
                 KeyValuePair<string, (DataColumn DataTableColumn, Column MatrixColumn)> columnInfo =
                     ColumnInfo.FirstOrDefault(e => e.Value.MatrixColumn.UniqueID == coluid);
                 if (columnInfo.Key == null) return;
-                (PropertyInfo Property, IUserTableField Field) propertyField = UserTableMetadataCache.GetUserField(typeof(T), columnInfo.Key);
+                (PropertyInfo Property, IUserTableField Field) propertyField =
+                    UserTableMetadataCache.GetUserField(typeof(T), columnInfo.Key);
                 if (propertyField == default) return;
 
                 object cellValue = cell.GetValue();
@@ -144,87 +150,105 @@ namespace SAPUtils.Forms {
                 UpdateMatrixColors(pVal.Row - 1);
             }
         }
+
         private void Application_MenuEvent(ref MenuEvent pVal, out bool bubbleEvent) {
             bubbleEvent = true;
 
             if (pVal.BeforeAction) return;
             if (Application.Forms.ActiveForm.UniqueID != UniqueID) return;
-            if (pVal.MenuUID == "1282" || pVal.MenuUID == _addRowMenuUid) {
-                T it = new T();
-                if (it is ISoftDeletable itsd) itsd.Active = true;
-                _observableData.Add(it);
-            }
-            else if (pVal.MenuUID == _deleteRowMenuUid) {
-                int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
-                if (rowIndex <= 0) return;
-                (T item, Status status) = _data[rowIndex - 1];
-                switch (item) {
-                    case ISoftDeletable sd when sd.Active == false && status == Status.Normal:
-                        sd.Active = true;
-                        _data[rowIndex - 1] = (item, Status.ModifiedRestored);
-                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
-                        break;
-                    case ISoftDeletable sd when sd.Active && status == Status.ModifiedRestored:
-                        sd.Active = false;
-                        _data[rowIndex - 1] = (item, Status.Delete);
-                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.Delete.GetReadableName();
-                        break;
-                    case ISoftDeletable sd when sd.Active && status == Status.New:
-                        sd.Active = false;
-                        _data[rowIndex - 1] = (item, Status.Discard);
-                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.Discard.GetReadableName();
-                        break;
-                    case ISoftDeletable sd when sd.Active == false && status == Status.Discard:
-                        sd.Active = false;
-                        _data[rowIndex - 1] = (item, Status.New);
-                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.New.GetReadableName();
-                        break;
-                    case ISoftDeletable sd when sd.Active == false && item is UserTableObjectModel utom && utom.OriginalActive == false &&
-                                                status == Status.Delete:
-                        sd.Active = false;
-                        _data[rowIndex - 1] = (item, Status.ModifiedRestored);
-                        ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.ModifiedRestored.GetReadableName();
-                        break;
-                    default:
-                        if (status == Status.New || status == Status.Discard) {
-                            Status updated = status == Status.Discard ? Status.New : Status.Discard;
-                            _data[rowIndex - 1] = (item, updated);
-                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
-                        }
-                        else {
-                            Status updated = status == Status.Delete ? Status.Modified : Status.Delete;
-                            _data[rowIndex - 1] = (item, updated);
-                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = updated.GetReadableName();
-                        }
-                        break;
+            try {
+                Freeze(true);
+                if (pVal.MenuUID == "1282" || pVal.MenuUID == _addRowMenuUid) {
+                    T it = new T();
+                    if (it is ISoftDeletable itsd) itsd.Active = true;
+                    _observableData.Add(it);
                 }
-                UpdateMatrixColors(rowIndex - 1);
-                _matrix.SelectRow(rowIndex, false, false);
-            }
-            else if (pVal.MenuUID == "1304") {
-                if (UnsavedChanges()) {
-                    int messageBox = Application.MessageBox(
-                        "Hay cambios sin guardar.\n¿Desea recargar y descartar los cambios?", 2,
-                        "Sí",
-                        "Cancelar");
+                else if (pVal.MenuUID == _deleteRowMenuUid) {
+                    int rowIndex = _matrix.GetNextSelectedRow(0, BoOrderType.ot_RowOrder);
+                    if (rowIndex <= 0) return;
+                    (T item, Status status) = _data[rowIndex - 1];
+                    switch (item) {
+                        case ISoftDeletable sd when sd.Active == false && status == Status.Normal:
+                            sd.Active = true;
+                            _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
+                                Status.ModifiedRestored.GetReadableName();
+                            break;
+                        case ISoftDeletable sd when sd.Active && status == Status.ModifiedRestored:
+                            sd.Active = false;
+                            _data[rowIndex - 1] = (item, Status.Delete);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
+                                Status.Delete.GetReadableName();
+                            break;
+                        case ISoftDeletable sd when sd.Active && status == Status.New:
+                            sd.Active = false;
+                            _data[rowIndex - 1] = (item, Status.Discard);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
+                                Status.Discard.GetReadableName();
+                            break;
+                        case ISoftDeletable sd when sd.Active == false && status == Status.Discard:
+                            sd.Active = false;
+                            _data[rowIndex - 1] = (item, Status.New);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.New.GetReadableName();
+                            break;
+                        case ISoftDeletable sd
+                            when sd.Active == false && item is UserTableObjectModel utom &&
+                                 utom.OriginalActive == false &&
+                                 status == Status.Delete:
+                            sd.Active = false;
+                            _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                            ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
+                                Status.ModifiedRestored.GetReadableName();
+                            break;
+                        default:
+                            if (status == Status.New || status == Status.Discard) {
+                                Status updated = status == Status.Discard ? Status.New : Status.Discard;
+                                _data[rowIndex - 1] = (item, updated);
+                                ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
+                                    updated.GetReadableName();
+                            }
+                            else {
+                                Status updated = status == Status.Delete ? Status.Modified : Status.Delete;
+                                _data[rowIndex - 1] = (item, updated);
+                                ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
+                                    updated.GetReadableName();
+                            }
 
-                    if (messageBox == 2) return;
+                            break;
+                    }
+
+                    UpdateMatrixColors(rowIndex - 1);
+                    _matrix.SelectRow(rowIndex, false, false);
                 }
-                LoadData();
-                UpdateMatrix();
-            }
+                else if (pVal.MenuUID == "1304") {
+                    if (UnsavedChanges()) {
+                        int messageBox = Application.MessageBox(
+                            "Hay cambios sin guardar.\n¿Desea recargar y descartar los cambios?", 2,
+                            "Sí",
+                            "Cancelar");
 
+                        if (messageBox == 2) return;
+                    }
+
+                    LoadData();
+                    UpdateMatrix();
+                }
+            }
+            finally {
+                Freeze(false);
+            }
         }
+
         private void ApplicationOnRightClickEvent(ref ContextMenuInfo eventInfo, out bool bubbleEvent) {
             bubbleEvent = true;
             if (eventInfo.FormUID != UniqueID) return;
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (eventInfo.EventType) {
-                case BoEventTypes.et_RIGHT_CLICK when eventInfo.BeforeAction:
-                {
+                case BoEventTypes.et_RIGHT_CLICK when eventInfo.BeforeAction: {
                     if (eventInfo.ItemUID == _matrix.Item.UniqueID) {
                         AddContextMenuItems();
                     }
+
                     break;
                 }
                 default:
@@ -232,6 +256,7 @@ namespace SAPUtils.Forms {
                     break;
             }
         }
+
         private void SaveButtonOnClickAfter(object sboObject, SBOItemEventArg pVal) {
             int messageBox = Application.MessageBox(
                 "Los cambios serán guardados\n¿Desea continuar?", 2,
@@ -267,6 +292,7 @@ namespace SAPUtils.Forms {
                     return;
             }
         }
+
         /// <inheritdoc />
         override protected void OnFormCloseAfter(SBOItemEventArg pVal) {
             base.OnFormCloseAfter(pVal);

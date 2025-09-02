@@ -71,7 +71,8 @@ namespace SAPUtils.__Internal.Extensions {
                 column = AddComboBoxColumn(matrix, uid, field);
             }
             else if (isLinked) {
-                column = field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone && string.IsNullOrEmpty(field.LinkedUdo)
+                column = field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone &&
+                         string.IsNullOrEmpty(field.LinkedUdo)
                     ? AddComboBoxFromUdt(matrix, uid, field, form)
                     : AddLinkedButtonColumn(matrix, uid, field, form, application);
             }
@@ -127,7 +128,6 @@ namespace SAPUtils.__Internal.Extensions {
             ref int index,
             DateTimeFieldAttribute field,
             PropertyInfo property) {
-
             Column dateColumn = matrix.Columns.Add($"_C{index}D", BoFormItemTypes.it_EDIT);
             Column timeColumn = matrix.Columns.Add($"_C{index}T", BoFormItemTypes.it_EDIT);
 
@@ -160,7 +160,8 @@ namespace SAPUtils.__Internal.Extensions {
             Column column,
             UserDataSource userDataSource) {
             ChooseFromListCreationParams cflParams =
-                (ChooseFromListCreationParams)application.CreateObject(BoCreatableObjectType.cot_ChooseFromListCreationParams);
+                (ChooseFromListCreationParams)application.CreateObject(BoCreatableObjectType
+                    .cot_ChooseFromListCreationParams);
             cflParams.UniqueID = cflId;
             cflParams.MultiSelection = false;
             cflParams.ObjectType = field.LinkedSystemObject != UDFLinkedSystemObjectTypesEnum.ulNone
@@ -207,6 +208,7 @@ namespace SAPUtils.__Internal.Extensions {
             catch {
                 form.DataSources.UserDataSources.Add($"_DS{uid}", BoDataType.dt_SHORT_TEXT, 50);
             }
+
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_COMBO_BOX);
             column.DataBind.SetBound(true, "", $"_DS{uid}");
 
@@ -215,9 +217,7 @@ namespace SAPUtils.__Internal.Extensions {
 
             IList<IUserFieldValidValue> vv = null;
             if (type != null) {
-                MethodInfo method = typeof(UserTableObjectModel)
-                    .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static)
-                    ?.MakeGenericMethod(type);
+                MethodInfo method = UserTableMetadataCache.GetAllMethodInfo(type);
                 if (method != null) {
                     object result = method.Invoke(null, new object[] { null, });
                     IEnumerable enumerable = result as IEnumerable;
@@ -229,6 +229,7 @@ namespace SAPUtils.__Internal.Extensions {
                             if (userTableObjectModel is ISoftDeletable sd) {
                                 if (!sd.Active) continue;
                             }
+
                             data.Add(userTableObjectModel);
                         }
                     }
@@ -244,10 +245,12 @@ namespace SAPUtils.__Internal.Extensions {
                     }
                 }
             }
+
             if (vv == null) {
                 using (IRepository repository = Repository.Get())
                     vv = repository.GetValidValuesFromUserTable(field.LinkedTable);
             }
+
             foreach (IValidValue userFieldValidValue in vv) {
                 bool add = true;
                 for (int i = 0; i < column.ValidValues.Count; i++)
@@ -255,9 +258,11 @@ namespace SAPUtils.__Internal.Extensions {
                         add = false;
                         break;
                     }
+
                 if (add)
                     column.ValidValues.Add(userFieldValidValue.Value, userFieldValidValue.Description);
             }
+
             column.DisplayDesc = true;
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(field.LinkedTable);
             if (userTable != null) {
@@ -265,6 +270,7 @@ namespace SAPUtils.__Internal.Extensions {
                     ? BoExpandType.et_ValueDescription
                     : BoExpandType.et_DescriptionOnly;
             }
+
             return column;
         }
 
@@ -313,9 +319,11 @@ namespace SAPUtils.__Internal.Extensions {
             if (field.Mandatory == false) {
                 column.ValidValues.Add("", "");
             }
+
             foreach (IValidValue validValue in field.ValidValues) {
                 column.ValidValues.Add(validValue.Value, validValue.Description);
             }
+
             return column;
         }
 
@@ -355,8 +363,8 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="UDFLinkedSystemObjectTypesEnum"/>
         internal static bool IsLinkedField(IUserTableField field) {
             return field.LinkedSystemObject != UDFLinkedSystemObjectTypesEnum.ulNone ||
-                !string.IsNullOrWhiteSpace(field.LinkedTable) ||
-                !string.IsNullOrWhiteSpace(field.LinkedUdo);
+                   !string.IsNullOrWhiteSpace(field.LinkedTable) ||
+                   !string.IsNullOrWhiteSpace(field.LinkedUdo);
         }
 
         /// <summary>
@@ -388,10 +396,10 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPUtils.Models.UserTables.IUserFieldValidValue"/>
         private static bool IsBooleanField(IUserTableField field) {
             return field.Type == typeof(bool) ||
-                field.Type == typeof(bool?) ||
-                field.ValidValues?.Count == 2 &&
-                field.ValidValues.Any(v => v.Value == "Y") &&
-                field.ValidValues.Any(v => v.Value == "N");
+                   field.Type == typeof(bool?) ||
+                   field.ValidValues?.Count == 2 &&
+                   field.ValidValues.Any(v => v.Value == "Y") &&
+                   field.ValidValues.Any(v => v.Value == "N");
         }
 
         /// <summary>
@@ -421,7 +429,8 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
         /// <seealso cref="SAPbouiCOM.LinkedButton"/>
-        private static Column AddLinkedButtonColumn(Matrix matrix, string uid, IUserTableField field, UserForm form, Application application) {
+        private static Column AddLinkedButtonColumn(Matrix matrix, string uid, IUserTableField field, UserForm form,
+            Application application) {
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_LINKED_BUTTON);
             string cflId = $"_CFL{uid}";
 
@@ -499,6 +508,7 @@ namespace SAPUtils.__Internal.Extensions {
                 catch (Exception ex) {
                     Logger.Instance.Error(ex);
                 }
+
                 if (pVal.ItemUID != "matrix") return;
                 {
                     try {
