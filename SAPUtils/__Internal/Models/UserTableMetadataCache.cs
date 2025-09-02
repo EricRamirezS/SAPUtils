@@ -7,18 +7,63 @@ using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Models.UserTables;
 
-namespace SAPUtils.__Internal.Models {
-    internal static class UserTableMetadataCache {
-        private static readonly ConcurrentDictionary<Type, List<(PropertyInfo Property, IUserTableField Field)>> PropertyFieldCache =
-            new ConcurrentDictionary<Type, List<(PropertyInfo Property, IUserTableField Field)>>();
+namespace SAPUtils.__Internal.Models
+{
+    internal static class UserTableMetadataCache
+    {
+        private static readonly ConcurrentDictionary<Type, List<(PropertyInfo Property, IUserTableField Field)>>
+            PropertyFieldCache =
+                new ConcurrentDictionary<Type, List<(PropertyInfo Property, IUserTableField Field)>>();
 
         private static readonly ConcurrentDictionary<Type, UserTableAttribute> UserTableAttributeCache =
             new ConcurrentDictionary<Type, UserTableAttribute>();
 
-        public static (PropertyInfo Property, IUserTableField Field) GetUserField(Type type, string name) {
+        private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache =
+            new ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>>();
+
+        private static readonly ConcurrentDictionary<Type, MethodInfo> GetAllMethodCache =
+            new ConcurrentDictionary<Type, MethodInfo>();
+
+        public static MethodInfo GetAllMethodInfo<T>()
+        {
+            return GetAllMethodInfo(typeof(T));
+        }
+
+        public static MethodInfo GetAllMethodInfo(Type type)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+
+            return GetAllMethodCache.GetOrAdd(type, t =>
+            {
+                MethodInfo method = typeof(UserTableObjectModel)
+                    .GetMethod("GetAll", BindingFlags.Public | BindingFlags.Static);
+
+                if (method == null)
+                    throw new InvalidOperationException("No se encontró UserTableObjectModel.GetAll");
+
+                return method.MakeGenericMethod(t);
+            });
+        }
+
+        public static PropertyInfo GetUserFieldPropertyInfo(Type type, string fieldName)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (string.IsNullOrWhiteSpace(fieldName)) throw new ArgumentNullException(nameof(fieldName));
+
+            Dictionary<string, PropertyInfo> properties = PropertyInfoCache.GetOrAdd(type, t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                    .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase));
+
+            properties.TryGetValue(fieldName, out PropertyInfo prop);
+            return prop;
+        }
+
+        public static (PropertyInfo Property, IUserTableField Field) GetUserField(Type type, string name)
+        {
             return PropertyFieldCache.GetOrAdd(type, t =>
             {
-                List<(PropertyInfo Property, IUserTableField Field)> props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                List<(PropertyInfo Property, IUserTableField Field)> props = t
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Name != "Code" && p.Name != "Name")
                     .Where(p => !p.IsDefined(typeof(IgnoreFieldAttribute), true))
                     .Select(p =>
@@ -42,10 +87,12 @@ namespace SAPUtils.__Internal.Models {
             }).FirstOrDefault(p => p.Property.Name == name);
         }
 
-        public static List<(PropertyInfo Property, IUserTableField Field)> GetUserFields(Type type) {
+        public static List<(PropertyInfo Property, IUserTableField Field)> GetUserFields(Type type)
+        {
             return PropertyFieldCache.GetOrAdd(type, t =>
             {
-                List<(PropertyInfo Property, IUserTableField Field)> props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                List<(PropertyInfo Property, IUserTableField Field)> props = t
+                    .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(p => p.Name != "Code" && p.Name != "Name")
                     .Where(p => !p.IsDefined(typeof(IgnoreFieldAttribute), true))
                     .Select(p =>
@@ -65,7 +112,8 @@ namespace SAPUtils.__Internal.Models {
             });
         }
 
-        public static IUserTable GetUserTableAttribute(Type type) {
+        public static IUserTable GetUserTableAttribute(Type type)
+        {
             return UserTableAttributeCache.GetOrAdd(type, t =>
                 t.GetCustomAttributes(typeof(UserTableAttribute), true)
                     .Cast<UserTableAttribute>()
@@ -73,11 +121,13 @@ namespace SAPUtils.__Internal.Models {
             );
         }
 
-        public static IUserTable GetUserTableAttribute(string tableName) {
+        public static IUserTable GetUserTableAttribute(string tableName)
+        {
             return UserTableAttributeCache.FirstOrDefault(e => e.Value.Name == tableName).Value;
         }
 
-        public static Type GetTableType(string tableName) {
+        public static Type GetTableType(string tableName)
+        {
             return UserTableAttributeCache.FirstOrDefault(e => e.Value.Name == tableName).Key;
         }
     }
