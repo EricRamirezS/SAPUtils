@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using SAPbobsCOM;
@@ -10,9 +11,6 @@ using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.Query;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Attributes.UserTables;
-using SAPUtils.Database;
-using SAPUtils.Events;
-using SAPUtils.Exceptions;
 using SAPUtils.Query;
 using SAPUtils.Utils;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
@@ -22,10 +20,8 @@ using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 // ReSharper disable UnusedMember.Global
 
 namespace SAPUtils.Models.UserTables {
-
     /// <inheritdoc />
     public abstract class UserTableObjectModel : IUserTableObjectModel {
-
         /// <summary>
         /// Represents a thread-safe cache for storing and retrieving instances of <see cref="UserTableObjectModel"/>
         /// objects based on their type and a unique code identifier.
@@ -37,6 +33,12 @@ namespace SAPUtils.Models.UserTables {
         /// <seealso cref="System.Collections.Concurrent.ConcurrentDictionary{TKey, TValue}"/>
         private static readonly ConcurrentDictionary<(Type, string), UserTableObjectModel> Cache =
             new ConcurrentDictionary<(Type, string), UserTableObjectModel>();
+
+        private static readonly ConcurrentDictionary<Type, Dictionary<PropertyInfo, Func<object, object>>>
+            GettersCache = new ConcurrentDictionary<Type, Dictionary<PropertyInfo, Func<object, object>>>();
+
+        private static readonly ConcurrentDictionary<Type, Dictionary<PropertyInfo, Action<object, object>>>
+            SettersCache = new ConcurrentDictionary<Type, Dictionary<PropertyInfo, Action<object, object>>>();
 
         internal string OriginalCode { get; set; }
         internal bool? OriginalActive { get; set; }
@@ -55,10 +57,13 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public abstract bool Add();
+
         /// <inheritdoc />
         public abstract bool Delete();
+
         /// <inheritdoc />
         public abstract bool Update(bool restore = false);
+
         /// <inheritdoc />
         public abstract bool Save();
 
@@ -74,6 +79,52 @@ namespace SAPUtils.Models.UserTables {
             clone.OriginalCreatedAt = default;
             clone.OriginalCreatedBy = 0;
             return clone;
+        }
+
+        internal static Dictionary<PropertyInfo, Func<object, object>> GetGetters(Type type) {
+            return GettersCache.GetOrAdd(type, BuildGetters);
+        }
+
+        internal static Dictionary<PropertyInfo, Action<object, object>> GetSetters(Type type) {
+            return SettersCache.GetOrAdd(type, BuildSetters);
+        }
+
+        private static Dictionary<PropertyInfo, Func<object, object>> BuildGetters(Type type) {
+            Dictionary<PropertyInfo, Func<object, object>> dict = new Dictionary<PropertyInfo, Func<object, object>>();
+
+            foreach ((PropertyInfo prop, IUserTableField _) in UserTableMetadataCache.GetUserFields(type)) {
+                ParameterExpression instanceParam = Expression.Parameter(typeof(object), "instance");
+                UnaryExpression typedInstance = Expression.Convert(instanceParam, type);
+                MemberExpression propertyAccess = Expression.Property(typedInstance, prop);
+                UnaryExpression convert = Expression.Convert(propertyAccess, typeof(object));
+
+                Func<object, object> lambda = Expression.Lambda<Func<object, object>>(convert, instanceParam).Compile();
+                dict[prop] = lambda;
+            }
+
+            return dict;
+        }
+
+        private static Dictionary<PropertyInfo, Action<object, object>> BuildSetters(Type type) {
+            Dictionary<PropertyInfo, Action<object, object>> dict =
+                new Dictionary<PropertyInfo, Action<object, object>>();
+
+            foreach ((PropertyInfo prop, IUserTableField _) in UserTableMetadataCache.GetUserFields(type)) {
+                if (!prop.CanWrite) continue;
+
+                ParameterExpression instanceParam = Expression.Parameter(typeof(object), "instance");
+                ParameterExpression valueParam = Expression.Parameter(typeof(object), "value");
+
+                UnaryExpression typedInstance = Expression.Convert(instanceParam, type);
+                UnaryExpression convertedValue = Expression.Convert(valueParam, prop.PropertyType);
+                BinaryExpression assign = Expression.Assign(Expression.Property(typedInstance, prop), convertedValue);
+
+                Action<object, object> lambda =
+                    Expression.Lambda<Action<object, object>>(assign, instanceParam, valueParam).Compile();
+                dict[prop] = lambda;
+            }
+
+            return dict;
         }
 
         /// <summary>
@@ -125,6 +176,7 @@ namespace SAPUtils.Models.UserTables {
             finally {
                 if (rs != null && Marshal.IsComObject(rs)) Marshal.ReleaseComObject(rs);
             }
+
             PrimaryKeyStrategy pks = userTable.PrimaryKeyStrategy;
             if (pks == PrimaryKeyStrategy.Serie) {
                 data = data
@@ -138,12 +190,16 @@ namespace SAPUtils.Models.UserTables {
                     .ThenBy(e => e.Code)
                     .ToList();
             }
+
             return data;
         }
 
-        private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T item) where T : IUserTableObjectModel {
+        private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T entity)
+            where T : IUserTableObjectModel {
             ILogger log = Logger.Instance;
-            foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(type)) {
+            Dictionary<PropertyInfo, Action<object, object>> setters = GetSetters(entity.GetType());
+            foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in
+                     UserTableMetadataCache.GetUserFields(type)) {
                 string fieldName = string.IsNullOrWhiteSpace(userTableField.Name)
                     ? propertyInfo.Name
                     : userTableField.Name;
@@ -156,19 +212,20 @@ namespace SAPUtils.Models.UserTables {
                     DateTime d = (DateTime)date.Value;
                     DateTime t = dtUserTableField.ParseTimeValue(time.Value);
                     DateTime dt = new DateTime(d.Year, d.Month, d.Day, t.Hour, t.Minute, t.Second, d.Kind);
-                    propertyInfo.SetValue(item, dt);
+                    setters[propertyInfo](entity, dt);
                 }
                 else {
                     Field field = fields.Item($"U_{fieldName}");
                     log.Trace("Processing field: {0}.{1} = {2}", tableName, fieldName, field.Value);
                     if (field.IsNull() == BoYesNoEnum.tNO) {
-                        propertyInfo.SetValue(item, userTableField.ParseValue(field.Value));
+                        setters[propertyInfo](entity, userTableField.ParseValue(field.Value));
                     }
                 }
             }
-            if (!(item is UserTableObjectModel itemModel)) return;
 
-            itemModel.OriginalCode = item.Code;
+            if (!(entity is UserTableObjectModel itemModel)) return;
+
+            itemModel.OriginalCode = entity.Code;
             if (itemModel is ISoftDeletable softDeletable) {
                 itemModel.OriginalActive = softDeletable.Active;
             }
@@ -314,6 +371,7 @@ namespace SAPUtils.Models.UserTables {
         /// </returns>
         /// <seealso cref="IUserTableObjectModel"/>
         public abstract T GetPreviousRecord<T>() where T : class, IUserTableObjectModel, new();
+
         /// <summary>
         /// Retrieves the next record of the specified type from a sequence of user table object models.
         /// </summary>
@@ -323,6 +381,7 @@ namespace SAPUtils.Models.UserTables {
         /// </returns>
         /// <seealso cref="IUserTableObjectModel"/>
         public abstract T GetNextRecord<T>() where T : class, IUserTableObjectModel, new();
+
         /// <summary>
         /// Retrieves the first record of the specified type from a sequence of user table object models.
         /// </summary>
@@ -332,6 +391,7 @@ namespace SAPUtils.Models.UserTables {
         /// </returns>
         /// <seealso cref="IUserTableObjectModel"/>
         public abstract T GetFirstRecord<T>() where T : class, IUserTableObjectModel, new();
+
         /// <summary>
         /// Retrieves the last record of the specified type from a sequence of user table object models.
         /// </summary>
@@ -355,622 +415,4 @@ namespace SAPUtils.Models.UserTables {
     /// <seealso cref="SAPUtils.__Internal.Models.UserTableMetadataCache" />
     [AttributeUsage(AttributeTargets.Property)]
     public class IgnoreFieldAttribute : Attribute { }
-
-    /// <summary>
-    /// Represents a generic base class for interacting with SAP B1 User Tables, providing CRUD operations and mapping logic.
-    /// </summary>
-    /// <typeparam name="T">
-    /// The derived type that extends <see cref="UserTableObjectModel{T}"/>. This type must be decorated with 
-    /// <see cref="UserTableAttribute"/> and define the structure of the user table.
-    /// </typeparam>
-    /// <remarks>
-    /// This class provides built-in support for:
-    /// <list type="bullet">
-    /// <item><description>Retrieving and saving user table data</description></item>
-    /// <item><description>Auto-generating codes using various <see cref="PrimaryKeyStrategy"/> strategies</description></item>
-    /// <item><description>Soft deletion and auditing when applicable</description></item>
-    /// </list>
-    /// </remarks>
-    public class UserTableObjectModel<T> : UserTableObjectModel where T : UserTableObjectModel<T>, new() {
-
-        private static IUserTable _userTableAttribute;
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="UserTableObjectModel{T}"/>, validating the presence of <see cref="UserTableAttribute"/>.
-        /// </summary>
-        /// <exception cref="UserTableAttributeNotFound">
-        /// Thrown when the <typeparamref name="T"/> type does not define a valid <see cref="UserTableAttribute"/>.
-        /// </exception>
-        protected UserTableObjectModel() {
-            Log.Trace("Initializing UserTableObjectModel...");
-            try {
-                if (UserTableAttribute == null)
-                    throw new UserTableAttributeNotFound(typeof(T).Name);
-            }
-            catch (Exception ex) {
-                Log.Error(ex);
-                throw new UserTableAttributeNotFound(typeof(T).Name);
-            }
-            _userTableAttribute = UserTableAttribute;
-
-            Log.Debug("UserTableAttribute initialized: {0}", _userTableAttribute.Name);
-        }
-
-        private static IUserTable UserTableAttribute => _userTableAttribute ?? (_userTableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T)));
-
-        /// <inheritdoc />
-        public override string Code { get; set; }
-
-        /// <inheritdoc />
-        public override string Name { get; set; }
-
-        private static ILogger Log => Logger.Instance;
-        /// <summary>
-        /// Retrieves all records of type <typeparamref name="T"/> from the corresponding user table.
-        /// </summary>
-        /// <returns>
-        /// A list of all records as instances of <typeparamref name="T"/>.
-        /// </returns>
-        public static List<T> GetAll(IWhere where = null) {
-            return GetAll<T>(where);
-        }
-
-        /// <summary>
-        /// Retrieves a record of type <typeparamref name="T"/> using the specified code.
-        /// </summary>
-        /// <param name="code">The code of the record to retrieve.</param>
-        /// <param name="item">
-        /// When this method returns, contains the retrieved item if found; otherwise, the default value of <typeparamref name="T"/>.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the item was found; otherwise, <c>false</c>.
-        /// </returns>
-        public static bool Get(string code, out T item) {
-            return UserTableObjectModel.Get(code, out item);
-        }
-
-
-        /// <inheritdoc />
-        public override bool Add() {
-            Log.Debug("Attempting to add {0} into table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
-            try {
-                SAPbobsCOM.IUserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
-                PrimaryKeyStrategy primaryKeyStrategy = _userTableAttribute.PrimaryKeyStrategy;
-                GenerateCode(primaryKeyStrategy, table);
-
-                if (Save()) return true;
-
-                if (_userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) return false;
-                Code = null;
-                return false;
-            }
-            catch (ItemAlreadyExistException ex) {
-                Log.Error(ex);
-            }
-            catch (Exception ex) {
-                Log.Critical(ex);
-            }
-
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override bool Update(bool restore = false) {
-            Log.Debug("Attempting to update {0} in table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
-            try {
-                Log.Trace("Retrieving SAP User Table `{0}`...", _userTableAttribute.Name);
-                UserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
-                RestoreOriginalCode();
-
-                if (!table.GetByKey(Code)) {
-                    throw new ItemDoNotExistException(GetType().Name, _userTableAttribute.Name, Code);
-                }
-
-                if (!restore || !(this is ISoftDeletable deletable)) return Save();
-                bool? temp = OriginalActive;
-                OriginalActive = deletable.Active;
-                if (Save()) {
-                    return true;
-                }
-                OriginalActive = temp;
-                return false;
-            }
-            catch (ItemDoNotExistException ex) {
-                Log.Error(ex);
-            }
-            catch (Exception ex) {
-                Log.Critical(ex);
-            }
-
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override bool Delete() {
-            Log.Debug("Attempting to delete {0} from table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
-            try {
-                UserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
-                RestoreOriginalCode();
-
-                if (!table.GetByKey(Code)) {
-                    Log.Info("{0} from table {1} with Code {2} does not exist.", GetType().Name, _userTableAttribute.Name, Code);
-                    return false;
-                }
-
-                int result = -1;
-                if (this is ISoftDeletable softDeletable) {
-                    if (OriginalActive.HasValue) {
-                        bool temp = OriginalActive.Value;
-                        softDeletable.Active = false;
-                        OriginalActive = false;
-                        if (Save()) {
-                            result = 0;
-                        }
-                        else {
-                            OriginalActive = !temp;
-                        }
-                    }
-                    else {
-                        softDeletable.Active = false;
-                        if (Save()) {
-                            result = 0;
-                        }
-                    }
-                }
-                else {
-                    result = table.Remove();
-                }
-
-                if (result == 0) {
-                    Log.Info("{0} from table {1} with Code {3} deleted successfully.", GetType().Name, _userTableAttribute.Name, Code);
-                    return true;
-                }
-
-                SapAddon.Instance().Company.GetLastError(out int errCode, out string errMsg);
-                Log.Error(
-                    "Failed to delete {0} from table {1} with Code {2}. SAP Error Code: {3}. SAP Error Message: {4}",
-                    GetType().Name,
-                    _userTableAttribute.Name,
-                    Code,
-                    errCode,
-                    errMsg);
-                return false;
-
-            }
-            catch (Exception ex) {
-                Log.Critical(ex);
-            }
-
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override bool Save() {
-            try {
-                foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(GetType())) {
-                    if (AuditableField.IsAuditableField(GetType(), propertyInfo)) continue;
-                    Log.Trace("Validating {0}'s field {1} = {2}", GetType().Name, propertyInfo.Name, propertyInfo.GetValue(this));
-                    if (userTableField.ValidateField(propertyInfo.GetValue(this))) continue;
-                    Log.Debug("Invalid value for field {0}: {1}", propertyInfo.Name, propertyInfo.GetValue(this));
-                    InvalidFieldEvent.Invoke(propertyInfo, userTableField);
-                    return false;
-                }
-                UserTable table = SapAddon.Instance().Company.UserTables.Item(_userTableAttribute.Name);
-                if (Code == null && OriginalCode == null) {
-                    PrimaryKeyStrategy primaryKeyStrategy = _userTableAttribute.PrimaryKeyStrategy;
-                    GenerateCode(primaryKeyStrategy, table);
-                }
-                else if (OriginalCode != null) {
-                    Code = OriginalCode;
-                }
-                Log.Debug("Saving {0} into table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
-                bool exist = table.GetByKey(Code);
-
-                if (exist) {
-                    Log.Trace("Updating existing {0} in table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
-                    if (this is IAuditableDate dateAudit) {
-                        dateAudit.CreatedAt = OriginalCreatedAt;
-                        dateAudit.UpdatedAt = DateTime.Now;
-                    }
-
-                    if (this is IAuditableUser userAudit) {
-                        userAudit.CreatedBy = OriginalCreatedBy;
-                        userAudit.UpdatedBy = SapAddon.Instance().Company.UserSignature;
-                    }
-
-                    if (this is ISoftDeletable deletable && OriginalActive.HasValue) {
-                        deletable.Active = OriginalActive.Value;
-                    }
-                }
-                else {
-                    Log.Trace("Inserting new {0} into table {1} with Code: {2}", GetType().Name, _userTableAttribute.Name, Code);
-                    table.Code = Code;
-
-                    if (this is IAuditableDate dateAudit) {
-                        dateAudit.CreatedAt = DateTime.Now;
-                        dateAudit.UpdatedAt = DateTime.Now;
-                        OriginalCreatedAt = dateAudit.CreatedAt;
-                    }
-
-                    if (this is IAuditableUser userAudit) {
-                        userAudit.CreatedBy = SapAddon.Instance().Company.UserSignature;
-                        userAudit.UpdatedBy = SapAddon.Instance().Company.UserSignature;
-                        OriginalCreatedBy = userAudit.CreatedBy;
-                    }
-
-                    if (this is ISoftDeletable deletableField) {
-                        deletableField.Active = true;
-                        OriginalActive = deletableField.Active;
-                    }
-                }
-
-                table.Name = Name;
-
-                foreach ((PropertyInfo propertyInfo, IUserTableField userTableField) in UserTableMetadataCache.GetUserFields(GetType())) {
-                    Log.Trace("Processing {0}'s field {1} = {2}", GetType().Name, propertyInfo.Name, propertyInfo.GetValue(this));
-                    string fieldName = string.IsNullOrWhiteSpace(userTableField.Name)
-                        ? propertyInfo.Name
-                        : userTableField.Name;
-
-                    object value = propertyInfo.GetValue(this);
-                    if (exist == false && value == null && userTableField.DefaultValue != null) {
-                        propertyInfo.SetValue(this, userTableField.DefaultValue);
-                        value = propertyInfo.GetValue(this);
-                    }
-
-                    switch (userTableField) {
-                        case DateTimeFieldAttribute _:
-                        {
-                            DateTime? dateTime = (DateTime?)value;
-                            table.UserFields.Fields.Item($"U_{fieldName}Date").Value = dateTime;
-                            table.UserFields.Fields.Item($"U_{fieldName}Time").Value = dateTime;
-                            break;
-                        }
-                        case DateFieldAttribute _:
-                        case TimeFieldAttribute _:
-                        {
-                            DateTime dateTime = (DateTime?)value ?? DateTime.MinValue;
-                            table.UserFields.Fields.Item($"U_{fieldName}").Value = dateTime;
-                            break;
-                        }
-                        default:
-                            try {
-                                table.UserFields.Fields.Item($"U_{fieldName}").Value =
-                                    userTableField.ToSapData(value);
-                            }
-                            catch (Exception ex) {
-                                Log.Warning("Failed to assign value to field {0}: {1}", fieldName, ex.Message);
-                                throw;
-                            }
-                            break;
-                    }
-                }
-
-                int result = exist ? table.Update() : table.Add();
-
-                if (result == 0) {
-                    OriginalCode = Code;
-                    Log.Info("{0} from table {1} with Code {2} saved successfully.", GetType().Name, _userTableAttribute.Name, Code);
-                    ClearCache<T>(OriginalCode);
-                    return true;
-                }
-
-                SapAddon.Instance().Company.GetLastError(out int errCode, out string errMsg);
-                Log.Error(
-                    "Failed to save {0} in table {1} with Code {2}. SAP Error Code: {3}. SAP Error Message: {4}",
-                    GetType().Name, _userTableAttribute.Name, Code, errCode, errMsg);
-                return false;
-            }
-            catch (Exception ex) {
-                Log.Critical(ex);
-            }
-
-            return false;
-        }
-
-        /// <inheritdoc />
-        public override T1 GetPreviousRecord<T1>() {
-            string previousCode = GetPreviousCode();
-            if (previousCode == null) return null;
-            return Get(previousCode, out T1 t) ? t : null;
-        }
-        /// <inheritdoc />
-        public override T1 GetNextRecord<T1>() {
-            string nextCode = GetNextCode();
-            if (nextCode == null) return null;
-            return Get(nextCode, out T1 t) ? t : null;
-        }
-
-        /// <inheritdoc />
-        public override T1 GetFirstRecord<T1>() {
-            string previousCode = GetFirstCode();
-            if (previousCode == null) return null;
-            return Get(previousCode, out T1 t) ? t : null;
-        }
-        /// <inheritdoc />
-        public override T1 GetLastRecord<T1>() {
-            string nextCode = GetLastCode();
-            if (nextCode == null) return null;
-            return Get(nextCode, out T1 t) ? t : null;
-        }
-
-        /// <summary>
-        /// Retrieves the previous record based on the current context within the user table.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
-        /// </typeparam>
-        /// <returns>
-        /// Returns an instance of the previous record if found; otherwise, returns <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
-        /// </remarks>
-        /// <seealso cref="UserTableObjectModel{T}"/>
-        public T GetPreviousRecord() {
-            return GetPreviousRecord<T>();
-        }
-
-        /// <summary>
-        /// Retrieves the next record based on the current context within the user table.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
-        /// </typeparam>
-        /// <returns>
-        /// Returns an instance of the next record if found; otherwise, returns <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
-        /// </remarks>
-        /// <seealso cref="UserTableObjectModel{T}"/>
-        public T GetNextRecord() {
-            return GetNextRecord<T>();
-        }
-
-        /// <summary>
-        /// Retrieves the first record based on the current context within the user table.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
-        /// </typeparam>
-        /// <returns>
-        /// Returns an instance of the first record if found; otherwise, returns <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
-        /// </remarks>
-        /// <seealso cref="UserTableObjectModel{T}"/>
-        public T GetFirstRecord() {
-            return GetFirstRecord<T>();
-        }
-
-        /// <summary>
-        /// Retrieves the last record based on the current context within the user table.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type representing the structure of the user table, which must inherit from <see cref="UserTableObjectModel{T}"/>.
-        /// </typeparam>
-        /// <returns>
-        /// Returns an instance of the last record if found; otherwise, returns <c>null</c>.
-        /// </returns>
-        /// <remarks>
-        /// The retrieval is based on the logical sequence of codes within the table. If no record exists, <c>null</c> is returned.
-        /// </remarks>
-        /// <seealso cref="UserTableObjectModel{T}"/>
-        public T GetLastRecord() {
-            return GetLastRecord<T>();
-        }
-
-        private void GenerateCode(PrimaryKeyStrategy primaryKeyStrategy, SAPbobsCOM.IUserTable table) {
-            switch (primaryKeyStrategy) {
-                case PrimaryKeyStrategy.Manual when string.IsNullOrEmpty(Code):
-                    throw new CodeNotSetException(_userTableAttribute.Name);
-                case PrimaryKeyStrategy.Manual when table.GetByKey(Code):
-                    throw new ItemAlreadyExistException(_userTableAttribute.Name, Code);
-                case PrimaryKeyStrategy.Manual:
-                    break;
-                case PrimaryKeyStrategy.Guid:
-                    Code = Guid.NewGuid().ToString();
-                    break;
-                case PrimaryKeyStrategy.Serie:
-                    using (Repository repository = (Repository)Repository.Get())
-                        Code = repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(PrimaryKeyStrategy));
-            }
-            if (Name == null) {
-                Name = Code;
-            }
-        }
-
-        /// <inheritdoc />
-        public override string GetNextAvailableCode() {
-            switch (_userTableAttribute.PrimaryKeyStrategy) {
-                case PrimaryKeyStrategy.Manual:
-                    return "";
-                case PrimaryKeyStrategy.Guid:
-                    return Guid.NewGuid().ToString();
-                case PrimaryKeyStrategy.Serie:
-                    using (Repository repository = (Repository)Repository.Get())
-                        return repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(PrimaryKeyStrategy));
-            }
-        }
-
-        /// <summary>
-        /// Generates a new code based on the primary key strategy defined in the user table attribute.
-        /// </summary>
-        /// <returns>
-        /// A new code as a string based on the selected primary key strategy. It could be an empty string (for manual strategy),
-        /// a GUID (for Guid strategy), or the next code in a sequence (for Serie strategy).
-        /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown if the primary key strategy is not recognized or supported.
-        /// </exception>
-        /// <seealso cref="SAPUtils.Models.UserTables.PrimaryKeyStrategy" />
-        public static string GetNewCode() {
-            switch (UserTableAttribute.PrimaryKeyStrategy) {
-                case PrimaryKeyStrategy.Manual:
-                    return "";
-                case PrimaryKeyStrategy.Guid:
-                    return Guid.NewGuid().ToString();
-                case PrimaryKeyStrategy.Serie:
-                    using (Repository repository = (Repository)Repository.Get())
-                        return repository.GetNextCodeUserTable(_userTableAttribute.Name).ToString();
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(PrimaryKeyStrategy));
-            }
-        }
-
-        private void RestoreOriginalCode() {
-            if (Code == OriginalCode) return;
-            Log.Debug("Reverting {0} Code to: {1}", GetType().Name, OriginalCode);
-            Code = OriginalCode;
-        }
-
-
-        private string GetNextCode() {
-            return GetAdjacentCode(next: true);
-        }
-
-        private string GetPreviousCode() {
-            return GetAdjacentCode(next: false);
-        }
-
-        private string GetAdjacentCode(bool next) {
-            string orderDir = next ? "ASC" : "DESC";
-            string comparisonOp = next ? ">" : "<";
-            string userTable = $"@{_userTableAttribute.Name}";
-            Recordset rs;
-            bool isHana = SapAddon.Instance().IsHana;
-
-            // 1. Obtener longitud máxima (solo si es Serie)
-            int maxLength = 0;
-            if (_userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie) {
-                string lenQuery = isHana
-                    ? $"SELECT MAX(LENGTH({Quote("Code")})) AS \"MaxLen\" FROM {Quote(userTable)}"
-                    : $"SELECT MAX(LEN({Quote("Code")})) AS MaxLen FROM {Quote(userTable)}";
-
-                rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-                rs.DoQuery(lenQuery);
-                maxLength = rs.Fields.Item(0).Value != null ? (int)rs.Fields.Item(0).Value : 0;
-            }
-
-            // 2. Preparar expresiones
-            string paddedCodeExpr = _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
-                ? isHana
-                    ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
-                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})"
-                : Quote("Code");
-
-            if (Code != null) {
-
-
-                string paddedCurrent = Code == null
-                    ? null
-                    : _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
-                        ? Code.PadLeft(maxLength, '0')
-                        : Code;
-
-                string where = paddedCurrent == null
-                    ? ""
-                    : $"WHERE {paddedCodeExpr} {comparisonOp} '{paddedCurrent.Replace("'", "''")}'";
-
-                // 3. Consulta principal
-                string mainQuery = isHana
-                    ? $@"
-                    SELECT {Quote("Code")}
-                    FROM {Quote(userTable)}
-                    {where}
-                    ORDER BY {paddedCodeExpr} {orderDir}
-                    LIMIT 1"
-                    : $@"
-                    SELECT TOP 1 {Quote("Code")}
-                    FROM {Quote(userTable)}
-                    {where}
-                    ORDER BY {paddedCodeExpr} {orderDir}";
-
-                rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-                rs.DoQuery(mainQuery);
-                if (!rs.EoF)
-                    return rs.Fields.Item("Code").Value.ToString();
-            }
-            rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-            // 4. Si no se encontró, consulta fallback
-            string fallbackQuery = isHana
-                ? $@"
-                    SELECT {Quote("Code")}
-                    FROM {Quote(userTable)}
-                    ORDER BY {paddedCodeExpr} {orderDir}
-                    LIMIT 1"
-                : $@"
-                SELECT TOP 1 {Quote("Code")}
-                FROM {Quote(userTable)}
-                ORDER BY {paddedCodeExpr} {orderDir}";
-
-            rs.DoQuery(fallbackQuery);
-            return rs.EoF ? null : rs.Fields.Item("Code").Value.ToString();
-
-            string Quote(string s) => isHana ? $"\"{s}\"" : $"[{s}]";
-        }
-
-        private string GetFirstCode() {
-            return GetEdgeCode(first: true);
-        }
-
-        private string GetLastCode() {
-            return GetEdgeCode(first: false);
-        }
-
-
-        private string GetEdgeCode(bool first) {
-            string orderDir = first ? "ASC" : "DESC";
-
-            string userTable = $"@{_userTableAttribute.Name}";
-            Recordset rs;
-            bool isHana = SapAddon.Instance().IsHana;
-
-            // Obtener longitud máxima si es Serie
-            int maxLength = 0;
-            if (_userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie) {
-                string lenQuery = isHana
-                    ? $"SELECT MAX(LENGTH({Quote("Code")})) AS \"MaxLen\" FROM {Quote(userTable)}"
-                    : $"SELECT MAX(LEN({Quote("Code")})) AS MaxLen FROM {Quote(userTable)}";
-
-                rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-                rs.DoQuery(lenQuery);
-                maxLength = rs.Fields.Item(0).Value != null ? (int)rs.Fields.Item(0).Value : 0;
-            }
-
-            // Expresión de ordenamiento
-            string paddedCodeExpr = _userTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
-                ? isHana
-                    ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
-                    : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})"
-                : Quote("Code");
-
-            // Consulta SQL
-            string query = isHana
-                ? $@"
-                    SELECT {Quote("Code")}
-                    FROM {Quote(userTable)}
-                    ORDER BY {paddedCodeExpr} {orderDir}
-                    LIMIT 1"
-                : $@"
-                    SELECT TOP 1 {Quote("Code")}
-                    FROM {Quote(userTable)}
-                    ORDER BY {paddedCodeExpr} {orderDir}";
-
-            rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
-            rs.DoQuery(query);
-
-            return rs.EoF ? null : rs.Fields.Item("Code").Value.ToString();
-
-            string Quote(string s) => isHana ? $"\"{s}\"" : $"[{s}]";
-        }
-    }
-
 }

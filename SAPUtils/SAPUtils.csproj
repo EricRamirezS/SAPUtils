@@ -132,6 +132,9 @@
       <Compile Include="Models\UserTables\UserTableObjectModel.cs">
       <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
     </Compile>
+      <Compile Include="Models\UserTables\UserTableObjectModel.typed.cs">
+          <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
+      </Compile>
       <Compile Include="Query\IWhere.cs"/>
       <Compile Include="Query\IWhereBuilder.cs"/>
       <Compile Include="Query\IWhereCondition.cs"/>
