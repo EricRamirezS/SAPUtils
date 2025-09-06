@@ -34,7 +34,7 @@ namespace SAPUtils.Forms {
         /// <para>
         /// For production environments it is strongly recommended to set this property to <c>true</c> 
         /// and to include a pre-generated matrix definition that already contains its columns. 
-        /// Such a definition can be obtained by calling <see cref="GetAsXML()"/> on the form 
+        /// Such a definition can be obtained by calling <see cref="UserForm.GetAsXML"/> on the form 
         /// after the matrix has been built once in development.  
         /// </para>
         /// <para>

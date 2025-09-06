@@ -108,22 +108,22 @@ namespace SAPUtils.Forms {
             ICellStyle dateStyle = workbook.CreateCellStyle();
             dateStyle.DataFormat = dataFormat.GetFormat(DisplayInfo.FormatInfo.GetDateFullFormat());
 
-            string CreateNumberFormat(int decimals, string prefix = "", string suffix = "") {
-                return decimals <= 0 ? $"{prefix}#,##0{suffix}" : $"{prefix}#,##0.{new string('0', decimals)}{suffix}";
+            string CreateNumberFormat(int decimalPlaces, string prefix = "", string suffix = "") {
+                return decimalPlaces <= 0 ? $"{prefix}#,##0{suffix}" : $"{prefix}#,##0.{new string('0', decimalPlaces)}{suffix}";
             }
 
-            string CreateMoneyFormat(int decimales) {
-                if (decimales < 0 || decimales > 6)
-                    throw new ArgumentOutOfRangeException(nameof(decimales),
+            string CreateMoneyFormat(int decimalPlaces) {
+                if (decimalPlaces < 0 || decimalPlaces > 6)
+                    throw new ArgumentOutOfRangeException(nameof(decimalPlaces),
                         Texts
                             .ChangeTrackerMatrixForm_GenerateExcel_The_number_of_decimal_places_must_be_between_0_and_6_);
 
-                string parteEntera = "#,##0";
-                string parteDecimal = decimales > 0 ? "," + new string('0', decimales) : "";
-                string patronNumero = parteEntera + parteDecimal;
+                const string integerPart = "#,##0";
+                string decimalPart = decimalPlaces > 0 ? "," + new string('0', decimalPlaces) : "";
+                string patronNumero = integerPart + decimalPart;
 
                 string formato =
-                    $@"_($* {patronNumero}_);_($* ({patronNumero});_($* ""-""{new string('?', decimales)}_);_(@_)";
+                    $@"_($* {patronNumero}_);_($* ({patronNumero});_($* ""-""{new string('?', decimalPlaces)}_);_(@_)";
 
                 return formato;
             }

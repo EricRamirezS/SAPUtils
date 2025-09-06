@@ -321,8 +321,8 @@ namespace SAPUtils.Forms {
 
 
                             if (isCombo ||
-                                isLinked && (field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone &&
-                                             string.IsNullOrEmpty(field.LinkedUdo))) {
+                                isLinked && field.LinkedSystemObject == UDFLinkedSystemObjectTypesEnum.ulNone &&
+                                string.IsNullOrEmpty(field.LinkedUdo)) {
                                 Task.Run(() => {
                                     if (isCombo) {
                                         column.ValidValues.AddRange(
@@ -350,7 +350,7 @@ namespace SAPUtils.Forms {
                                                         data.ForEach(e => vv.Add(new UserFieldValidValue(
                                                             e.Code, e.DisplayName
                                                         )));
-                                                        if (field.Mandatory == false) {
+                                                        if (!field.Mandatory) {
                                                             vv.Insert(0, new UserFieldValidValue("", ""));
                                                         }
                                                     }
