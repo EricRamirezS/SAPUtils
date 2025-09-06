@@ -1,5 +1,6 @@
 ﻿using System;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Exceptions {
     /// <summary>
@@ -29,6 +30,6 @@ namespace SAPUtils.Exceptions {
         /// primary key strategy for the table is manually defined but has not been supplied.
         /// </remarks>
         public CodeNotSetException(string tableName) : base(
-            $"No Code was provided for new data in {tableName}, but PrimaryKeyStrategy was set to Manual") { }
+            string.Format(Texts.CodeNotSetException_CodeNotSetException_No_Code_was_provided_for_new_data_in__0___but_PrimaryKeyStrategy_was_set_to_Manual_, tableName)) { }
     }
 }

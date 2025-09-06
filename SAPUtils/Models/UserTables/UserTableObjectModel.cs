@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -11,6 +12,7 @@ using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.Query;
 using SAPUtils.__Internal.Utils;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Query;
 using SAPUtils.Utils;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
@@ -27,7 +29,7 @@ namespace SAPUtils.Models.UserTables {
         /// objects based on their type and a unique code identifier.
         /// </summary>
         /// <remarks>
-        /// This cache utilizes a <see cref="System.Collections.Concurrent.ConcurrentDictionary{TKey, TValue}"/>
+        /// This cache uses a <see cref="System.Collections.Concurrent.ConcurrentDictionary{TKey, TValue}"/>
         /// to ensure thread-safety when accessing or modifying the stored instances.
         /// </remarks>
         /// <seealso cref="System.Collections.Concurrent.ConcurrentDictionary{TKey, TValue}"/>
@@ -89,6 +91,7 @@ namespace SAPUtils.Models.UserTables {
             return SettersCache.GetOrAdd(type, BuildSetters);
         }
 
+        [Localizable(false)]
         private static Dictionary<PropertyInfo, Func<object, object>> BuildGetters(Type type) {
             Dictionary<PropertyInfo, Func<object, object>> dict = new Dictionary<PropertyInfo, Func<object, object>>();
 
@@ -105,6 +108,7 @@ namespace SAPUtils.Models.UserTables {
             return dict;
         }
 
+        [Localizable(false)]
         private static Dictionary<PropertyInfo, Action<object, object>> BuildSetters(Type type) {
             Dictionary<PropertyInfo, Action<object, object>> dict =
                 new Dictionary<PropertyInfo, Action<object, object>>();
@@ -137,20 +141,21 @@ namespace SAPUtils.Models.UserTables {
         /// <returns>
         /// A list of objects of type <typeparamref name="T"/> representing the records found in the user table.
         /// </returns>
+        [Localizable(false)]
         public static List<T> GetAll<T>(IWhere where = null) where T : IUserTableObjectModel, new() {
             List<T> data = new List<T>();
             Type type = typeof(T);
             ILogger log = Logger.Instance;
             where = where ?? Where.Builder().Build();
-            log.Debug("Fetching All {0}", type.FullName);
+            log.Debug(Texts.UserTableObjectModel_GetAll_Fetching_All__0_, type.FullName);
 
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
             if (userTable == null) {
-                log.Error("UserTableAttribute not found in {0}", type.FullName);
+                log.Error(Texts.UserTableObjectModel_GetAll_UserTableAttribute_not_found_in__0_, type.FullName);
                 return data;
             }
 
-            log.Debug("Fetching all {0} from table {1}", type.FullName, userTable.Name);
+            log.Debug(Texts.UserTableObjectModel_GetAll_Fetching_all__0__from_table__1_, type.FullName, userTable.Name);
 
             string tableName = userTable.Name;
             Recordset rs = null;
@@ -159,7 +164,7 @@ namespace SAPUtils.Models.UserTables {
                 tableName = SapAddon.Instance().IsHana ? $"\"@{tableName}\"" : $"[@{tableName}]";
                 string whereString = new SqlWhereBuilder(where).Build();
                 string query = $"SELECT T0.* FROM {tableName} T0 {whereString}";
-                log.Trace("Executing query: {0}", query);
+                log.Trace(Texts.UserTableObjectModel_GetAll_Executing_query___0_, query);
                 rs.DoQuery(query);
 
                 while (!rs.EoF) {
@@ -194,6 +199,7 @@ namespace SAPUtils.Models.UserTables {
             return data;
         }
 
+        [Localizable(false)]
         private static void PopulateFields<T>(Fields fields, Type type, string tableName, ref T entity)
             where T : IUserTableObjectModel {
             ILogger log = Logger.Instance;
@@ -203,7 +209,7 @@ namespace SAPUtils.Models.UserTables {
                 string fieldName = string.IsNullOrWhiteSpace(userTableField.Name)
                     ? propertyInfo.Name
                     : userTableField.Name;
-                log.Trace("Processing field: {0}.{1}", tableName, fieldName);
+                log.Trace(Texts.UserTableObjectModel_PopulateFields_Processing_field___0___1_, tableName, fieldName);
                 if (userTableField is DateTimeFieldAttribute dtUserTableField) {
                     Field date = fields.Item($"U_{fieldName}Date");
                     Field time = fields.Item($"U_{fieldName}Time");
@@ -216,7 +222,7 @@ namespace SAPUtils.Models.UserTables {
                 }
                 else {
                     Field field = fields.Item($"U_{fieldName}");
-                    log.Trace("Processing field: {0}.{1} = {2}", tableName, fieldName, field.Value);
+                    log.Trace(Texts.UserTableObjectModel_PopulateFields_, tableName, fieldName, field.Value);
                     if (field.IsNull() == BoYesNoEnum.tNO) {
                         setters[propertyInfo](entity, userTableField.ParseValue(field.Value));
                     }
@@ -255,24 +261,24 @@ namespace SAPUtils.Models.UserTables {
         public static bool Get<T>(string code, out T item) where T : IUserTableObjectModel, new() {
             Type type = typeof(T);
             ILogger log = Logger.Instance;
-            log.Debug("Fetching {0} with Code: {1}", type.FullName, code);
+            log.Debug(Texts.UserTableObjectModel_Get_Fetching__0__with_Code___1_, type.FullName, code);
             item = default;
             IUserTable userTable = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
             if (userTable == null) {
-                log.Error("UserTableAttribute not found in {0}", type.FullName);
+                log.Error(Texts.UserTableObjectModel_Get_UserTableAttribute_not_found_in__0_, type.FullName);
                 return false;
             }
 
-            log.Debug("Fetching {0} from table {1} with Code: {2}", type.FullName, userTable.Name, code);
+            log.Debug(Texts.UserTableObjectModel_Get_Fetching__0__from_table__1__with_Code___2_, type.FullName, userTable.Name, code);
 
             string tableName = userTable.Name;
             UserTable table = SapAddon.Instance().Company.UserTables.Item(tableName);
             if (!table.GetByKey(code)) {
-                log.Info("{0} from table {1} not found with Code: {2}", type.FullName, tableName, code);
+                log.Info(Texts.UserTableObjectModel_Get__0__from_table__1__not_found_with_Code___2_, type.FullName, tableName, code);
                 return false;
             }
 
-            log.Debug("{0} from table {1} found in {0}, populating properties...", type.FullName, tableName, code);
+            log.Debug(Texts.UserTableObjectModel_Get__0__from_table__1__found_in__0___populating_properties___, type.FullName, tableName, code);
             item = new T {
                 Code = table.Code,
                 Name = table.Name,
@@ -280,7 +286,7 @@ namespace SAPUtils.Models.UserTables {
 
             PopulateFields(table.UserFields.Fields, type, tableName, ref item);
 
-            log.Trace("{0} successfully populated for Code: {1}", type.FullName, code);
+            log.Trace(Texts.UserTableObjectModel_Get__0__successfully_populated_for_Code___1_, type.FullName, code);
             return true;
         }
 
@@ -294,7 +300,7 @@ namespace SAPUtils.Models.UserTables {
         /// The cached or freshly retrieved instance of <typeparamref name="T"/> if found; otherwise, <c>null</c>.
         /// </returns>
         /// <seealso cref="Get{T}(string, out T)"/>
-        static protected T GetCached<T>(string code) where T : UserTableObjectModel, new() {
+        protected static T GetCached<T>(string code) where T : UserTableObjectModel, new() {
             if (string.IsNullOrWhiteSpace(code))
                 return null;
 

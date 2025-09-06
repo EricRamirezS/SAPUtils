@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -15,6 +16,7 @@ using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Database;
 using SAPUtils.Extensions;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Utils;
 using ChooseFromList = SAPbouiCOM.ChooseFromList;
@@ -106,7 +108,7 @@ namespace SAPUtils.Forms {
         /// construction of the <see cref="ChangeTrackerMatrixForm{T}"/>.
         /// </remarks>
         /// <seealso cref="ChangeTrackerMatrixForm{T}"/>
-        private readonly bool _userDeleteContextButton;
+        private readonly bool _useDeleteContextButton;
 
         /// <summary>
         /// Represents a mapping between field names and their respective <see cref="SAPbouiCOM.ChooseFromList"/> objects
@@ -224,17 +226,17 @@ namespace SAPUtils.Forms {
         /// <seealso cref="ISoftDeletable"/>
         /// <seealso cref="IAuditableDate"/>
         /// <seealso cref="IAuditableUser"/>
+        [Localizable(false)]
         protected ChangeTrackerMatrixForm(
             bool useAddContextButton = true,
-            bool userDeleteContextButton = true,
-            string uid = null) : base(uid) {
+            bool useDeleteContextButton = true) {
             if (!Alive) return;
             try {
                 Task<List<T>> dataLoadTask = PreloadDataAsync();
                 ShowWaitCursor();
                 Freeze(true);
                 _useAddContextButton = useAddContextButton;
-                _userDeleteContextButton = userDeleteContextButton;
+                _useDeleteContextButton = useDeleteContextButton;
                 _tableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
 
                 _addRowMenuUid = $"{typeof(T).Name}{UniqueID}AddRow)";
@@ -266,7 +268,7 @@ namespace SAPUtils.Forms {
                     foreach ((PropertyInfo property, IUserTableField field) in itemInfo) {
                         string fieldName = property.Name;
 
-                        if (field is DateTimeFieldAttribute dt) {
+                        if (field is DateTimeFieldAttribute) {
                             string dateColumnUid = $"_C{i}D";
                             string timeColumnUid = $"_C{i}T";
 
@@ -293,8 +295,7 @@ namespace SAPUtils.Forms {
                             ColumnToProperty[column.UniqueID] = property;
 
                             string cflId = $"_CFL{columnId}";
-                            ChooseFromList cfl;
-                            cfl = UIAPIRawForm.ChooseFromLists
+                            ChooseFromList cfl = UIAPIRawForm.ChooseFromLists
                                 .Cast<ChooseFromList>()
                                 .FirstOrDefault(item => item.UniqueID == cflId);
 
@@ -338,19 +339,20 @@ namespace SAPUtils.Forms {
                                             MethodInfo method = UserTableMetadataCache.GetAllMethodInfo(type);
                                             if (method != null) {
                                                 object result = method.Invoke(null, new object[] { null });
-                                                IEnumerable enumerable = result as IEnumerable;
-                                                List<IUserTableObjectModel> data = enumerable
-                                                    .OfType<IUserTableObjectModel>()
-                                                    .Where(u => !(u is ISoftDeletable sd) || sd.Active)
-                                                    .ToList();
+                                                if (result is IEnumerable enumerable) {
+                                                    List<IUserTableObjectModel> data = enumerable
+                                                        .OfType<IUserTableObjectModel>()
+                                                        .Where(u => !(u is ISoftDeletable sd) || sd.Active)
+                                                        .ToList();
 
-                                                if (data.Count > 0) {
-                                                    vv = new List<IUserFieldValidValue>();
-                                                    data.ForEach(e => vv.Add(new UserFieldValidValue(
-                                                        e.Code, e.DisplayName
-                                                    )));
-                                                    if (field.Mandatory == false) {
-                                                        vv.Insert(0, new UserFieldValidValue("", ""));
+                                                    if (data.Count > 0) {
+                                                        vv = new List<IUserFieldValidValue>();
+                                                        data.ForEach(e => vv.Add(new UserFieldValidValue(
+                                                            e.Code, e.DisplayName
+                                                        )));
+                                                        if (field.Mandatory == false) {
+                                                            vv.Insert(0, new UserFieldValidValue("", ""));
+                                                        }
                                                     }
                                                 }
                                             }
@@ -374,8 +376,6 @@ namespace SAPUtils.Forms {
                 EnableMenu("1281", false); // find button
                 EnableMenu("1282", _useAddContextButton); // add button
                 EnableMenu("1304", true); //Enable Refresh
-
-                (DataColumn DataTableColumn, Column MatrixColumn) value;
 
 
                 EventSubscriber();
@@ -408,7 +408,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="IUserTableObjectModel"/>
         // ReSharper disable once ReplaceAutoPropertyWithComputedProperty
         // ReSharper disable once VirtualMemberNeverOverridden.Global
-        virtual protected string ObjectCodePropertyName { get; } = nameof(IUserTableObjectModel.Code);
+        protected virtual string ObjectCodePropertyName { get; } = nameof(IUserTableObjectModel.Code);
 
         /// <summary>
         /// Provides a collection representing the data bound to the matrix in the form.
@@ -423,11 +423,11 @@ namespace SAPUtils.Forms {
         protected ICollection<T> Data => _observableData;
 
         private Task<List<T>> PreloadDataAsync() {
-            Logger.Trace("Preloading data...");
+            Logger.Trace(Texts.ChangeTrackerMatrixForm_PreloadDataAsync_Preloading_data___);
             return Task.Factory.StartNew(() => {
-                    Logger.Debug("PreloadData Thread Started");
+                    Logger.Debug(Texts.ChangeTrackerMatrixForm_PreloadDataAsync_PreloadData_Thread_Started);
                     List<T> data = LoadCustomData() ?? UserTableObjectModel.GetAll<T>();
-                    Logger.Debug("PreloadData Thread Data Loaded");
+                    Logger.Debug(Texts.ChangeTrackerMatrixForm_PreloadDataAsync_PreloadData_Thread_Data_Loaded);
                     return data;
                 },
                 CancellationToken.None,
@@ -441,14 +441,14 @@ namespace SAPUtils.Forms {
         /// </summary>
         /// <returns>The matrix object used in the form.</returns>
         /// <seealso cref="SAPbouiCOM.Matrix"/>
-        abstract protected Matrix GetMatrix();
+        protected abstract Matrix GetMatrix();
 
         /// <summary>
         /// Retrieves the save button from the form.
         /// </summary>
         /// <returns>The <see cref="SAPbouiCOM.Button"/> instance representing the save button in the form.</returns>
         /// <seealso cref="SAPbouiCOM.Button"/>
-        abstract protected Button GetSaveButton();
+        protected abstract Button GetSaveButton();
 
         /// <summary>
         /// Retrieves the button control used for exporting data to Excel.
@@ -460,7 +460,7 @@ namespace SAPUtils.Forms {
         /// <returns>
         /// A <see cref="Button"/> object representing the export-to-Excel button.
         /// </returns>
-        abstract protected Button GetExportToExcelButton();
+        protected abstract Button GetExportToExcelButton();
 
         /// <summary>
         /// Retrieves the button control responsible for importing data from an Excel file.
@@ -472,7 +472,7 @@ namespace SAPUtils.Forms {
         /// The returned button is used in the form for triggering the import functionality from an Excel file.
         /// </remarks>
         /// <seealso cref="SAPbouiCOM.Button"/>
-        abstract protected Button GetImportFromExcelButton();
+        protected abstract Button GetImportFromExcelButton();
 
         /// <summary>
         /// Determines whether a specific item of type <typeparamref name="T"/> is editable.
@@ -483,7 +483,7 @@ namespace SAPUtils.Forms {
         /// <returns>
         /// A boolean value indicating whether the specified item is editable.
         /// </returns>
-        virtual protected bool IsEditable(T item) => true;
+        protected virtual bool IsEditable(T item) => true;
 
         /// <summary>
         /// Determines if there are unsaved changes in the current data collection.

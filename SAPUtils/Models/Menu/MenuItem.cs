@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using SAPbouiCOM;
 
@@ -128,6 +129,7 @@ namespace SAPUtils.Models.Menu {
         public Func<bool> Available { get; }
     }
 
+    [Localizable(false)]
     internal class SapMenuItem : MenuItem {
         internal SapMenuItem(string name, SapMenuUid sapId, IList<IMenuItem> subMenus = null)
             : base(uid: ((int)sapId).ToString(), name: name, subMenus: subMenus ?? new List<IMenuItem>()) { }

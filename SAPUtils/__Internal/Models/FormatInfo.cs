@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using SAPUtils.I18N;
 
 namespace SAPUtils.__Internal.Models {
     /// <summary>
@@ -145,6 +146,7 @@ namespace SAPUtils.__Internal.Models {
         /// </exception>
         public string GetDateFullFormat() {
             switch (DateFormat) {
+                // ReSharper disable LocalizableElement
                 case 0:
                     return $"dd{DateSep}MM{DateSep}yy";
                 case 1:
@@ -159,8 +161,9 @@ namespace SAPUtils.__Internal.Models {
                     return $"dd{DateSep}MMM{DateSep}yyyy";
                 case 6:
                     return $"yy{DateSep}MM{DateSep}dd";
+                // ReSharper restore LocalizableElement
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(DateFormat), DateFormat, "Formato de fecha no reconocido.");
+                    throw new ArgumentOutOfRangeException(nameof(DateFormat), DateFormat, Texts.FormatInfo_GetDateFullFormat_Unrecognized_date_format_);
             }
         }
     }

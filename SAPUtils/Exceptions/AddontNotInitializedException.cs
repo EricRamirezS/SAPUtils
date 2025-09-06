@@ -1,4 +1,5 @@
 using System;
+using SAPUtils.I18N;
 
 // ReSharper disable UnusedType.Global
 
@@ -18,6 +19,6 @@ namespace SAPUtils.Exceptions {
         /// that has not been properly initialized.
         /// </summary>
         public AddontNotInitializedException() : base(
-            "El add-on no ha sido inicializado, ") { }
+            Texts.AddontNotInitializedException_AddontNotInitializedException_The_add_on_has_not_been_initialized_) { }
     }
 }

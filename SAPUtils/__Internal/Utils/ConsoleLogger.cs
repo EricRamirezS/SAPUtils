@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -7,22 +8,24 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using SAPUtils.__Internal.Enums;
+using SAPUtils.I18N;
 
 // ReSharper disable UnusedMember.Global
 
 namespace SAPUtils.__Internal.Utils {
     [SuppressMessage("ReSharper", "ExplicitCallerInfoArgument")]
-    internal class ConsoleLogger : IDisposable {
-
+    internal abstract class ConsoleLogger : IDisposable {
         private static readonly LogLevel MinimumLevel;
         private static readonly Logger.LogInfo LogInfo;
 
-        private static readonly BlockingCollection<Action> _queue = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
-        private static readonly Task _worker;
+        private static readonly BlockingCollection<Action> Queue =
+            new BlockingCollection<Action>(new ConcurrentQueue<Action>());
+
+        private static readonly Task Worker;
 
         static ConsoleLogger() {
-            _worker = Task.Run(() => {
-                foreach (Action action in _queue.GetConsumingEnumerable()) {
+            Worker = Task.Run(() => {
+                foreach (Action action in Queue.GetConsumingEnumerable()) {
                     action();
                 }
             });
@@ -32,15 +35,16 @@ namespace SAPUtils.__Internal.Utils {
         }
 
         public void Dispose() {
-            _queue?.CompleteAdding();
-            _worker?.Wait();
+            Queue?.CompleteAdding();
+            Worker?.Wait();
         }
 
         private static void Enqueue(Action action) {
             if (MinimumLevel == LogLevel.None) return;
-            _queue.Add(action);
+            Queue.Add(action);
         }
 
+        [Localizable(false)]
         private static void PrintColoredLogEntry(
             LogLevel level,
             string message,
@@ -52,6 +56,7 @@ namespace SAPUtils.__Internal.Utils {
             PrintColoredLogEntry(timestamp, threadId, level, message, callerName, callerFile, callerLine);
         }
 
+        [Localizable(false)]
         internal static void PrintColoredLogEntry(
             string timestamp,
             int threadId,
@@ -62,7 +67,6 @@ namespace SAPUtils.__Internal.Utils {
             [CallerLineNumber] int callerLine = 0) {
             if (MinimumLevel > level) return;
             Enqueue(() => {
-
                 ConsoleColor originalColor = Console.ForegroundColor;
 
                 bool includeSeparator = false;
@@ -71,6 +75,7 @@ namespace SAPUtils.__Internal.Utils {
                     Console.Write(timestamp + " ");
                     includeSeparator = true;
                 }
+
                 if (LogInfo.IncludeThreadId) {
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.Write($"[Thread {threadId}] ");
@@ -103,6 +108,7 @@ namespace SAPUtils.__Internal.Utils {
                             levelColor = ConsoleColor.White;
                             break;
                     }
+
                     Console.ForegroundColor = levelColor;
                     Console.Write($"[{level.ToString().ToUpperInvariant()}] ");
                     includeSeparator = true;
@@ -133,7 +139,6 @@ namespace SAPUtils.__Internal.Utils {
 
         internal static void PrintExceptionToConsole(Exception exception) {
             Enqueue(() => {
-
                 ConsoleColor originalColor = Console.ForegroundColor;
                 PrintExceptionBlock(exception);
 
@@ -150,17 +155,19 @@ namespace SAPUtils.__Internal.Utils {
                     if (isInner) {
                         Console.ForegroundColor = ConsoleColor.DarkMagenta;
                         Console.WriteLine();
-                        Console.Write("Caused by: ");
+                        Console.Write(Texts.ConsoleLogger_PrintExceptionToConsole_Caused_by__);
                     }
                     else {
                         Console.ForegroundColor = ConsoleColor.Red;
                     }
 
-                    Console.WriteLine($"{ex.GetType().Name}: {ex.Message}");
+                    Console.WriteLine(Texts.ConsoleLogger_PrintExceptionToConsole__0____1_, ex.GetType().Name,
+                        ex.Message);
 
                     if (ex.TargetSite != null) {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"Occurred in: {ex.TargetSite.DeclaringType?.FullName}.{ex.TargetSite.Name}");
+                        Console.WriteLine(Texts.ConsoleLogger_PrintExceptionToConsole_Occurred_in___0___1_,
+                            ex.TargetSite.DeclaringType?.FullName, ex.TargetSite.Name);
                     }
 
                     StackTrace stackTrace = new StackTrace(ex, true);
@@ -168,12 +175,13 @@ namespace SAPUtils.__Internal.Utils {
 
                     if (frame?.GetFileName() != null) {
                         Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.WriteLine($"File: {frame.GetFileName()}");
-                        Console.WriteLine($"Line: {frame.GetFileLineNumber()}");
+                        Console.WriteLine(Texts.ConsoleLogger_PrintExceptionToConsole_File___0_, frame.GetFileName());
+                        Console.WriteLine(Texts.ConsoleLogger_PrintExceptionToConsole_Line___0_,
+                            frame.GetFileLineNumber());
                     }
 
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.WriteLine("Stack Trace:");
+                    Console.WriteLine(Texts.ConsoleLogger_PrintExceptionToConsole_Stack_Trace_);
                     Console.WriteLine(ex.StackTrace);
                 }
             });
@@ -247,5 +255,4 @@ namespace SAPUtils.__Internal.Utils {
             }
         }
     }
-
 }

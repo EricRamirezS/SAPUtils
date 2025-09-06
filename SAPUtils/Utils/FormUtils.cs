@@ -3,6 +3,7 @@ using System.Linq;
 using SAPbobsCOM;
 using SAPbouiCOM;
 using SAPUtils.Extensions;
+using SAPUtils.I18N;
 using Application = SAPbouiCOM.Application;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -165,6 +166,7 @@ namespace SAPUtils.Utils {
             if (string.IsNullOrWhiteSpace(value)) {
                 return;
             }
+            // ReSharper disable once LocalizableElement
             string cleanValue = value.Replace(":", "", 1);
 
             bool tryParse = int.TryParse(cleanValue, out int time);
@@ -179,6 +181,7 @@ namespace SAPUtils.Utils {
                 }
 
                 if (bubbleEvent) {
+                    // ReSharper disable once LocalizableElement
                     string visibleValue = $"{hours:D2}:{minutes:D2}";
                     if (visibleValue != value) {
                         editText.Value = visibleValue;
@@ -188,8 +191,8 @@ namespace SAPUtils.Utils {
             else {
                 bubbleEvent = false;
             }
-            if (bubbleEvent == false) {
-                SapAddon.Instance().Application.SetStatusBarMessage("Valor temporal no válido (ODBC-1031) [131-183]", BoMessageTime.bmt_Short);
+            if (!bubbleEvent) {
+                SapAddon.Instance().Application.SetStatusBarMessage(Texts.FormUtils_ValidateTimeCell_Invalid_time_value__ODBC_1031___131_183_, BoMessageTime.bmt_Short);
             }
         }
     }

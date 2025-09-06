@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using SAPbouiCOM;
+using SAPUtils.I18N;
 using SAPUtils.Models.Menu;
 using MenuItem = SAPbouiCOM.MenuItem;
 using UtilsMenuItem = SAPUtils.Models.Menu.IMenuItem;
@@ -17,29 +18,29 @@ namespace SAPUtils {
         /// </summary>
         /// <param name="menuItems">A list of menu items to be added to the menu structure.</param>
         public void CreateMenu(params UtilsMenuItem[] menuItems) {
-            Logger.Debug("Creating menu");
+            Logger.Debug(Texts.SapAddon_CreateMenu_Loading_Menus);
             try {
-                Application.SetStatusBarMessage("Cargando menus", BoMessageTime.bmt_Medium, false);
-                Logger.Trace("Creating BoCreatableObjectType.cot_MenuCreationParams");
+                Application.SetStatusBarMessage(Texts.SapAddon_CreateMenu_Loading_Menus, BoMessageTime.bmt_Medium, false);
+                Logger.Trace(Texts.SapAddon_CreateMenu_Creating_BoCreatableObjectType_cot_MenuCreationParams);
                 MenuCreationParams creationPackage =
                     Application.CreateObject(BoCreatableObjectType.cot_MenuCreationParams) as MenuCreationParams;
-                Logger.Trace("Get Menus Object");
+                Logger.Trace(Texts.SapAddon_CreateMenu_Get_Menus_Object);
                 Menus mainMenu = Application.Menus;
-                Logger.Trace("Getting Meny Item by id {0}", MenuId);
+                Logger.Trace(Texts.SapAddon_CreateMenu_Getting_Menu_Item_by_id__0_, MenuId);
                 MenuItem sapMenuItem = Application.Menus.Item(MenuId);
                 Menus menus = sapMenuItem.SubMenus;
 
-                Logger.Trace("Setting new Menus ItemPosition to last index if no position is set");
+                Logger.Trace(Texts.SapAddon_CreateMenu_Setting_new_Menus_ItemPosition_to_last_index_if_no_position_is_set);
                 Array.ForEach(menuItems, e => e.ItemPosition = e.ItemPosition ?? -1);
                 AddMenuItems(mainMenu, creationPackage, menus, menuItems);
 
-                Logger.Trace("Subscribing to Application.MenuEvent");
+                Logger.Trace(Texts.SapAddon_CreateMenu_Subscribing_to_Application_MenuEvent);
                 Application.MenuEvent += SBO_Application_MenuEvent;
             }
             catch (Exception ex) {
                 Logger.Error(ex);
                 Application.SetStatusBarMessage(
-                    "No logro crearse el nuevo menu. Error: " + ex.Message,
+                    string.Format(Texts.SapAddon_CreateMenu_The_new_menu_could_not_be_created__Error___0_, ex.Message),
                     BoMessageTime.bmt_Short);
             }
         }
@@ -52,15 +53,15 @@ namespace SAPUtils {
 
                 if (menuItem.MenuType == BoMenuType.mt_POPUP) {
                     if (!(menuItem is SapMenuItem)) {
-                        Logger.Debug("Adding menu folder {0}", menuItem.Uid);
+                        Logger.Debug(Texts.SapAddon_AddMenuItems_Adding_menu_folder__0_, menuItem.Uid);
                         AddMenuItem(creationPackage, menus, menuItem);
                     }
 
-                    Logger.Debug("Adding menu folder {0} item", menuItem.Uid);
+                    Logger.Debug(Texts.SapAddon_AddMenuItems_Adding_menu_folder__0__item, menuItem.Uid);
                     AddMenuItems(mainMenu, creationPackage, mainMenu.Item(menuItem.Uid).SubMenus, menuItem.SubMenus);
                 }
                 else {
-                    Logger.Debug("Adding menu item {0}", menuItem.Uid);
+                    Logger.Debug(Texts.SapAddon_AddMenuItems_Adding_menu_item__0_, menuItem.Uid);
                     AddMenuItem(creationPackage, menus, menuItem);
                 }
             }
@@ -68,13 +69,13 @@ namespace SAPUtils {
 
         private void AddMenuItem(MenuCreationParams creationPackage, Menus menus, UtilsMenuItem menuItem) {
             if (menuItem is SapMenuItem) {
-                Logger.Trace("Menu item {0} is Sap Menu, skipping.", menuItem.Uid);
+                Logger.Trace(Texts.SapAddon_AddMenuItem_Menu_item__0__is_Sap_Menu__skipping_, menuItem.Uid);
                 return;
             }
 
-            Logger.Trace("Checking if menu item {0} exists", menuItem.Uid);
+            Logger.Trace(Texts.SapAddon_AddMenuItem_Checking_if_menu_item__0__exists, menuItem.Uid);
             if (menus.Exists(menuItem.Uid)) {
-                Logger.Trace("Removing menu item {0}", menuItem.Uid);
+                Logger.Trace(Texts.SapAddon_AddMenuItem_Removing_menu_item__0_, menuItem.Uid);
                 menus.RemoveEx(menuItem.Uid);
             }
 
@@ -87,8 +88,8 @@ namespace SAPUtils {
                 creationPackage.Position = menuItem.ItemPosition.Value;
             }
 
-            if (string.IsNullOrEmpty(menuItem.ImageUrl) == false) {
-                Logger.Trace("Setting menu item {0}'s image", menuItem.Uid);
+            if (!string.IsNullOrEmpty(menuItem.ImageUrl)) {
+                Logger.Trace(Texts.SapAddon_AddMenuItem_Setting_menu_item__0__s_image, menuItem.Uid);
                 creationPackage.Image = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, menuItem.ImageUrl);
             }
 
@@ -97,18 +98,18 @@ namespace SAPUtils {
         }
 
         private void SBO_Application_MenuEvent(ref MenuEvent pval, out bool bubbleevent) {
-            Logger.Trace("SBO_Application_MenuEvent called with pval.MenuUID {0}", pval.MenuUID);
+            Logger.Trace(Texts.SapAddon_SBO_Application_MenuEvent_SBO_Application_MenuEvent_called_with_pval_MenuUID__0_, pval.MenuUID);
             bubbleevent = true;
 
             try {
                 if (!pval.BeforeAction) return;
                 if (!_menuActions.TryGetValue(pval.MenuUID, out Action action)) return;
-                Logger.Trace("Invoke {0} related method", pval.MenuUID);
+                Logger.Trace(Texts.SapAddon_SBO_Application_MenuEvent_Invoke__0__related_method, pval.MenuUID);
                 action.Invoke();
             }
             catch (Exception ex) {
                 Logger.Error(ex);
-                Application.MessageBox(ex.ToString());
+                Application.MessageBox(ex.Message);
             }
         }
     }

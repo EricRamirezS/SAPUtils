@@ -1,4 +1,5 @@
 ﻿using System;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Exceptions {
     /// <summary>
@@ -24,7 +25,7 @@ namespace SAPUtils.Exceptions {
         /// not properly annotated with the required attribute.
         /// </remarks>
         /// <seealso cref="SAPUtils.Attributes.UserTables.UserTableAttribute"/>
-        public UserTableAttributeNotFound(string name) : base($"{name} is not decorated with UserTableAttribute") { }
+        public UserTableAttributeNotFound(string name) : base(string.Format(Texts.UserTableAttributeNotFound_UserTableAttributeNotFound__0__is_not_decorated_with_UserTableAttribute_, name)) { }
     }
 
 }

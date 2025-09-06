@@ -145,7 +145,7 @@
       <Compile Include="Utils\FormUtils.cs"/>
       <Compile Include="Utils\ILogger.cs"/>
       <Compile Include="Utils\Parsers.cs"/>
-    <Compile Include="Utils\SapClass.cs"/>
+      <Compile Include="Utils\SapClass.cs"/>
       <Compile Include="Utils\SapColors.cs"/>
       <Compile Include="Utils\SapUtils.cs"/>
       <Compile Include="Utils\TopMostDialog.cs"/>
@@ -158,6 +158,10 @@
       <Compile Include="__Internal\Enums\Status.cs"/>
       <Compile Include="__Internal\Events\EventSubscriber.cs"/>
       <Compile Include="__Internal\Extensions\MatrixExtensions.cs"/>
+      <Compile Include="__Internal\I18N\I18N.cs"/>
+      <Compile Include="__Internal\I18N\Texts.Designer.cs">
+          <DependentUpon>Texts.resx</DependentUpon>
+      </Compile>
       <Compile Include="__Internal\Models\AuditableField.cs"/>
       <Compile Include="__Internal\Models\FormatInfo.cs"/>
       <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
@@ -243,6 +247,39 @@
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="__Internal\I18N\Texts.de.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.en-GB.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.en-SG.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.es.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.fr.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.it.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.pt-BR.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.pt-PT.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Texts.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Include="__Internal\I18N\Texts.ru.resx">
+            <DependentUpon>Texts.resx</DependentUpon>
+        </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +10,7 @@ using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 using IValidValue = SAPbouiCOM.IValidValue;
@@ -34,20 +36,20 @@ namespace SAPUtils {
         [SuppressMessage("ReSharper", "RedundantArgumentDefaultValue")]
         public void InitializeUserTables(Type[] tables) {
             foreach (Type table in tables) {
-                Logger.Trace("Processing table: {0}", table.Name);
+                Logger.Trace(Texts.SapAddon_InitializeUserTables_Processing_table___0_, table.Name);
                 if (!ValidateTable(table)) continue;
 
                 if (!ValidateFields(table)) continue;
 
                 IUserTable userTable = (IUserTable)table.GetCustomAttributes(typeof(UserTableAttribute), true).First();
 
-                Logger.Trace("Creating user table: {0}", userTable.Name);
+                Logger.Trace(Texts.SapAddon_InitializeUserTables_Creating_user_table___0_, userTable.Name);
                 CreateUserTable(userTable);
 
                 foreach (PropertyInfo propertyInfo in table.GetProperties().Where(p => !IsIgnoredField(p))) {
                     if (propertyInfo.Name == "Code" || propertyInfo.Name == "Name") continue;
                     if (IsIgnoredField(propertyInfo)) continue;
-                    Logger.Trace("Processing field: {0}.{1}", userTable.Name, propertyInfo.Name);
+                    Logger.Trace(Texts.SapAddon_InitializeUserTables_Processing_field___0___1_, userTable.Name, propertyInfo.Name);
                     IUserTableField userTableField;
                     if (!AuditableField.IsAuditableField(table, propertyInfo)) {
 
@@ -68,7 +70,7 @@ namespace SAPUtils {
                     if (userTableField is DateTimeFieldAttribute dtUserTableField) {
                         CreateUserTableField(
                             userTable.Name,
-                            dtUserTableField.Name + "Date",
+                            $"{dtUserTableField.Name}Date",
                             dtUserTableField.DateDescription,
                             dtUserTableField.FieldType,
                             dtUserTableField.SubType,
@@ -85,7 +87,7 @@ namespace SAPUtils {
                         Thread.Sleep(100);
                         CreateUserTableField(
                             userTable.Name,
-                            dtUserTableField.Name + "Time",
+                            $"{dtUserTableField.Name}Time",
                             dtUserTableField.TimeDescription,
                             dtUserTableField.FieldType,
                             BoFldSubTypes.st_Time,
@@ -135,7 +137,7 @@ namespace SAPUtils {
         /// <seealso cref="IUserField"/>
         public void AddSapTableUserField(string tableName, IUserField fieldInfo) {
             if (fieldInfo is DateTimeFieldAttribute) {
-                throw new NotSupportedException("Cannot create DateTimeFieldAttribute Field in System Table, use Date and Time instead.");
+                throw new NotSupportedException(Texts.SapAddon_AddSapTableUserField_Cannot_create_DateTimeFieldAttribute_Field_in_System_Table__use_Date_and_Time_instead_);
             }
             CreateUserTableField(tableName,
                 fieldInfo.Name,
@@ -160,9 +162,9 @@ namespace SAPUtils {
             try {
                 userTableMd = Company.GetBusinessObject(BoObjectTypes.oUserTables) as UserTablesMD;
 
-                Logger.Trace("Verifying if table {0} already exist", userTable.Name);
+                Logger.Trace(Texts.SapAddon_CreateUserTable_Verifying_if_table__0__already_exist, userTable.Name);
                 if (userTableMd != null && userTableMd.GetByKey(userTable.Name)) {
-                    Logger.Debug("Table {0} already exist", userTable.Name);
+                    Logger.Debug(Texts.SapAddon_CreateUserTable_Table__0__already_exist, userTable.Name);
                     return;
                 }
 
@@ -173,12 +175,12 @@ namespace SAPUtils {
                 userTableMd.TableType = userTable.TableType;
 
                 if (userTableMd.Add() == 0) {
-                    Logger.Info("Table {0} created", userTable.Name);
+                    Logger.Info(Texts.SapAddon_CreateUserTable_Table__0__created, userTable.Name);
                     return;
                 }
 
                 string error = Company.GetLastErrorDescription();
-                throw new Exception($"No es posible agregar la tabla de usuario {userTable.Name}. Error {error}");
+                throw new Exception(string.Format(Texts.SapAddon_CreateUserTable_Unable_to_add_user_table__0___Error__1_, userTable.Name, error));
             }
             finally {
                 if (userTableMd != null) Marshal.ReleaseComObject(userTableMd);
@@ -186,6 +188,7 @@ namespace SAPUtils {
             }
         }
 
+        [Localizable(false)]
         private void CreateUserTableField(string tableName,
             string fieldName,
             string fieldDescription,
@@ -205,7 +208,7 @@ namespace SAPUtils {
                 userFieldsMd = Company.GetBusinessObject(BoObjectTypes.oUserFields) as UserFieldsMD;
 
                 if (ExistTableField(tableName, fieldName, userTable)) {
-                    Logger.Debug("Field {0}.{1} already exist", tableName, fieldName);
+                    Logger.Debug(Texts.SapAddon_CreateUserTableField_Field__0___1__already_exist, tableName, fieldName);
                     return;
                 }
 
@@ -240,12 +243,12 @@ namespace SAPUtils {
                 if (linkedUdo != null) userFieldsMd.LinkedUDO = linkedUdo;
 
                 if (userFieldsMd.Add() == 0) {
-                    Logger.Info("Field {0}.{1} created", tableName, fieldName);
+                    Logger.Info(Texts.SapAddon_CreateUserTableField_Field__0___1__created, tableName, fieldName);
                 }
                 else {
                     string error = Company.GetLastErrorDescription();
                     throw new Exception(
-                        $"No es posible agregar el campo {fieldName} a la tabla {tableName}. Error {error}");
+                        string.Format(Texts.SapAddon_CreateUserTableField_Unable_to_add_field__0__to_table__1___Error__2_, fieldName, tableName, error));
                 }
             }
             finally {
@@ -256,13 +259,15 @@ namespace SAPUtils {
 
         private bool ExistTableField(string tableName, string fieldName, bool userTable) {
             Recordset recordset = null;
-            Logger.Trace("Verifying if field {0}.{1} already exist", tableName, fieldName);
+            Logger.Trace(Texts.SapAddon_ExistTableField_Verifying_if_field__0___1__already_exist, tableName, fieldName);
             try {
                 recordset = Company.GetBusinessObject(BoObjectTypes.BoRecordset) as Recordset;
                 if (recordset != null) {
                     recordset.DoQuery(IsHana
+                        // ReSharper disable LocalizableElement
                         ? $@"SELECT '0' AS ""IGNORE"" FROM CUFD WHERE ""TableID"" = '{(userTable ? "@" : "")}{tableName}' AND ""AliasID"" = '{fieldName}'"
                         : $"SELECT NULL FROM CUFD WHERE TableId = '{(userTable ? "@" : "")}{tableName}' AND AliasId = '{fieldName}'");
+                    // ReSharper restore LocalizableElement
                     return recordset.RecordCount > 0;
                 }
             }
@@ -274,16 +279,16 @@ namespace SAPUtils {
         }
 
         private bool ValidateTable(Type table) {
-            Logger.Trace("Verifying table {0} implements UserTableObjectModel", table.Name);
+            Logger.Trace(Texts.SapAddon_ValidateTable_Verifying_table__0__implements_UserTableObjectModel, table.Name);
             if (!UserTableObjectModelType.IsAssignableFrom(table)) {
-                Logger.Error("{0} is not assignable From IUserTableObjectModel", table.Name);
+                Logger.Error(Texts.SapAddon_ValidateTable__0__is_not_assignable_From_IUserTableObjectModel, table.Name);
                 return false;
             }
 
-            Logger.Trace("Veryfing table {0} has Attribute UserTableAttribute", table.Name);
+            Logger.Trace(Texts.SapAddon_ValidateTable_Veryfing_table__0__has_Attribute_UserTableAttribute, table.Name);
             if (table.GetCustomAttributes(typeof(UserTableAttribute), true).FirstOrDefault() is UserTableAttribute) return true;
 
-            Logger.Error("UserTable Attribute not found in class {0}", table.Name);
+            Logger.Error(Texts.SapAddon_ValidateTable_UserTable_Attribute_not_found_in_class__0_, table.Name);
             return false;
 
         }
@@ -298,19 +303,18 @@ namespace SAPUtils {
                     continue;
 
                 if (IsIgnoredField(propertyInfo)) {
-                    Logger.Trace("{0} property `{1}` markes as Ignored", table.Name, propertyInfo.Name);
+                    Logger.Trace(Texts.SapAddon_ValidateFields__0__Property__1__Marked_as_Ignored, table.Name, propertyInfo.Name);
                     continue;
                 }
 
                 if (!(propertyInfo.GetCustomAttributes(typeof(IUserTableField), true)
                         .FirstOrDefault() is IUserTableField userTableField)) {
-                    Logger.Error("IUserTableField not found in {0}.{1}", table.Name, propertyInfo.Name);
+                    Logger.Error(Texts.SapAddon_ValidateFields_IUserTableField_not_found_in__0___1_, table.Name, propertyInfo.Name);
                     valid = false;
                 }
                 else if (NormalizeType(userTableField.Type) != NormalizeType(propertyInfo.PropertyType)) {
                     Logger.Error(
-                        "IUserTableField {0}.{1} is not valid. " +
-                        "Expected property type: {2}, but got: {3}",
+                        Texts.SapAddon_ValidateFields_IUserTableField__0___1__is_not_valid__Expected_property_type___2___but_got___3_,
                         table.Name, propertyInfo.Name, userTableField.Type, propertyInfo.PropertyType);
                     valid = false;
                 }

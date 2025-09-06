@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -21,6 +22,7 @@ using SAPUtils.__Internal.Enums;
 using SAPUtils.__Internal.Models;
 using SAPUtils.__Internal.Query;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Query;
 using SAPUtils.Utils;
@@ -31,9 +33,9 @@ using ValidValue = SAPbouiCOM.ValidValue;
 
 namespace SAPUtils.Forms {
     public abstract partial class ChangeTrackerMatrixForm<T> {
+        #region Export
 
-        #region Exportar
-
+        [Localizable(false)]
         private void ExportToExcel(object sboObject, SBOItemEventArg pVal) {
             try {
                 CancellationTokenSource cts = new CancellationTokenSource();
@@ -58,35 +60,48 @@ namespace SAPUtils.Forms {
                     excelStream.CopyTo(fs);
                 }
 
-                int option = ShowMessageBox("Exportación completada:\n" + filePath, 1, "OK", "Abrir");
+                int option = ShowMessageBox(
+                    string.Format(Texts.ChangeTrackerMatrixForm_ExportToExcel_Export_completed___0_, filePath), 1,
+                    Texts.ChangeTrackerMatrixForm_ExportToExcel_OK,
+                    Texts.ChangeTrackerMatrixForm_ExportToExcel_Open);
 
                 if (option == 2) {
                     Process.Start(filePath);
                 }
             }
             catch (Exception ex) {
-                SetStatusBarMessage($"No se pudo generar el Excel: {ex.Message}");
+                SetStatusBarMessage(string.Format(
+                    Texts.ChangeTrackerMatrixForm_ExportToExcel_The_Excel_could_not_be_generated___0_, ex.Message));
             }
         }
+
         private string ChooseSavePath() {
+            const string excelFormat = "(*.xlsx)|*.xlsx";
             using (SaveFileDialog sfd = new SaveFileDialog()) {
-                sfd.Title = "Guardar Excel";
-                sfd.Filter = "Archivos de Excel (*.xlsx)|*.xlsx";
+                sfd.Title = Texts.ChangeTrackerMatrixForm_ChooseSavePath_Save_Excel;
+                sfd.Filter = string.Format(Texts.ChangeTrackerMatrixForm_ChooseSavePath_Excel_files__0_, excelFormat);
+                // ReSharper disable LocalizableElement
                 sfd.DefaultExt = "xlsx";
                 sfd.FileName = $"{Title.Replace(' ', '_')}.xlsx";
+                // ReSharper restore LocalizableElement
 
                 DialogResult result = TopMostDialog.ShowDialog(sfd);
 
                 return result != DialogResult.OK ? null : sfd.FileName;
             }
         }
+
+        [Localizable(false)]
         private MemoryStream GenerateExcel(CancellationToken token) {
             if (token.IsCancellationRequested)
                 return null;
             XSSFWorkbook workbook = new XSSFWorkbook();
             ISheet sheet = workbook.CreateSheet(Title);
 
-            Dictionary<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)> comboBoxValidations = new Dictionary<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)>();
+            Dictionary<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)>
+                comboBoxValidations =
+                    new Dictionary<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType
+                        expandType)>();
 
             IDataFormat dataFormat = workbook.CreateDataFormat();
 
@@ -99,13 +114,16 @@ namespace SAPUtils.Forms {
 
             string CreateMoneyFormat(int decimales) {
                 if (decimales < 0 || decimales > 6)
-                    throw new ArgumentOutOfRangeException(nameof(decimales), "La cantidad de decimales debe estar entre 0 y 6.");
+                    throw new ArgumentOutOfRangeException(nameof(decimales),
+                        Texts
+                            .ChangeTrackerMatrixForm_GenerateExcel_The_number_of_decimal_places_must_be_between_0_and_6_);
 
                 string parteEntera = "#,##0";
                 string parteDecimal = decimales > 0 ? "," + new string('0', decimales) : "";
                 string patronNumero = parteEntera + parteDecimal;
 
-                string formato = $@"_($* {patronNumero}_);_($* ({patronNumero});_($* ""-""{new string('?', decimales)}_);_(@_)";
+                string formato =
+                    $@"_($* {patronNumero}_);_($* ({patronNumero});_($* ""-""{new string('?', decimales)}_);_(@_)";
 
                 return formato;
             }
@@ -123,7 +141,8 @@ namespace SAPUtils.Forms {
             qtyStyle.DataFormat = dataFormat.GetFormat(CreateNumberFormat(DisplayInfo.FormatInfo.QtyDec));
 
             ICellStyle percentStyle = workbook.CreateCellStyle();
-            percentStyle.DataFormat = dataFormat.GetFormat(CreateNumberFormat(DisplayInfo.FormatInfo.PercentDec, "", "%"));
+            percentStyle.DataFormat =
+                dataFormat.GetFormat(CreateNumberFormat(DisplayInfo.FormatInfo.PercentDec, "", "%"));
 
             ICellStyle measureStyle = workbook.CreateCellStyle();
             measureStyle.DataFormat = dataFormat.GetFormat(CreateNumberFormat(DisplayInfo.FormatInfo.MeasureDec));
@@ -166,8 +185,8 @@ namespace SAPUtils.Forms {
                     case BoFormItemTypes.it_CHECK_BOX:
                     {
                         List<(string Value, string Desc)> items = new List<(string Value, string Desc)> {
-                            ("N", "No"),
-                            ("Y", "Sí"),
+                            ("N", Texts.ChangeTrackerMatrixForm_GenerateExcel_No),
+                            ("Y", Texts.ChangeTrackerMatrixForm_GenerateExcel_Yes),
                         };
 
                         string rangeName = $"ComboVals_{excelColIndex}";
@@ -184,6 +203,7 @@ namespace SAPUtils.Forms {
                             catch {
                                 tableName = $"@{cfl.ObjectType}";
                             }
+
                             IWhereBuilder where = Where.Builder();
                             Conditions conditions = cfl.GetConditions();
                             IEnumerator enumerator = conditions.GetEnumerator();
@@ -240,10 +260,13 @@ namespace SAPUtils.Forms {
                                         throw new ArgumentOutOfRangeException();
                                 }
                             }
+
                             if (enumerator is IDisposable disposable) disposable.Dispose();
                             string quotedTableName = SapAddon.Instance().IsHana ? $"\"{tableName}\"" : $"[{tableName}]";
-                            string query = $"SELECT * FROM {quotedTableName} {new SqlWhereBuilder(where.Build()).Build()}";
-                            Recordset rs = (Recordset)SapAddon.Instance().Company.GetBusinessObject(BoObjectTypes.BoRecordset);
+                            string query =
+                                $"SELECT * FROM {quotedTableName} {new SqlWhereBuilder(where.Build()).Build()}";
+                            Recordset rs = (Recordset)SapAddon.Instance().Company
+                                .GetBusinessObject(BoObjectTypes.BoRecordset);
                             rs.DoQuery(query);
                             List<(string Value, string Desc)> items = new List<(string Value, string Desc)> {
                                 ("", ""),
@@ -262,16 +285,19 @@ namespace SAPUtils.Forms {
                                     v = rs.Fields.Item(0).Value.ToString();
                                     d = rs.Fields.Item(1).Value.ToString();
                                 }
+
                                 items.Add((v, d));
 
                                 rs.MoveNext();
                             }
+
                             string rangeName = $"ComboVals_{excelColIndex}";
                             comboBoxValidations[excelColIndex] = (items, rangeName, BoExpandType.et_ValueDescription);
                         }
                         catch {
                             // No validation
                         }
+
                         break;
                     case BoFormItemTypes.it_BUTTON:
                     case BoFormItemTypes.it_STATIC:
@@ -291,6 +317,7 @@ namespace SAPUtils.Forms {
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
                 excelColIndex++;
             }
 
@@ -302,6 +329,7 @@ namespace SAPUtils.Forms {
                 row.CreateCell(0).SetCellValue(i); // Columna de Excel
                 row.CreateCell(1).SetCellValue(uid); // UID de SAP
             }
+
             int mappingSheetIx = workbook.GetSheetIndex("ColumnUIDMapping");
 #pragma warning disable CS0612 // Type or member is obsolete
             workbook.SetSheetHidden(mappingSheetIx, SheetVisibility.VeryHidden);
@@ -313,7 +341,9 @@ namespace SAPUtils.Forms {
                     string columnUid = _matrix.Columns.Item(matrixCol).UniqueID;
                     BoFieldsType fieldType = _dataTable.Columns.Item(columnUid).Type;
 
-                    if (comboBoxValidations.TryGetValue(excelCol, out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) comboInfo)) {
+                    if (comboBoxValidations.TryGetValue(excelCol,
+                            out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)
+                            comboInfo)) {
                         (string Value, string Desc) match = comboInfo.items.FirstOrDefault();
                         string valueToSet = "";
                         if (match != default) {
@@ -331,6 +361,7 @@ namespace SAPUtils.Forms {
                                     throw new ArgumentOutOfRangeException();
                             }
                         }
+
                         excelRow.CreateCell(excelCol).SetCellValue(valueToSet);
                     }
                     else {
@@ -392,9 +423,12 @@ namespace SAPUtils.Forms {
                     foreach ((int matrixCol, int excelCol) in visibleCols) {
                         string rawValue = _dataTable.GetValue(matrixCol, row)?.ToString() ?? "";
 
-                        if (comboBoxValidations.TryGetValue(excelCol, out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) comboInfo)) {
+                        if (comboBoxValidations.TryGetValue(excelCol,
+                                out (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)
+                                comboInfo)) {
                             string valueToSet = rawValue;
-                            (string Value, string Desc) match = comboInfo.items.FirstOrDefault(x => x.Value == rawValue || x.Desc == rawValue);
+                            (string Value, string Desc) match =
+                                comboInfo.items.FirstOrDefault(x => x.Value == rawValue || x.Desc == rawValue);
                             if (!string.IsNullOrEmpty(match.Value)) {
                                 switch (comboInfo.expandType) {
                                     case BoExpandType.et_ValueOnly:
@@ -410,6 +444,7 @@ namespace SAPUtils.Forms {
                                         throw new ArgumentOutOfRangeException();
                                 }
                             }
+
                             excelRow.CreateCell(excelCol).SetCellValue(valueToSet);
                         }
                         else {
@@ -426,6 +461,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = intStyle;
                                     break;
                                 case BoFieldsType.ft_Date:
@@ -435,6 +471,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = dateStyle;
                                     break;
                                 case BoFieldsType.ft_Float:
@@ -444,6 +481,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = floatStyle;
                                     break;
                                 case BoFieldsType.ft_Quantity:
@@ -453,6 +491,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = qtyStyle;
                                     break;
                                 case BoFieldsType.ft_Price:
@@ -462,6 +501,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = priceStyle;
                                     break;
                                 case BoFieldsType.ft_Rate:
@@ -471,6 +511,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = rateStyle;
                                     break;
                                 case BoFieldsType.ft_Measure:
@@ -480,6 +521,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = measureStyle;
                                     break;
                                 case BoFieldsType.ft_Sum:
@@ -489,6 +531,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = sumStyle;
                                     break;
                                 case BoFieldsType.ft_Percent:
@@ -498,6 +541,7 @@ namespace SAPUtils.Forms {
                                     else {
                                         cell.SetCellValue(rawValue);
                                     }
+
                                     cell.CellStyle = percentStyle;
                                     break;
                                 case BoFieldsType.ft_NotDefined:
@@ -515,7 +559,8 @@ namespace SAPUtils.Forms {
 
             IDataValidationHelper dvHelper = sheet.GetDataValidationHelper();
             workbook.CreateSheet("ValidationSheet");
-            foreach (KeyValuePair<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType)> kvp in comboBoxValidations) {
+            foreach (KeyValuePair<int, (List<(string Value, string Desc)> items, string rangeName, BoExpandType
+                         expandType)> kvp in comboBoxValidations) {
                 int colIndex = kvp.Key;
                 (List<(string Value, string Desc)> items, string rangeName, BoExpandType expandType) = kvp.Value;
 
@@ -541,12 +586,14 @@ namespace SAPUtils.Forms {
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
                 string formulaRange = $"ValidationSheet!${colLetter}${1}:${colLetter}${items.Count}";
                 XSSFName name = (XSSFName)workbook.CreateName();
                 name.NameName = rangeName;
                 name.RefersToFormula = formulaRange;
 
-                CellRangeAddressList addressList = new CellRangeAddressList(1, Math.Max(_dataTable.Rows.Count, 1), colIndex, colIndex);
+                CellRangeAddressList addressList =
+                    new CellRangeAddressList(1, Math.Max(_dataTable.Rows.Count, 1), colIndex, colIndex);
                 IDataValidationConstraint constraint = dvHelper.CreateFormulaListConstraint(rangeName);
                 IDataValidation validation = dvHelper.CreateValidation(constraint, addressList);
                 validation.ShowErrorBox = true;
@@ -641,10 +688,17 @@ namespace SAPUtils.Forms {
                 IDataValidation validation = dvHelper.CreateValidation(constraint, addressList);
                 validation.ShowErrorBox = true;
                 switch (constraint.GetValidationType()) {
-                    case 1: validation.CreateErrorBox("Valor inválido", "Solo se permiten números enteros."); break;
-                    case 2: validation.CreateErrorBox("Valor inválido", "Solo se permiten números decimales."); break;
-                    case 4: validation.CreateErrorBox("Valor inválido", "Solo se permiten fechas."); break;
+                    case 1:
+                        validation.CreateErrorBox(Texts.ChangeTrackerMatrixForm_GenerateExcel_Invalid_value,
+                            Texts.ChangeTrackerMatrixForm_GenerateExcel_Only_integers_are_allowed_); break;
+                    case 2:
+                        validation.CreateErrorBox(Texts.ChangeTrackerMatrixForm_GenerateExcel_Invalid_value,
+                            Texts.ChangeTrackerMatrixForm_GenerateExcel_Only_decimal_numbers_are_allowed_); break;
+                    case 4:
+                        validation.CreateErrorBox(Texts.ChangeTrackerMatrixForm_GenerateExcel_Invalid_value,
+                            Texts.ChangeTrackerMatrixForm_GenerateExcel_Only_dates_are_allowed_); break;
                 }
+
                 sheet.AddValidationData(validation);
             }
 
@@ -659,6 +713,7 @@ namespace SAPUtils.Forms {
                 if (currentWidth < minWidth)
                     sheet.SetColumnWidth(excelCol, minWidth);
             }
+
             using (MemoryStream ms = new MemoryStream()) {
                 workbook.Write(ms, true);
                 ms.Position = 0;
@@ -669,15 +724,17 @@ namespace SAPUtils.Forms {
 
         #endregion
 
-        #region Importar
+        #region Import
 
+        [Localizable(false)]
         private void ImportFromExcel(object sboObject, SBOItemEventArg pVal) {
-
             if (UnsavedChanges()) {
                 int messageBox = Application.MessageBox(
-                    "Hay cambios sin guardar.\n¿Desea descartar los cambios?", 2,
-                    "Continuar",
-                    "Cancelar");
+                    Texts
+                        .ChangeTrackerMatrixForm_ImportFromExcel_There_are_unsaved_changes__Do_you_want_to_discard_the_changes_,
+                    2,
+                    Texts.ChangeTrackerMatrixForm_ImportFromExcel_Continue,
+                    Texts.ChangeTrackerMatrixForm_ImportFromExcel_Cancel);
 
                 if (messageBox == 2) return;
             }
@@ -698,13 +755,15 @@ namespace SAPUtils.Forms {
                 string keyField = ObjectCodePropertyName;
                 (DataColumn _, Column column) = ColumnInfo[keyField];
                 IUserTable table = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
-                List<(PropertyInfo Property, IUserTableField Field)> userFields = UserTableMetadataCache.GetUserFields(typeof(T));
+                List<(PropertyInfo Property, IUserTableField Field)> userFields =
+                    UserTableMetadataCache.GetUserFields(typeof(T));
                 foreach (Dictionary<string, object> data in importedData) {
                     if (!ColumnToProperty.TryGetValue(column.UniqueID, out PropertyInfo keyProperty))
                         continue;
                     if (!data.TryGetValue(column.UniqueID, out object keyValue))
                         continue;
-                    T original = _observableData.FirstOrDefault(e => keyProperty.GetValue(e) != null && keyProperty.GetValue(e).ToString() == keyValue.ToString());
+                    T original = _observableData.FirstOrDefault(e =>
+                        keyProperty.GetValue(e) != null && keyProperty.GetValue(e).ToString() == keyValue.ToString());
                     T item;
                     if (original == null) {
                         item = new T();
@@ -712,6 +771,7 @@ namespace SAPUtils.Forms {
                     else {
                         item = (T)original.Clone();
                     }
+
                     foreach (KeyValuePair<string, object> keyValuePair in data) {
                         string columnName = keyValuePair.Key;
                         object value = keyValuePair.Value;
@@ -722,12 +782,14 @@ namespace SAPUtils.Forms {
                                 if (original == null && table.PrimaryKeyStrategy == PrimaryKeyStrategy.Manual) {
                                     item.Code = value?.ToString();
                                 }
+
                                 break;
                             case "Name":
                                 item.Name = value?.ToString();
                                 break;
                             default:
-                                (PropertyInfo _, IUserTableField field) = userFields.FirstOrDefault(e => e.Property.Name == propertyInfo.Name);
+                                (PropertyInfo _, IUserTableField field) =
+                                    userFields.FirstOrDefault(e => e.Property.Name == propertyInfo.Name);
                                 if (field != null) {
                                     if (field is DateTimeFieldAttribute dtf) {
                                         if (columnName.EndsWith("D")) {
@@ -746,8 +808,10 @@ namespace SAPUtils.Forms {
                                             else {
                                                 date = dtf.ParseDateValue(value);
                                             }
+
                                             propertyInfo.SetValue(item, date);
                                         }
+
                                         if (columnName.EndsWith("T")) {
                                             DateTime? time = propertyInfo.GetValue(item) as DateTime?;
                                             if (time.HasValue) {
@@ -764,6 +828,7 @@ namespace SAPUtils.Forms {
                                             else {
                                                 time = dtf.ParseTimeValue(value);
                                             }
+
                                             propertyInfo.SetValue(item, time);
                                         }
                                     }
@@ -777,13 +842,16 @@ namespace SAPUtils.Forms {
                                                 //ignored
                                             }
                                         }
+
                                         object newValue = field.ParseValue(value);
                                         propertyInfo.SetValue(item, newValue);
                                     }
                                 }
+
                                 break;
                         }
                     }
+
                     if (original == null) {
                         _observableData.Add(item);
                         int findIndex = _data.FindIndex(e => ReferenceEquals(e.Item, item));
@@ -796,30 +864,37 @@ namespace SAPUtils.Forms {
                         if (equals) continue;
                         int indexOf = _observableData.IndexOf(original);
                         _observableData[indexOf] = item;
-                        _data[indexOf] = (item, Status.Modified);
+                        _data[indexOf] = (item, Status.Modify);
                     }
                 }
             }
             catch (Exception ex) {
-                SetStatusBarMessage($"No se pudo leer el Excel: {ex.Message}");
+                SetStatusBarMessage(
+                    string.Format(Texts.ChangeTrackerMatrixForm_ImportFromExcel_Could_not_read_Excel___0_, ex.Message));
             }
             finally {
                 _dataReload = false;
                 UpdateMatrix();
             }
         }
+
         private string ChooseOpenPath() {
+            const string excelFormat = "(*.xlsx)|*.xlsx";
             using (OpenFileDialog sfd = new OpenFileDialog()) {
-                sfd.Title = "Importar archivo Excel";
-                sfd.Filter = "Archivos de Excel (*.xlsx)|*.xlsx";
+                sfd.Title = Texts.ChangeTrackerMatrixForm_ChooseOpenPath_Import_Excel_file;
+                sfd.Filter = string.Format(Texts.ChangeTrackerMatrixForm_ChooseOpenPath_Excel_files__0_, excelFormat);
+                // ReSharper disable LocalizableElement
                 sfd.DefaultExt = "xlsx";
                 sfd.FileName = $"{Title.Replace(' ', '_')}.xlsx";
+                // ReSharper restore LocalizableElement
 
                 DialogResult result = TopMostDialog.ShowDialog(sfd);
 
                 return result != DialogResult.OK ? null : sfd.FileName;
             }
         }
+
+        [Localizable(false)]
         private List<Dictionary<string, object>> ParseExcel(string path) {
             List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
 
@@ -828,15 +903,20 @@ namespace SAPUtils.Forms {
 
                 ISheet sheet = workbook.GetSheet(Title);
                 if (sheet == null)
-                    throw new Exception($"El archivo no contiene la hoja '{Title}'. Por favor, genere el archivo Excel desde el botón de exportar.");
+                    throw new Exception(string.Format(
+                        Texts
+                            .ChangeTrackerMatrixForm_ParseExcel_The_file_does_not_contain_the_sheet___0____Please_generate_the_Excel_file_using_the_export_button_,
+                        Title));
 
                 ISheet validationSheet = workbook.GetSheet("ValidationSheet");
                 if (validationSheet == null)
-                    throw new Exception("Excel inválido. Por favor, genere el archivo Excel desde el botón de exportar.");
+                    throw new Exception(Texts
+                        .ChangeTrackerMatrixForm_ParseExcel_Invalid_Excel_file__Please_generate_the_Excel_file_using_the_export_button_);
 
                 ISheet mappingSheet = workbook.GetSheet("ColumnUIDMapping");
                 if (mappingSheet == null)
-                    throw new Exception("Excel inválido. Por favor, genere el archivo Excel desde el botón de exportar.");
+                    throw new Exception(Texts
+                        .ChangeTrackerMatrixForm_ParseExcel_Invalid_Excel__Please_generate_the_Excel_file_using_the_export_button__);
 
                 IRow headerRow = sheet.GetRow(0);
                 int columnCount = headerRow.LastCellNum;
@@ -875,7 +955,8 @@ namespace SAPUtils.Forms {
                     }
                 }
 
-                Dictionary<int, Dictionary<string, string>> valueMappings = new Dictionary<int, Dictionary<string, string>>();
+                Dictionary<int, Dictionary<string, string>> valueMappings =
+                    new Dictionary<int, Dictionary<string, string>>();
                 for (int colIndex = 0; colIndex < columnCount; colIndex++) {
                     valueMappings[colIndex] = new Dictionary<string, string>();
                     for (int rowIndex = 0; rowIndex <= validationSheet.LastRowNum; rowIndex++) {
@@ -886,7 +967,8 @@ namespace SAPUtils.Forms {
                         string desc = row.GetCell(colIndex * 3 + 1)?.ToString().Trim();
                         string combo = row.GetCell(colIndex * 3 + 2)?.ToString().Trim();
 
-                        if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(desc) && string.IsNullOrEmpty(combo)) break;
+                        if (string.IsNullOrEmpty(value) && string.IsNullOrEmpty(desc) &&
+                            string.IsNullOrEmpty(combo)) break;
 
                         if (!string.IsNullOrEmpty(value)) valueMappings[colIndex]["__VAL__" + value] = value;
                         if (!string.IsNullOrEmpty(desc)) valueMappings[colIndex]["__DESC__" + desc] = value;
@@ -963,6 +1045,7 @@ namespace SAPUtils.Forms {
                                                 parsedValue = cell.StringCellValue.Trim();
                                                 break;
                                         }
+
                                         break;
                                     case CellType.Boolean:
                                         parsedValue = cell.BooleanCellValue;
@@ -986,12 +1069,12 @@ namespace SAPUtils.Forms {
 
                     result.Add(dict);
                 }
+
                 return result;
             }
         }
 
         #endregion
-
     }
 
     internal static class ObjectComparer {
@@ -1031,15 +1114,17 @@ namespace SAPUtils.Forms {
                             && !IsIgnored(f))
                 .ToList();
 
-            return !(from field in fields let val1 = field.GetValue(obj1) let val2 = field.GetValue(obj2) where !Equals(val1, val2) select val1).Any();
-
+            return !(from field in fields
+                let val1 = field.GetValue(obj1)
+                let val2 = field.GetValue(obj2)
+                where !Equals(val1, val2)
+                select val1).Any();
         }
 
         private static bool IsFromExcludedInterface(MemberInfo member) {
             Type declaringType = member.DeclaringType;
 
             return declaringType != null && ExcludedInterfaces.Any(iFace => iFace.IsAssignableFrom(declaringType));
-
         }
 
         private static bool IsIgnored(MemberInfo member) {

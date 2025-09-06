@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
@@ -49,6 +50,7 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override string ToSapData(object value) {
             switch (value) {
                 case null:

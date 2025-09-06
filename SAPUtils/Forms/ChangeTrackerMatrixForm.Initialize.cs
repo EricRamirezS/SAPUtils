@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using SAPbobsCOM;
 using SAPbouiCOM;
@@ -6,6 +7,7 @@ using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Extensions;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Utils;
 using ChooseFromList = SAPbouiCOM.ChooseFromList;
 
@@ -43,9 +45,10 @@ namespace SAPUtils.Forms {
         /// </para>
         /// </remarks>
         /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
-        virtual protected bool MatrixAlreadyGenerated => false;
+        protected virtual bool MatrixAlreadyGenerated => false;
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override void OnInitializeComponent() {
             _saveButton = GetSaveButton();
             _matrix = GetMatrix();
@@ -71,6 +74,7 @@ namespace SAPUtils.Forms {
             _helper.Item.Visible = true;
         }
 
+        [Localizable(false)]
         private void CustomInitializeComponent() {
             DataColumn indexDataColumn = _dataTable.Columns.Add("#", BoFieldsType.ft_Integer);
             DataColumn codeDataColumn = _dataTable.Columns.Add("Code", BoFieldsType.ft_AlphaNumeric, 50);
@@ -83,13 +87,13 @@ namespace SAPUtils.Forms {
 
             Column codeColumn = _matrix.Columns.Add("Code", BoFormItemTypes.it_EDIT);
             codeColumn.Editable = false;
-            codeColumn.TitleObject.Caption = "Código";
+            codeColumn.TitleObject.Caption = Texts.ChangeTrackerMatrixForm_CustomInitializeComponent_Code;
             codeColumn.DataBind.Bind(_dataTable.UniqueID, "Code");
             codeColumn.Width = 50;
 
             Column nameColumn = _matrix.Columns.Add("Name", BoFormItemTypes.it_EDIT);
             nameColumn.Editable = true;
-            nameColumn.TitleObject.Caption = "Nombre";
+            nameColumn.TitleObject.Caption = Texts.ChangeTrackerMatrixForm_CustomInitializeComponent_Name;
             nameColumn.DataBind.Bind(_dataTable.UniqueID, "Name");
             nameColumn.Width = 100;
 
@@ -151,7 +155,7 @@ namespace SAPUtils.Forms {
 
             _dataTable.Columns.Add("_S_T_A_T_E", BoFieldsType.ft_AlphaNumeric);
             _stateColumn = _matrix.Columns.Add("_S_T_A_T_E", BoFormItemTypes.it_EDIT);
-            _stateColumn.TitleObject.Caption = "[Estado]";
+            _stateColumn.TitleObject.Caption = Texts.ChangeTrackerMatrixForm_CustomInitializeComponent__State_;
             _stateColumn.Editable = false;
             _stateColumn.Width = 32;
             _stateColumn.DataBind.Bind(_dataTable.UniqueID, "_S_T_A_T_E");

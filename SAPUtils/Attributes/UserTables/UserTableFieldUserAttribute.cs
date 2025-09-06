@@ -4,6 +4,7 @@ using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Exceptions;
+using SAPUtils.I18N;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 using IValidValue = SAPbouiCOM.IValidValue;
 
@@ -45,7 +46,7 @@ namespace SAPUtils.Attributes.UserTables {
             set
             {
                 if (value != null && value.Length > 50)
-                    throw new NameTooLongException($"Name cannot exceed 50 characters. Provided length: {value.Length}.");
+                    throw new NameTooLongException(string.Format(Texts.UserTableFieldAttributeBase_Name_Name_cannot_exceed_50_characters__Provided_length___0__, value.Length));
                 _name = value;
             }
         }
@@ -57,7 +58,7 @@ namespace SAPUtils.Attributes.UserTables {
             set
             {
                 if (value != null && value.Length > 80)
-                    throw new DescriptionTooLongException($"Description cannot exceed 80 characters. Provided length: {value.Length}.");
+                    throw new DescriptionTooLongException(string.Format(Texts.UserTableFieldAttributeBase_Description_Description_cannot_exceed_80_characters__Provided_length___0__, value.Length));
                 _description = value;
             }
         }

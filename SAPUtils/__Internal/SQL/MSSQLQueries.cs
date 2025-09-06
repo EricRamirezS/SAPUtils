@@ -1,4 +1,7 @@
-﻿namespace SAPUtils.__Internal.SQL {
+﻿using System.ComponentModel;
+
+namespace SAPUtils.__Internal.SQL {
+    [Localizable(false)]
     internal sealed class MssqlQueries : CommonQueries {
         public override string GetNextCodeUserTableQuery(string tableName) {
             return $"SELECT COALESCE(MAX(CAST([Code] AS INTEGER)), 0) + 1 AS [Code] FROM [@{tableName}]";

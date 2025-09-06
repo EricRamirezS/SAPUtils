@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using SAPbobsCOM;
 
@@ -11,6 +12,7 @@ namespace SAPUtils.Extensions {
     /// This class enables functionalities related to SAP Business One UDF-linked system object types.
     /// </remarks>
     /// <seealso cref="UDFLinkedSystemObjectTypesEnum"/>
+    [Localizable(false)]
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public static class UDFLinkedSystemObjectTypesEnumExtension {

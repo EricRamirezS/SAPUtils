@@ -1,12 +1,12 @@
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 // ReSharper disable UnusedMember.Global
 
 #pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
 
-namespace SAPUtils.Utils
-{
+namespace SAPUtils.Utils {
     /// <summary>
     /// Provides methods for logging messages and exceptions at different severity levels.
     /// <br/>
@@ -53,8 +53,8 @@ namespace SAPUtils.Utils
     /// <remarks>
     /// Each level supports logging messages, objects, or exceptions, with optional caller information for context.
     /// </remarks>
-    public interface ILogger
-    {
+    [Localizable(true)]
+    public interface ILogger {
         /// <summary>
         /// Logs a trace-level message with optional formatting arguments.
         /// </summary>

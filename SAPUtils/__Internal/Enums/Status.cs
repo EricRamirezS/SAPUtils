@@ -1,5 +1,6 @@
 ﻿using System;
 using SAPUtils.Forms;
+using SAPUtils.I18N;
 
 namespace SAPUtils.__Internal.Enums {
     /// <summary>
@@ -12,8 +13,8 @@ namespace SAPUtils.__Internal.Enums {
     /// or future state during data processing.
     /// </remarks>
     /// <seealso cref="SAPUtils.__Internal.Enums.Status.Normal"/>
-    /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
-    /// <seealso cref="SAPUtils.__Internal.Enums.Status.ModifiedRestored"/>
+    /// <seealso cref="Modify"/>
+    /// <seealso cref="Restore"/>
     /// <seealso cref="SAPUtils.__Internal.Enums.Status.New"/>
     /// <seealso cref="SAPUtils.__Internal.Enums.Status.Discard"/>
     /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
@@ -27,7 +28,7 @@ namespace SAPUtils.__Internal.Enums {
         /// This status is typically assigned to items that do not require updates, deletions,
         /// or other modifications during data processing or tracking.
         /// </remarks>
-        /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
+        /// <seealso cref="Modify"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.New"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
         /// <seealso cref="Discard"/>
@@ -41,16 +42,16 @@ namespace SAPUtils.__Internal.Enums {
         /// context need to be tracked without immediately committing those changes.
         /// </remarks>
         /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
-        Modified,
+        Modify,
 
         /// <summary>
         /// The object was previously soft-deleted and is now marked for restoration.
         /// Additionally, one or more of its fields have been modified since deletion.
         /// </summary>
-        /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
+        /// <seealso cref="Modify"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Discard"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
-        ModifiedRestored,
+        Restore,
 
         /// <summary>
         /// Represents a newly created item or record within the context of the application.
@@ -61,7 +62,7 @@ namespace SAPUtils.__Internal.Enums {
         /// </remarks>
         /// <seealso cref="SAPUtils.Forms.ChangeTrackerMatrixForm{T}"/>
         /// <seealso cref="Status.Normal"/>
-        /// <seealso cref="Status.Modified"/>
+        /// <seealso cref="Modify"/>
         /// <seealso cref="Discard"/>
         /// <seealso cref="Status.Delete"/>
         New,
@@ -77,7 +78,7 @@ namespace SAPUtils.__Internal.Enums {
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.New"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Delete"/>
         /// <seealso cref="SAPUtils.__Internal.Enums.Status.Normal"/>
-        /// <seealso cref="SAPUtils.__Internal.Enums.Status.Modified"/>
+        /// <seealso cref="Modify"/>
         Discard,
 
         /// <summary>
@@ -97,17 +98,17 @@ namespace SAPUtils.__Internal.Enums {
         public static string GetReadableName(this Status status) {
             switch (status) {
                 case Status.Normal:
-                    return "✅ Normal";
-                case Status.Modified:
-                    return "✏️ Modificar";
-                case Status.ModifiedRestored:
-                    return "🔁 Restaurar";
+                    return Texts.StatusExtensions_GetReadableName_Normal;
+                case Status.Modify:
+                    return Texts.StatusExtensions_GetReadableName_Modify;
+                case Status.Restore:
+                    return Texts.StatusExtensions_GetReadableName_Restore;
                 case Status.New:
-                    return "➕ Nuevo";
+                    return Texts.StatusExtensions_GetReadableName_New;
                 case Status.Discard:
-                    return "❌ Descartar";
+                    return Texts.StatusExtensions_GetReadableName_Discard;
                 case Status.Delete:
-                    return "🗑️ Eliminar";
+                    return Texts.StatusExtensions_GetReadableName_Delete;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }

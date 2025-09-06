@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using SAPbouiCOM;
 using static SAPUtils.Utils.Parsers;
@@ -7,6 +9,9 @@ namespace SAPUtils.Extensions {
     /// <summary>
     /// Provides extension methods for the <see cref="SAPbouiCOM.EditText"/> class to simplify parsing and setting values.
     /// </summary>
+    [Localizable(false)]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public static class EditTextExtensions {
 
         /// <summary>

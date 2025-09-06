@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,6 +13,7 @@ using SAPUtils.Attributes.UserTables;
 using SAPUtils.Database;
 using SAPUtils.Events;
 using SAPUtils.Exceptions;
+using SAPUtils.I18N;
 using SAPUtils.Query;
 using SAPUtils.Utils;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
@@ -31,6 +34,7 @@ namespace SAPUtils.Models.UserTables {
     /// <item><description>Soft deletion and auditing when applicable</description></item>
     /// </list>
     /// </remarks>
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class UserTableObjectModel<T> : UserTableObjectModel where T : UserTableObjectModel<T>, new() {
         private static readonly Type CachedType = typeof(T);
 
@@ -40,7 +44,7 @@ namespace SAPUtils.Models.UserTables {
             UserTableAttribute = UserTableMetadataCache.GetUserTableAttribute(typeof(T));
             CachedUserFields = UserTableMetadataCache.GetUserFields(typeof(T));
 
-            _fieldMeta = new List<FieldMetadata>();
+            FieldMeta = new List<FieldMetadata>();
 
             List<(PropertyInfo Property, IUserTableField Field)> userFields =
                 UserTableMetadataCache.GetUserFields(typeof(T));
@@ -62,13 +66,13 @@ namespace SAPUtils.Models.UserTables {
                         break;
                 }
 
-                _fieldMeta.Add(new FieldMetadata {
+                FieldMeta.Add(new FieldMetadata {
                     Prop = prop,
                     Field = field,
                     SapName = string.IsNullOrWhiteSpace(field.Name) ? prop.Name : field.Name,
                     Kind = kind,
                     Getter = CreateGetter(prop),
-                    Setter = CreateSetter(prop)
+                    Setter = CreateSetter(prop),
                 });
             }
         }
@@ -80,7 +84,7 @@ namespace SAPUtils.Models.UserTables {
         /// Thrown when the <typeparamref name="T"/> type does not define a valid <see cref="Attributes.UserTables.UserTableAttribute"/>.
         /// </exception>
         protected UserTableObjectModel() {
-            Log.Trace("Initializing UserTableObjectModel...");
+            Log.Trace(Texts.UserTableObjectModel_UserTableObjectModel_Initializing_UserTableObjectModel___);
             try {
                 if (UserTableAttribute == null)
                     throw new UserTableAttributeNotFound(typeof(T).Name);
@@ -90,7 +94,7 @@ namespace SAPUtils.Models.UserTables {
                 throw new UserTableAttributeNotFound(typeof(T).Name);
             }
 
-            Log.Debug("UserTableAttribute initialized: {0}", UserTableAttribute.Name);
+            Log.Debug(Texts.UserTableObjectModel_UserTableObjectModel_UserTableAttribute_initialized___0_, UserTableAttribute.Name);
         }
 
         /// <inheritdoc />
@@ -128,7 +132,7 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public override bool Add() {
-            Log.Debug("Attempting to add {0} into table {1} with Code: {2}", GetType().Name, UserTableAttribute.Name,
+            Log.Debug(Texts.UserTableObjectModel_Add_Attempting_to_add__0__into_table__1__with_Code___2_, GetType().Name, UserTableAttribute.Name,
                 Code);
             try {
                 SAPbobsCOM.IUserTable table = SapAddon.Instance().Company.UserTables.Item(UserTableAttribute.Name);
@@ -153,10 +157,10 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public override bool Update(bool restore = false) {
-            Log.Debug("Attempting to update {0} in table {1} with Code: {2}", GetType().Name, UserTableAttribute.Name,
+            Log.Debug(Texts.UserTableObjectModel_Update_Attempting_to_update__0__in_table__1__with_Code___2_, GetType().Name, UserTableAttribute.Name,
                 Code);
             try {
-                Log.Trace("Retrieving SAP User Table `{0}`...", UserTableAttribute.Name);
+                Log.Trace(Texts.UserTableObjectModel_Update_Retrieving_SAP_User_Table___0_____, UserTableAttribute.Name);
                 UserTable table = SapAddon.Instance().Company.UserTables.Item(UserTableAttribute.Name);
                 RestoreOriginalCode();
 
@@ -186,14 +190,14 @@ namespace SAPUtils.Models.UserTables {
 
         /// <inheritdoc />
         public override bool Delete() {
-            Log.Debug("Attempting to delete {0} from table {1} with Code: {2}", GetType().Name, UserTableAttribute.Name,
+            Log.Debug(Texts.UserTableObjectModel_Delete_Attempting_to_delete__0__from_table__1__with_Code___2_, GetType().Name, UserTableAttribute.Name,
                 Code);
             try {
                 UserTable table = SapAddon.Instance().Company.UserTables.Item(UserTableAttribute.Name);
                 RestoreOriginalCode();
 
                 if (!table.GetByKey(Code)) {
-                    Log.Info("{0} from table {1} with Code {2} does not exist.", GetType().Name,
+                    Log.Info(Texts.UserTableObjectModel_Delete__0__from_table__1__with_Code__2__does_not_exist_, GetType().Name,
                         UserTableAttribute.Name, Code);
                     return false;
                 }
@@ -223,14 +227,14 @@ namespace SAPUtils.Models.UserTables {
                 }
 
                 if (result == 0) {
-                    Log.Info("{0} from table {1} with Code {3} deleted successfully.", GetType().Name,
+                    Log.Info(Texts.UserTableObjectModel_Delete__0__from_table__1__with_Code__3__deleted_successfully_, GetType().Name,
                         UserTableAttribute.Name, Code);
                     return true;
                 }
 
                 SapAddon.Instance().Company.GetLastError(out int errCode, out string errMsg);
                 Log.Error(
-                    "Failed to delete {0} from table {1} with Code {2}. SAP Error Code: {3}. SAP Error Message: {4}",
+                    Texts.UserTableObjectModel_Delete_Failed_to_delete__0__from_table__1__with_Code__2___SAP_Error_Code___3___SAP_Error_Message___4_,
                     GetType().Name,
                     UserTableAttribute.Name,
                     Code,
@@ -252,12 +256,12 @@ namespace SAPUtils.Models.UserTables {
                 DateTime nowDt = DateTime.Now;
                 int userSign = company.UserSignature;
 
-                foreach (FieldMetadata meta in _fieldMeta) {
+                foreach (FieldMetadata meta in FieldMeta) {
                     if (AuditableField.IsAuditableField(CachedType, meta.Prop)) continue;
                     object value = meta.Getter((T)this);
-                    Log.Trace(() => $"Validating {CachedType.Name}'s field {meta.Prop.Name} = {value}");
+                    Log.Trace(() => string.Format(Texts.UserTableObjectModel_Save_Validating__0__s_field__1_____2_, CachedType.Name, meta.Prop.Name, value));
                     if (meta.Field.ValidateField(value)) continue;
-                    Log.Debug(() => $"Invalid value for field {meta.Prop.Name}: {value}");
+                    Log.Debug(() => string.Format(Texts.UserTableObjectModel_Save_Invalid_value_for_field__0____1_, meta.Prop.Name, value));
                     InvalidFieldEvent.Invoke(meta.Prop, meta.Field);
                     return false;
                 }
@@ -268,15 +272,15 @@ namespace SAPUtils.Models.UserTables {
                 if (Code == null && OriginalCode == null) GenerateCode(UserTableAttribute.PrimaryKeyStrategy, table);
                 else if (OriginalCode != null) Code = OriginalCode;
 
-                Log.Debug("Saving {0} into table {1} with Code: {2}", CachedType.Name, UserTableAttribute.Name, Code);
+                Log.Debug(Texts.UserTableObjectModel_Save_Saving__0__into_table__1__with_Code___2_, CachedType.Name, UserTableAttribute.Name, Code);
                 bool exist = table.GetByKey(Code);
 
                 if (exist)
-                    Log.Trace("Updating existing {0} in table {1} with Code: {2}", CachedType.Name,
+                    Log.Trace(Texts.UserTableObjectModel_Save_Updating_existing__0__in_table__1__with_Code___2_, CachedType.Name,
                         UserTableAttribute.Name, Code);
                 else {
                     table.Code = Code;
-                    Log.Trace("Inserting new {0} into table {1} with Code: {2}", CachedType.Name,
+                    Log.Trace(Texts.UserTableObjectModel_Save_Inserting_new__0__into_table__1__with_Code___2_, CachedType.Name,
                         UserTableAttribute.Name, Code);
                 }
 
@@ -284,7 +288,7 @@ namespace SAPUtils.Models.UserTables {
 
                 table.Name = Name;
 
-                foreach (FieldMetadata meta in _fieldMeta) {
+                foreach (FieldMetadata meta in FieldMeta) {
                     object value = meta.Getter((T)this);
 
                     if (!exist && value == null && meta.Field.DefaultValue != null) {
@@ -294,6 +298,7 @@ namespace SAPUtils.Models.UserTables {
 
                     switch (meta.Kind) {
                         case SapFieldKind.DateTime:
+                            // ReSharper disable LocalizableElement
                             fields.Item($"U_{meta.SapName}Date").Value = value;
                             fields.Item($"U_{meta.SapName}Time").Value = value;
                             break;
@@ -306,22 +311,23 @@ namespace SAPUtils.Models.UserTables {
                             try {
                                 fields.Item($"U_{meta.SapName}").Value = meta.Field.ToSapData(value);
                             }
+                            // ReSharper restore LocalizableElement
                             catch (Exception ex) {
-                                Log.Warning("Failed to assign value to field {0}: {1}", meta.SapName, ex.Message);
+                                Log.Warning(Texts.UserTableObjectModel_Save_Failed_to_assign_value_to_field__0____1_, meta.SapName, ex.Message);
                                 throw;
                             }
 
                             break;
                     }
 
-                    Log.Trace(() => $"Processed field {meta.Prop.Name} = {value}");
+                    Log.Trace(() => string.Format(Texts.UserTableObjectModel_Save_Processed_field__0_____1_, meta.Prop.Name, value));
                 }
 
                 int result = exist ? table.Update() : table.Add();
 
                 if (result == 0) {
                     OriginalCode = Code;
-                    Log.Info("{0} from table {1} with Code {2} saved successfully.", CachedType.Name,
+                    Log.Info(Texts.UserTableObjectModel_Save__0__from_table__1__with_Code__2__saved_successfully_, CachedType.Name,
                         UserTableAttribute.Name, Code);
                     Task.Run(() => ClearCache<T>(OriginalCode));
                     return true;
@@ -329,7 +335,7 @@ namespace SAPUtils.Models.UserTables {
 
                 company.GetLastError(out int errCode, out string errMsg);
                 Log.Error(
-                    "Failed to save {0} in table {1} with Code {2}. SAP Error Code: {3}. SAP Error Message: {4}",
+                    Texts.UserTableObjectModel_Save_Failed_to_save__0__in_table__1__with_Code__2___SAP_Error_Code___3___SAP_Error_Message___4_,
                     CachedType.Name, UserTableAttribute.Name, Code, errCode, errMsg);
                 return false;
             }
@@ -502,7 +508,7 @@ namespace SAPUtils.Models.UserTables {
 
         private void RestoreOriginalCode() {
             if (Code == OriginalCode) return;
-            Log.Debug("Reverting {0} Code to: {1}", GetType().Name, OriginalCode);
+            Log.Debug(Texts.UserTableObjectModel_RestoreOriginalCode_Reverting__0__Code_to___1_, GetType().Name, OriginalCode);
             Code = OriginalCode;
         }
 
@@ -515,6 +521,7 @@ namespace SAPUtils.Models.UserTables {
             return GetAdjacentCode(next: false);
         }
 
+        [Localizable(false)]
         private string GetAdjacentCode(bool next) {
             string orderDir = next ? "ASC" : "DESC";
             string comparisonOp = next ? ">" : "<";
@@ -522,7 +529,6 @@ namespace SAPUtils.Models.UserTables {
             Recordset rs;
             bool isHana = SapAddon.Instance().IsHana;
 
-            // 1. Obtener longitud máxima (solo si es Serie)
             int maxLength = 0;
             if (UserTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie) {
                 string lenQuery = isHana
@@ -534,7 +540,6 @@ namespace SAPUtils.Models.UserTables {
                 maxLength = rs.Fields.Item(0).Value != null ? (int)rs.Fields.Item(0).Value : 0;
             }
 
-            // 2. Preparar expresiones
             string paddedCodeExpr = UserTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
                 ? isHana
                     ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
@@ -552,7 +557,6 @@ namespace SAPUtils.Models.UserTables {
                     ? ""
                     : $"WHERE {paddedCodeExpr} {comparisonOp} '{paddedCurrent.Replace("'", "''")}'";
 
-                // 3. Consulta principal
                 string mainQuery = isHana
                     ? $@"
                     SELECT {Quote("Code")}
@@ -591,16 +595,17 @@ namespace SAPUtils.Models.UserTables {
             string Quote(string s) => isHana ? $"\"{s}\"" : $"[{s}]";
         }
 
-        private string GetFirstCode() {
+        private static string GetFirstCode() {
             return GetEdgeCode(first: true);
         }
 
-        private string GetLastCode() {
+        private static string GetLastCode() {
             return GetEdgeCode(first: false);
         }
 
 
-        private string GetEdgeCode(bool first) {
+        [Localizable(false)]
+        private static string GetEdgeCode(bool first) {
             string orderDir = first ? "ASC" : "DESC";
 
             string userTable = $"@{UserTableAttribute.Name}";
@@ -619,14 +624,12 @@ namespace SAPUtils.Models.UserTables {
                 maxLength = rs.Fields.Item(0).Value != null ? (int)rs.Fields.Item(0).Value : 0;
             }
 
-            // Expresión de ordenamiento
             string paddedCodeExpr = UserTableAttribute.PrimaryKeyStrategy == PrimaryKeyStrategy.Serie
                 ? isHana
                     ? $"LPAD({Quote("Code")}, {maxLength}, '0')"
                     : $"RIGHT(REPLICATE('0', {maxLength}) + {Quote("Code")}, {maxLength})"
                 : Quote("Code");
 
-            // Consulta SQL
             string query = isHana
                 ? $@"
                     SELECT {Quote("Code")}
@@ -650,11 +653,13 @@ namespace SAPUtils.Models.UserTables {
             if (this is IAuditableDate dateAudit) {
                 dateAudit.UpdatedAt = nowDt;
                 dateAudit.CreatedAt = !exist ? nowDt : OriginalCreatedAt;
+                OriginalCreatedAt = dateAudit.CreatedAt;
             }
 
             if (this is IAuditableUser userAudit) {
                 userAudit.UpdatedBy = userSign;
                 userAudit.CreatedBy = exist ? OriginalCreatedBy : userSign;
+                OriginalCreatedBy = userAudit.CreatedBy;
             }
 
             if (exist) {
@@ -668,6 +673,8 @@ namespace SAPUtils.Models.UserTables {
             }
         }
 
+        [Localizable(false)]
+        [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
         private static Func<T, object> CreateGetter(PropertyInfo prop) {
             ParameterExpression instanceParam = Expression.Parameter(typeof(T), "instance");
             MemberExpression propertyAccess =
@@ -676,6 +683,8 @@ namespace SAPUtils.Models.UserTables {
             return Expression.Lambda<Func<T, object>>(convertToObject, instanceParam).Compile();
         }
 
+        [Localizable(false)]
+        [SuppressMessage("ReSharper", "AssignNullToNotNullAttribute")]
         private static Action<T, object> CreateSetter(PropertyInfo prop) {
             ParameterExpression instanceParam = Expression.Parameter(typeof(T), "instance");
             ParameterExpression valueParam = Expression.Parameter(typeof(object), "value");
@@ -699,16 +708,17 @@ namespace SAPUtils.Models.UserTables {
             Normal,
             DateTime,
             Date,
-            Time
+            Time,
         }
 
         // ReSharper disable StaticMemberInGenericType
         private static readonly IUserTable UserTableAttribute;
+        // ReSharper disable NotAccessedField.Local
         private static readonly List<(PropertyInfo Property, IUserTableField Field)> CachedUserFields;
         private static readonly Dictionary<PropertyInfo, Func<object, object>> PropertyGetters;
         private static readonly Dictionary<PropertyInfo, Action<object, object>> PropertySetters;
-
-        private static readonly List<FieldMetadata> _fieldMeta;
+        // ReSharper restore NotAccessedField.Local
+        private static readonly List<FieldMetadata> FieldMeta;
         // ReSharper restore StaticMemberInGenericType
     }
 }

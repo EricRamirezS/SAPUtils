@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using SAPUtils.__Internal.Attributes.UserTables;
@@ -54,6 +55,7 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override string ToSapData(object value) {
             return value == null ? "0" : ((double)value).ToString(CultureInfo.InvariantCulture);
         }

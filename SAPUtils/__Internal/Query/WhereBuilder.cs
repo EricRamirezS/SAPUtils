@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using SAPUtils.Query;
 
 namespace SAPUtils.__Internal.Query {
 
+    [Localizable(false)]
     internal class WhereBuilder : IWhereBuilder {
         private readonly Stack<WhereGroup> _groupStack = new Stack<WhereGroup>();
 

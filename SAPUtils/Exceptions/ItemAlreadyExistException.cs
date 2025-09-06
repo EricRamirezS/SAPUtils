@@ -1,4 +1,5 @@
 ﻿using System;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Exceptions {
     /// <summary>
@@ -25,6 +26,6 @@ namespace SAPUtils.Exceptions {
         /// <param name="code">The duplicate code of the item that is already present in the table.</param>
         /// <seealso cref="SAPUtils.Models.UserTables.UserTableObjectModel{T}"/>
         public ItemAlreadyExistException(string name, string code) : base(
-            $"Item with code {code} already exists in table {name}.") { }
+            string.Format(Texts.ItemAlreadyExistException_ItemAlreadyExistException_Item_with_code__0__already_exists_in_table__1__, code, name)) { }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Exceptions {
     /// <summary>
@@ -6,6 +7,6 @@ namespace SAPUtils.Exceptions {
     /// </summary>
     public class ItemDoNotExistException : Exception {
         internal ItemDoNotExistException(string className, string name, string code) : base(
-            $"{className} with code {code} does not exist in table {name}.") { }
+            string.Format(Texts.ItemDoNotExistException_ItemDoNotExistException__0__with_code__1__does_not_exist_in_table__2__, className, code, name)) { }
     }
 }

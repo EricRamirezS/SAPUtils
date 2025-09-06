@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using SAPbobsCOM;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Utils {
     /// <summary>
@@ -36,7 +38,7 @@ namespace SAPUtils.Utils {
         /// - Table "OITM" -> Primary key "ItemCode"
         /// </example>
         /// <seealso cref="System.Collections.Generic.Dictionary{TKey, TValue}"/>
-        private static readonly Dictionary<string, string> PrimaryKeys = new Dictionary<string, string> {
+        [Localizable(false)] private static readonly Dictionary<string, string> PrimaryKeys = new Dictionary<string, string> {
             ["OACT"] = "AcctCode",
             ["OCRD"] = "CardCode",
             ["ODSC"] = "BankCode",
@@ -90,7 +92,7 @@ namespace SAPUtils.Utils {
         /// which can be used in operations such as data display, querying, or processing.
         /// </remarks>
         /// <seealso cref="System.Collections.Generic.Dictionary{TKey, TValue}"/>
-        private static readonly Dictionary<string, string> ReadableColumns = new Dictionary<string, string> {
+        [Localizable(false)] private static readonly Dictionary<string, string> ReadableColumns = new Dictionary<string, string> {
             ["OACT"] = "AcctName", // Codigo de la cuenta
             ["OCRD"] = "CardName", // Codigo del socio de negocios
             ["ODSC"] = "BankName", // Codigo del banco
@@ -118,7 +120,7 @@ namespace SAPUtils.Utils {
             ["OWHS"] = "WhsCode", // Nombre del almacén
             ["OITT"] = "Code", // Nombre del producto terminado
             ["OWTR"] = "DocNum", // Número de transferencia de stock
-            ["OOPR"] = "Name\t", // Nombre de la oportunidad
+            ["OOPR"] = "Name", // Nombre de la oportunidad
             ["ODRF"] = "DocNum", // Número de borrador
             ["OMRV"] = "DocNum", // Número de reconciliación
             ["OHEM"] = "firstName", // Nombre del empleado
@@ -133,7 +135,7 @@ namespace SAPUtils.Utils {
             ["OOAT"] = "AbsID", // Nombre del activo
         };
 
-        private static readonly Dictionary<string, string> ObjectTypeToTable = new Dictionary<string, string> {
+        [Localizable(false)] private static readonly Dictionary<string, string> ObjectTypeToTable = new Dictionary<string, string> {
             ["1"] = "OACT", // Chart of Accounts
             ["2"] = "OCRD", // Business Partners
             ["3"] = "ODSC", // Banks (DSC1: bank accounts, ODSC: header)
@@ -190,7 +192,7 @@ namespace SAPUtils.Utils {
             if (tableName != null && PrimaryKeys.TryGetValue(tableName, out string key))
                 return key;
 
-            throw new ArgumentException($"Clave primaria no conocida para la tabla '{tableName}'.");
+            throw new ArgumentException(string.Format(Texts.SapUtils_GetPrimaryKey_Primary_key_not_known_for_table___0___, tableName));
         }
 
         /// <summary>
@@ -207,7 +209,7 @@ namespace SAPUtils.Utils {
             if (tableName != null && ReadableColumns.TryGetValue(tableName, out string key))
                 return key;
 
-            throw new ArgumentException($"Clave primaria no conocida para la tabla '{tableName}'.");
+            throw new ArgumentException(string.Format(Texts.SapUtils_GetReadableColumn_Primary_key_not_known_for_table___0___, tableName));
         }
         /// <summary>
         /// Retrieves the SAP table name associated with a given object type string representation.
@@ -228,7 +230,7 @@ namespace SAPUtils.Utils {
             if (objType != null && ObjectTypeToTable.TryGetValue(objType, out string key))
                 return key;
 
-            throw new ArgumentException($"Tabla no conocida para Object Type: '{objType}'.");
+            throw new ArgumentException(string.Format(Texts.SapUtils_GetTableNameFromObjectType_Table_not_known_for_Object_Type____0___, objType));
         }
 
         /// <summary>

@@ -72,6 +72,21 @@ namespace SAPUtils.Events {
         /// <see cref="SAPUtils.Events.ItemEvents"/>
         public static event ItemBeforeHandler FormLoadBefore;
 
+        /// <summary>
+        /// Event raised before a form is closed in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event allows the execution of custom logic or validation before the form is closed.
+        /// The event can also be used to stop the form closing process by setting the <paramref name="bubbleEvent"/> parameter to `false`.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form that is about to be closed.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing details of the event.</param>
+        /// <param name="bubbleEvent">
+        /// A boolean flag indicating whether the event should continue to propagate.
+        /// Use `false` to cancel the form closing process.
+        /// </param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
         public static event ItemBeforeHandler FormCloseBefore;
 
         /// <summary>
@@ -136,6 +151,16 @@ namespace SAPUtils.Events {
         /// <see cref="SAPUtils.Events.FormEvents"/>
         public static event ItemAfterHandler FormLoadAfter;
 
+        /// <summary>
+        /// Event triggered after a form is closed in the SAP Business One application interface.
+        /// </summary>
+        /// <remarks>
+        /// This event allows executing logic or cleanup operations immediately after the closure of a form.
+        /// </remarks>
+        /// <param name="formUid">The unique identifier of the form that triggered the event.</param>
+        /// <param name="pVal">A reference to the <see cref="SAPbouiCOM.ItemEvent"/> object containing details of the closing form.</param>
+        /// <see cref="SAPbouiCOM.ItemEvent"/>
+        /// <see cref="SAPUtils.Events.ItemEvents"/>
         public static event ItemAfterHandler FormCloseAfter;
 
         /// <summary>

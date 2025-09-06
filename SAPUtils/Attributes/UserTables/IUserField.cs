@@ -12,7 +12,6 @@ namespace SAPUtils.Attributes.UserTables {
     /// </remarks>
     /// <seealso cref="T:SAPUtils.__Internal.Attributes.UserTables.IUserTableField" />
     /// <seealso cref="T:SAPUtils.Attributes.UserTables.UserTableFieldAttributeBase" />
-    /// <seealso cref="T:SAPUtils.__Internal.Attributes.UserTables.UserField" />
     public interface IUserField {
         /// <summary>
         /// Gets the technical name of the user-defined field (UDF).

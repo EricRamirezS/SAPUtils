@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Newtonsoft.Json;
 using SAPUtils.__Internal.Enums;
+using SAPUtils.I18N;
 
 namespace SAPUtils.__Internal.Utils {
     [Serializable]
@@ -13,6 +14,7 @@ namespace SAPUtils.__Internal.Utils {
         public LogLevel LogLevel { get; set; } = LogLevel.Info;
         public bool LogToConsole { get; set; } = true;
         public bool LogToFile { get; set; } = true;
+        // ReSharper disable once LocalizableElement
         public string MessageFormat { get; set; } = "[{DateTime}][{Company}][{User}][{Level}]: {Message}";
 
         public static LogSettings Instance
@@ -41,7 +43,7 @@ namespace SAPUtils.__Internal.Utils {
                     File.WriteAllText(filePath, json);
                 }
                 catch (Exception ex) {
-                    Console.WriteLine($"Error saving LogSettings file: {ex.Message}");
+                    Console.WriteLine(Texts.LogSettings_Instance_Error_saving_LogSettings_file___0_, ex.Message);
                 }
 
                 return _instance;

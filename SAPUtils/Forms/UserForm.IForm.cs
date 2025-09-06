@@ -1,5 +1,6 @@
 ﻿using System;
 using SAPbouiCOM;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Forms {
     public abstract partial class UserForm : IForm {
@@ -7,7 +8,7 @@ namespace SAPUtils.Forms {
         /// Sets the focus to the form.
         /// </summary>
         public void Select() {
-            Logger.Trace("Selecting form with UID: {0}", UniqueID);
+            Logger.Trace(Texts.UserForm_Select_Selecting_form_with_UID___0_, UniqueID);
             UIAPIRawForm?.Select();
         }
 
@@ -15,7 +16,7 @@ namespace SAPUtils.Forms {
         /// Closes an open form.
         /// </summary>
         public void Close() {
-            Logger.Debug("Closing form with UID: {0}", UniqueID);
+            Logger.Debug(Texts.UserForm_Close_Closing_form_with_UID___0_, UniqueID);
             UIAPIRawForm?.Close();
         }
 
@@ -25,7 +26,7 @@ namespace SAPUtils.Forms {
         /// In the current release, the form is always updated so there is no need for refreshing the form.
         /// </summary>
         public void Refresh() {
-            Logger.Debug("Refreshing form with UID: {0}", UniqueID);
+            Logger.Debug(Texts.UserForm_Refresh_Refreshing_form_with_UID___0_, UniqueID);
             UIAPIRawForm?.Refresh();
             int originalPane = PaneLevel;
             PaneLevel = originalPane == 1 ? 2 : 1; // Pane arbitrario
@@ -37,7 +38,7 @@ namespace SAPUtils.Forms {
         /// </summary>
         /// <returns></returns>
         public string GetAsXML() {
-            Logger.Trace("Getting XML representation of form with UID: {0}", UniqueID);
+            Logger.Trace(Texts.UserForm_GetAsXML_Getting_XML_representation_of_form_with_UID___0_, UniqueID);
             return UIAPIRawForm?.GetAsXML();
         }
 
@@ -47,13 +48,13 @@ namespace SAPUtils.Forms {
         /// </summary>
         /// <exception cref="Exception">Thrown when the update operation fails.</exception>
         public void Update() {
-            Logger.Debug("Updating form with UID: {0}", UniqueID);
+            Logger.Debug(Texts.UserForm_Update_Updating_form_with_UID___0_, UniqueID);
             try {
                 UIAPIRawForm?.Update();
-                Logger.Info("Form updated successfully");
+                Logger.Info(Texts.UserForm_Update_Form_updated_successfully);
             }
             catch (Exception ex) {
-                Logger.Error("Error updating form: {0}", ex);
+                Logger.Error(Texts.UserForm_Update_Error_updating_form___0_, ex);
                 throw;
             }
         }
@@ -105,7 +106,7 @@ namespace SAPUtils.Forms {
         /// </example>
         /// <seealso cref="UserForm"/>
         public void Freeze(bool newVal) {
-            Logger.Debug("Setting form freeze state to {0} for form with UID: {1}", newVal, UniqueID);
+            Logger.Debug(Texts.UserForm_Freeze_Setting_form_freeze_state_to__0__for_form_with_UID___1_, newVal, UniqueID);
             UIAPIRawForm?.Freeze(newVal);
         }
 
@@ -146,7 +147,7 @@ namespace SAPUtils.Forms {
         /// </example>
         /// <seealso cref="UserForm"/>
         public void EnableMenu(string menuUid, bool enableFlag) {
-            Logger.Trace("Setting menu {0} enabled state to {1} for form with UID: {2}",
+            Logger.Trace(Texts.UserForm_EnableMenu_Setting_menu__0__enabled_state_to__1__for_form_with_UID___2_,
                 menuUid, enableFlag, UniqueID);
             UIAPIRawForm?.EnableMenu(menuUid, enableFlag);
         }
@@ -177,7 +178,7 @@ namespace SAPUtils.Forms {
         /// <seealso cref="UserForm"/>
         /// <seealso cref="EnableMenu(string, bool)"/>
         public void ResetMenuStatus() {
-            Logger.Debug("Resetting menu status for form with UID: {0}", UniqueID);
+            Logger.Debug(Texts.UserForm_ResetMenuStatus_Resetting_menu_status_for_form_with_UID___0_, UniqueID);
             UIAPIRawForm?.ResetMenuStatus();
         }
 
@@ -188,7 +189,7 @@ namespace SAPUtils.Forms {
         /// <param name="width">The new width of the form.</param>
         /// <param name="height">The new height of the form.</param>
         public void Resize(int width, int height) {
-            Logger.Debug("Resizing form to Width: {0}, Height: {1}", width, height);
+            Logger.Debug(Texts.UserForm_Resize_Resizing_form_to_Width___0___Height___1_, width, height);
             UIAPIRawForm?.Resize(width, height);
         }
 
@@ -196,7 +197,7 @@ namespace SAPUtils.Forms {
         /// Enables format search.
         /// </summary>
         public void EnableFormatSearch() {
-            Logger.Debug("Enabling format search for form with UID: {0}", UniqueID);
+            Logger.Debug(Texts.UserForm_EnableFormatSearch_Enabling_format_search_for_form_with_UID___0_, UniqueID);
             UIAPIRawForm?.EnableFormatSearch();
         }
 

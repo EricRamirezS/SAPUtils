@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using SAPbobsCOM;
@@ -18,6 +20,7 @@ namespace SAPUtils.Database {
     /// This class is designed to be used internally within the system for handling SAP Business One
     /// table record management and primary key generation.
     /// </summary>
+    [Localizable(false)]
     public class Repository : IRepository {
         /// <summary>
         /// Represents the queries interface implementation used for database query execution.
@@ -126,6 +129,8 @@ namespace SAPUtils.Database {
             }
             return data;
         }
+
+        /// <inheritdoc />
         public string BuildWhere(IWhere where) {
             return new SqlWhereBuilder(where).Build();
         }
@@ -202,6 +207,7 @@ namespace SAPUtils.Database {
     /// <summary>
     /// Defines the contract for a repository that provides operations for interacting with user-defined tables.
     /// </summary>
+    [SuppressMessage("ReSharper", "UnusedMemberInSuper.Global")]
     public interface IRepository : IDisposable {
         /// <summary>
         /// Retrieves a collection of valid values for a specified user-defined table.
@@ -220,6 +226,13 @@ namespace SAPUtils.Database {
         /// </remarks>
         /// <seealso cref="IUserFieldValidValue"/>
         IList<IUserFieldValidValue> GetValidValuesFromUserTable(string userTableName);
+        /// <summary>
+        /// Constructs a SQL WHERE clause based on a given <see cref="IWhere"/> condition.
+        /// </summary>
+        /// <param name="where">An instance of the <see cref="IWhere"/> interface representing the conditions to build the WHERE clause.</param>
+        /// <returns>A <see cref="string"/> representing the constructed SQL WHERE clause.</returns>
+        /// <seealso cref="IWhere"/>
+        /// <seealso cref="SAPUtils.__Internal.Query.SqlWhereBuilder"/>
         string BuildWhere(IWhere where);
     }
 }

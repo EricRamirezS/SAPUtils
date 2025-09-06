@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.Utils;
@@ -51,6 +52,7 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override string ToSapData(object value) {
             return value == null ? "" : ((DateTime)value).ToString("HHmm");
         }
@@ -59,6 +61,7 @@ namespace SAPUtils.Attributes.UserTables {
         public override bool ValidateField(object value) => true;
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override string ToColumnData(object value) {
             return value == null ? "0000" : ((DateTime)value).ToString("HH:mm");
         }

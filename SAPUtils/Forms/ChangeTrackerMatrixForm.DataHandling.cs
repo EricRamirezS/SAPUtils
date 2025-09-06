@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
@@ -12,6 +13,7 @@ using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Enums;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Utils;
 
@@ -19,12 +21,12 @@ namespace SAPUtils.Forms {
     [SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")]
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public abstract partial class ChangeTrackerMatrixForm<T> {
-        private static readonly ConcurrentDictionary<PropertyInfo, Func<T, object>> _getterCache =
+        private static readonly ConcurrentDictionary<PropertyInfo, Func<T, object>> GetterCache =
             new ConcurrentDictionary<PropertyInfo, Func<T, object>>();
 
         private static readonly
             ConcurrentDictionary<Type, List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter,
-                IUserTableField Field)>> _fieldCache =
+                IUserTableField Field)>> FieldCache =
                 new ConcurrentDictionary<Type, List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter,
                     IUserTableField Field)>>();
 
@@ -40,10 +42,11 @@ namespace SAPUtils.Forms {
         /// A list of data items of type <typeparamref name="T"/>. Returns null by default if not implemented.
         /// </returns>
         /// <seealso cref="UserTableObjectModel.GetAll{T}"/>
-        virtual protected List<T> LoadCustomData() {
+        protected virtual List<T> LoadCustomData() {
             return null;
         }
 
+        [Localizable(false)]
         private void AddRowToMatrix(int index, T item, Status status) {
             if (index < 0) index = _dataTable.Rows.Count;
 
@@ -185,7 +188,7 @@ namespace SAPUtils.Forms {
                 (int rowColor, int rowDisabledColor) = GetRowColors(status, item);
 
                 // Skip "#" (0) and "_S_T_A_T_E" (last)
-                var editableFlags = new bool[lastColumn + 1];
+                bool[] editableFlags = new bool[lastColumn + 1];
                 bool allEditable = true;
                 for (int j = 1; j < lastColumn; j++) {
                     editableFlags[j] = _matrix.CommonSetting.GetCellEditable(matrixRow, j);
@@ -269,7 +272,7 @@ namespace SAPUtils.Forms {
 
             int success = 0;
             int failed = 0;
-            foreach (Status status in new[] { Status.Modified, Status.ModifiedRestored, Status.Delete, Status.New, }) {
+            foreach (Status status in new[] { Status.Modify, Status.Restore, Status.Delete, Status.New }) {
                 T[] items = modifiedData
                     .Where(x => x.Status == status)
                     .Select(x => x.Item)
@@ -278,8 +281,8 @@ namespace SAPUtils.Forms {
                     bool ok = false;
                     // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
                     switch (status) {
-                        case Status.Modified: ok = i.Update(); break;
-                        case Status.ModifiedRestored: ok = i.Update(true); break;
+                        case Status.Modify: ok = i.Update(); break;
+                        case Status.Restore: ok = i.Update(true); break;
                         case Status.Delete: ok = i.Delete(); break;
                         case Status.New: ok = i.Add(); break;
                     }
@@ -289,8 +292,8 @@ namespace SAPUtils.Forms {
                         failed++;
                         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
                         switch (status) {
-                            case Status.Modified:
-                            case Status.ModifiedRestored: _failedUpdate.Add((i, status)); break;
+                            case Status.Modify:
+                            case Status.Restore: _failedUpdate.Add((i, status)); break;
                             case Status.Delete: _failedDelete.Add((i, status)); break;
                             case Status.New: _failedAdd.Add((i, status)); break;
                         }
@@ -299,15 +302,15 @@ namespace SAPUtils.Forms {
             }
 
             if (failed > 0 && success == 0) {
-                SetStatusBarMessage("No se han podido guardar los cambios.", type: BoStatusBarMessageType.smt_Error);
+                SetStatusBarMessage(Texts.ChangeTrackerMatrixForm_SaveChanges_Changes_could_not_be_saved_, type: BoStatusBarMessageType.smt_Error);
             }
 
             if (failed > 0) {
-                SetStatusBarMessage($"Se han guardado {success} cambios. Han fallado {failed} cambios.",
+                SetStatusBarMessage(string.Format(Texts.ChangeTrackerMatrixForm_SaveChanges__0__changes_have_been_saved___1__changes_have_failed_, success, failed),
                     type: BoStatusBarMessageType.smt_Warning);
             }
             else {
-                SetStatusBarMessage($"Se han guardado {success} cambios.", type: BoStatusBarMessageType.smt_Success);
+                SetStatusBarMessage(string.Format(Texts.ChangeTrackerMatrixForm_SaveChanges__0__changes_have_been_saved_, success), type: BoStatusBarMessageType.smt_Success);
             }
 
             ShowArrowCursor();
@@ -385,8 +388,9 @@ namespace SAPUtils.Forms {
             }
         }
 
+        // ReSharper disable once UnusedMember.Local
         private static object GetPropertyValue(PropertyInfo prop, T item) {
-            Func<T, object> getter = _getterCache.GetOrAdd(prop,
+            Func<T, object> getter = GetterCache.GetOrAdd(prop,
                 p => {
                     ParameterExpression param = Expression.Parameter(typeof(T));
                     UnaryExpression body = Expression.Convert(Expression.Property(param, p), typeof(object));
@@ -400,13 +404,14 @@ namespace SAPUtils.Forms {
             _columnsCache = ColumnInfo.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 
-        private List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter, IUserTableField Field)>
+        private static List<(string FieldKey, PropertyInfo Property, Func<T, object> Getter, IUserTableField Field)>
             GetCachedFields() {
-            return _fieldCache.GetOrAdd(typeof(T), type => {
+            return FieldCache.GetOrAdd(typeof(T), type => {
                 List<(string, PropertyInfo, Func<T, object>, IUserTableField)> list =
                     new List<(string, PropertyInfo, Func<T, object>, IUserTableField)>();
                 foreach ((PropertyInfo prop, IUserTableField field) in UserTableMetadataCache.GetUserFields(type)) {
                     string fieldKey = field.Name ?? prop.Name;
+                    // ReSharper disable once LocalizableElement
                     ParameterExpression param = Expression.Parameter(typeof(T), "x");
                     UnaryExpression body = Expression.Convert(Expression.Property(param, prop), typeof(object));
                     Func<T, object> getter = Expression.Lambda<Func<T, object>>(body, param).Compile();
@@ -442,8 +447,8 @@ namespace SAPUtils.Forms {
 
         internal static readonly Dictionary<Status, (int Normal, int Dark)> StatusColors =
             new Dictionary<Status, (int Normal, int Dark)> {
-                [Status.Modified] = (KhakiColor, DarkKhakiColor),
-                [Status.ModifiedRestored] = (BlueColor, DarkBlueColor),
+                [Status.Modify] = (KhakiColor, DarkKhakiColor),
+                [Status.Restore] = (BlueColor, DarkBlueColor),
                 [Status.New] = (GreenColor, DarkGreenColor),
                 [Status.Discard] = (SalmonColor, DarkSalmonColor),
                 [Status.Delete] = (RedColor, DarkRedColor),

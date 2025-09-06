@@ -1,0 +1,741 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"
+                xmlns="" id="root">
+        <xsd:element name="root" msdata:IsDataSet="true">
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="SapAddon_GenerateSetupFiles_Files_Generated" xml:space="preserve">
+    <value>Erstellte Dateien:
+{0}
+{1}</value>
+  </data>
+    <data name="SapAddon_Run_Finishing_add_on_initialization" xml:space="preserve">
+    <value>Add-on-Initialisierung beenden</value>
+  </data>
+    <data name="SapAddon_Run_Running_SAP_Add_on" xml:space="preserve">
+    <value>SAP-Add-on wird ausgeführt</value>
+  </data>
+    <data name="SapAddon_SapAddon_SAP_Add_on_Initialized" xml:space="preserve">
+    <value>SAP-Add-on initialisiert</value>
+  </data>
+    <data name="SapAddon_SapAddon_Add_on_could_not_be_initialized" xml:space="preserve">
+    <value>Add-on konnte nicht initialisiert werden</value>
+  </data>
+    <data name="SapAddon_GenerateSetupFiles_No__csproj_file_was_found_in_the_executable_path_or_parent_folders"
+          xml:space="preserve">
+    <value>Keine .csproj-Datei im ausführbaren Pfad oder übergeordneten Ordner gefunden</value>
+  </data>
+    <data name="SapAddon_CreateMenu_Loading_Menus" xml:space="preserve">
+    <value>Lade Menüs</value>
+  </data>
+    <data name="SapAddon_CreateMenu_Creating_BoCreatableObjectType_cot_MenuCreationParams" xml:space="preserve">
+    <value>BoCreatableObjectType.cot_MenuCreationParams erstellen</value>
+  </data>
+    <data name="SapAddon_CreateMenu_Get_Menus_Object" xml:space="preserve">
+    <value>Get Menus Object</value>
+  </data>
+    <data name="SapAddon_CreateMenu_Getting_Menu_Item_by_id__0_" xml:space="preserve">
+    <value>Lade Menüeintrag über id {0}</value>
+  </data>
+    <data name="SapAddon_CreateMenu_Setting_new_Menus_ItemPosition_to_last_index_if_no_position_is_set"
+          xml:space="preserve">
+    <value>Setze neue Menü-Eintragsposition auf den letzten Index, wenn keine Position gesetzt ist</value>
+  </data>
+    <data name="SapAddon_CreateMenu_Subscribing_to_Application_MenuEvent" xml:space="preserve">
+    <value>Abonnieren von Application.MenuEvent</value>
+  </data>
+    <data name="SapAddon_CreateMenu_The_new_menu_could_not_be_created__Error__" xml:space="preserve">
+    <value>Das neue Menü konnte nicht erstellt werden. Fehler: </value>
+  </data>
+    <data name="SapAddon_CreateMenu_The_new_menu_could_not_be_created__Error___0_" xml:space="preserve">
+    <value>Das neue Menü konnte nicht erstellt werden. Fehler: {0}</value>
+  </data>
+    <data name="SapAddon_AddMenuItems_Adding_menu_folder__0_" xml:space="preserve">
+    <value>Menüordner {0} hinzufügen</value>
+  </data>
+    <data name="SapAddon_AddMenuItems_Adding_menu_folder__0__item" xml:space="preserve">
+    <value>Menüordner {0} Element hinzufügen</value>
+  </data>
+    <data name="SapAddon_AddMenuItems_Adding_menu_item__0_" xml:space="preserve">
+    <value>Menüpunkt {0} hinzufügen</value>
+  </data>
+    <data name="SapAddon_AddMenuItem_Menu_item__0__is_Sap_Menu__skipping_" xml:space="preserve">
+    <value>Menüpunkt {0} ist Sap Menü, übersprungen.</value>
+  </data>
+    <data name="SapAddon_AddMenuItem_Checking_if_menu_item__0__exists" xml:space="preserve">
+    <value>Überprüfe, ob der Menüpunkt {0} existiert</value>
+  </data>
+    <data name="SapAddon_AddMenuItem_Removing_menu_item__0_" xml:space="preserve">
+    <value>Entferne Menüpunkt {0}</value>
+  </data>
+    <data name="SapAddon_AddMenuItem_Setting_menu_item__0__s_image" xml:space="preserve">
+    <value>Setze Menüpunkt {0}Bild</value>
+  </data>
+    <data name="SapAddon_SBO_Application_MenuEvent_SBO_Application_MenuEvent_called_with_pval_MenuUID__0_"
+          xml:space="preserve">
+    <value>SBO_Application_MenuEvent mit pval.MenuUID {0} aufgerufen</value>
+  </data>
+    <data name="SapAddon_SBO_Application_MenuEvent_Invoke__0__related_method" xml:space="preserve">
+    <value>{0} verwandte Methode aufrufen</value>
+  </data>
+    <data name="SapAddon_InitializeUserTables_Processing_table___0_" xml:space="preserve">
+    <value>Verarbeite Tabelle: {0}</value>
+  </data>
+    <data name="SapAddon_InitializeUserTables_Creating_user_table___0_" xml:space="preserve">
+    <value>Benutzertabelle wird erstellt: {0}</value>
+  </data>
+    <data name="SapAddon_InitializeUserTables_Processing_field___0___1_" xml:space="preserve">
+    <value>Verarbeite Feld: {0}.{1}</value>
+  </data>
+    <data name="SapAddon_AddSapTableUserField_Cannot_create_DateTimeFieldAttribute_Field_in_System_Table__use_Date_and_Time_instead_"
+          xml:space="preserve">
+    <value>DatumTimeFieldAttributfeld kann in der Systemtabelle nicht erstellt werden. Verwenden Sie stattdessen Datum und Zeit.</value>
+  </data>
+    <data name="SapAddon_CreateUserTable_Verifying_if_table__0__already_exist" xml:space="preserve">
+    <value>Überprüft, ob die Tabelle {0} bereits existiert</value>
+  </data>
+    <data name="SapAddon_CreateUserTable_Table__0__already_exist" xml:space="preserve">
+    <value>Tabelle {0} existiert bereits</value>
+  </data>
+    <data name="SapAddon_CreateUserTable_Table__0__created" xml:space="preserve">
+    <value>Tabelle {0} erstellt</value>
+  </data>
+    <data name="SapAddon_CreateUserTable_Unable_to_add_user_table__0___Error__1_" xml:space="preserve">
+    <value>Konnte die Benutzertabelle {0}nicht hinzufügen. Fehler {1}</value>
+  </data>
+    <data name="SapAddon_CreateUserTableField_Field__0___1__already_exist" xml:space="preserve">
+    <value>Feld {0}.{1} existiert bereits</value>
+  </data>
+    <data name="SapAddon_CreateUserTableField_Field__0___1__created" xml:space="preserve">
+    <value>Feld {0}.{1} erstellt</value>
+  </data>
+    <data name="SapAddon_CreateUserTableField_Unable_to_add_field__0__to_table__1___Error__2_" xml:space="preserve">
+    <value>Konnte das Feld {0} nicht zur Tabelle {1}hinzufügen. Fehler {2}</value>
+  </data>
+    <data name="SapAddon_ExistTableField_Verifying_if_field__0___1__already_exist" xml:space="preserve">
+    <value>Überprüft, ob das Feld {0}bereits vorhanden ist.{1}</value>
+  </data>
+    <data name="SapAddon_ValidateTable_Verifying_table__0__implements_UserTableObjectModel" xml:space="preserve">
+    <value>Überprüft Tabelle {0} implementiert UserTableObjectModel</value>
+  </data>
+    <data name="SapAddon_ValidateTable__0__is_not_assignable_From_IUserTableObjectModel" xml:space="preserve">
+    <value>{0} ist vom IUserTableObjectModel nicht zuweisbar</value>
+  </data>
+    <data name="SapAddon_ValidateTable_Veryfing_table__0__has_Attribute_UserTableAttribute" xml:space="preserve">
+    <value>Überprüfen der Tabelle {0}, ob das Attribut „UserTableAttribute“ vorhanden ist</value>
+  </data>
+    <data name="SapAddon_ValidateTable_UserTable_Attribute_not_found_in_class__0_" xml:space="preserve">
+    <value>BenutzerTable Attribut nicht gefunden in Klasse {0}</value>
+  </data>
+    <data name="SapAddon_ValidateFields__0__Property__1__Marked_as_Ignored" xml:space="preserve">
+    <value>{0} Eigenschaft `{1}` Markierungen als ignoriert</value>
+        <comment>SapAddon_ValidateFields__0__Property__1__Marked_as_Ignored</comment>
+  </data>
+    <data name="SapAddon_ValidateFields_IUserTableField_not_found_in__0___1_" xml:space="preserve">
+    <value>IUserTableField nicht gefunden in {0}.{1}</value>
+  </data>
+    <data name="SapAddon_ValidateFields_IUserTableField__0___1__is_not_valid__Expected_property_type___2___but_got___3_"
+          xml:space="preserve">
+    <value>IUserTableField {0}.{1} ist nicht gültig. Erwarteter Objekttyp: {2}, aber erhalten: {3}</value>
+  </data>
+    <data name="StatusExtensions_GetReadableName_Normal" xml:space="preserve">
+    <value>✅ Normal</value>
+  </data>
+    <data name="StatusExtensions_GetReadableName_Modify" xml:space="preserve">
+    <value>:Bleistift: Ändern</value>
+  </data>
+    <data name="StatusExtensions_GetReadableName_Restore" xml:space="preserve">
+    <value>🔁 Wiederherstellen</value>
+  </data>
+    <data name="StatusExtensions_GetReadableName_New" xml:space="preserve">
+    <value>➕ Neu</value>
+  </data>
+    <data name="StatusExtensions_GetReadableName_Discard" xml:space="preserve">
+    <value>:Cross_mark: Verwerfen</value>
+  </data>
+    <data name="StatusExtensions_GetReadableName_Delete" xml:space="preserve">
+    <value>🗑️ Löschen</value>
+  </data>
+    <data name="MatrixExtensions_CflSubscriber_Error_applying_CFL_on_matrix___0_" xml:space="preserve">
+    <value>Fehler beim Anwenden von CFL auf Matrix: {0}</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Active" xml:space="preserve">
+    <value>Aktiv</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Inactive" xml:space="preserve">
+    <value>Inaktiv</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Created_at_date" xml:space="preserve">
+    <value>Erstellt am Datum</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Created_at_time" xml:space="preserve">
+    <value>Zur Zeit erstellt</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Updated_at_date" xml:space="preserve">
+    <value>Aktualisiert am Datum</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Updated_at_time" xml:space="preserve">
+    <value>Aktualisiert</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Created_by" xml:space="preserve">
+    <value>Erstellt von</value>
+  </data>
+    <data name="AuditableField_GetUserTableField_Updated_by" xml:space="preserve">
+    <value>Aktualisiert von</value>
+  </data>
+    <data name="AuditableField_GetUserTableField__0__is_not_supported_in_IAuditable" xml:space="preserve">
+    <value>{0} wird nicht in IAuditable unterstützt</value>
+  </data>
+    <data name="FormatInfo_GetDateFullFormat_Unrecognized_date_format_" xml:space="preserve">
+    <value>Unbekanntes Datumsformat.</value>
+  </data>
+    <data name="UserFieldValidValue_ParseValidValuePairs_Valid_values_must_be_provided_in__value__description__pairs_"
+          xml:space="preserve">
+    <value>Gültige Werte müssen in (Wert, Beschreibung) Paaren angegeben werden.</value>
+  </data>
+    <data name="UserTableMetadataCache_GetAllMethodInfo_UserTableObjectModel_GetAll_Method_not_found"
+          xml:space="preserve">
+    <value>UserTableObjectModel.GetAll-Methode nicht gefunden</value>
+  </data>
+    <data name="SqlWhereBuilder_BuildGroup_Unsupported_comparison___0_" xml:space="preserve">
+    <value>Nicht unterstützter Vergleich: {0}</value>
+  </data>
+    <data name="ConsoleLogger_PrintExceptionToConsole_Caused_by__" xml:space="preserve">
+    <value>Ausgelöst von: </value>
+  </data>
+    <data name="ConsoleLogger_PrintExceptionToConsole__0____1_" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+    <data name="ConsoleLogger_PrintExceptionToConsole_Occurred_in___0___1_" xml:space="preserve">
+    <value>Aufgetreten in: {0}.{1}</value>
+  </data>
+    <data name="ConsoleLogger_PrintExceptionToConsole_File___0_" xml:space="preserve">
+    <value>Datei: {0}</value>
+  </data>
+    <data name="ConsoleLogger_PrintExceptionToConsole_Line___0_" xml:space="preserve">
+    <value>Zeile: {0}</value>
+  </data>
+    <data name="ConsoleLogger_PrintExceptionToConsole_Stack_Trace_" xml:space="preserve">
+    <value>Stack-Trace:</value>
+  </data>
+    <data name="Logger_Logger_JSON_error___0_" xml:space="preserve">
+    <value>JSON-Fehler: {0}</value>
+  </data>
+    <data name="Logger_ProcessLogQueue__Logger__Error_writing_log___0_" xml:space="preserve">
+    <value>[Logger] Fehler beim Schreiben des Logs: {0}</value>
+  </data>
+    <data name="Logger_GetLogFilePath_The_path_contains_invalid_characters___fullPath_" xml:space="preserve">
+    <value>Der Pfad enthält ungültige Zeichen: {fullPath}</value>
+  </data>
+    <data name="Logger_GetLogFilePath_Company" xml:space="preserve">
+    <value>Firma</value>
+  </data>
+    <data name="Logger_GetLogFilePath_User" xml:space="preserve">
+    <value>Benutzer</value>
+  </data>
+    <data name="Logger_Log__Not_serializable_to_XML___0___ToString_____1_" xml:space="preserve">
+    <value>[Nicht serialisierbar zu XML] {0}. ToString(): {1}</value>
+  </data>
+    <data name="Logger_Log__Object___0___1__2_" xml:space="preserve">
+    <value>[Objekt: {0}]{1}{2}</value>
+  </data>
+    <data name="Logger_ExceptionToString_Occurred_in___0___1_" xml:space="preserve">
+    <value>Aufgetreten in: {0}.{1}</value>
+  </data>
+    <data name="Logger_ExceptionToString_File___0_" xml:space="preserve">
+    <value>Datei: {0}</value>
+  </data>
+    <data name="Logger_ExceptionToString_Line___0_" xml:space="preserve">
+    <value>Zeile: {0}</value>
+  </data>
+    <data name="Logger_ExceptionToString_Stack_Trace_" xml:space="preserve">
+    <value>Stack-Trace:</value>
+  </data>
+    <data name="Logger_ExceptionToString_Caused_by___0____1_" xml:space="preserve">
+    <value>Ausgelöst von: {0}: {1}</value>
+  </data>
+    <data name="Logger_CleanOldLogs_No_se_pudo_eliminar_el_archivo__0____1_" xml:space="preserve">
+    <value>No se pudo eliminar el archivo {0}: {1}</value>
+  </data>
+    <data name="Logger_CleanOldLogs_Could_not_delete_file__0____1_" xml:space="preserve">
+    <value>Konnte Datei {0}nicht löschen: {1}</value>
+  </data>
+    <data name="Logger_Format__0___ERROR_FORMATTING_ARGUMENTS____1_" xml:space="preserve">
+    <value>{0} [FEHLER-FORMIERUNGS]: {1}</value>
+  </data>
+    <data name="Logger_Log__null" xml:space="preserve">
+    <value>null</value>
+  </data>
+    <data name="Logger_Error_Unknown_error" xml:space="preserve">
+    <value>Unbekannter Fehler</value>
+  </data>
+    <data name="LogSettings_Instance_Error_saving_LogSettings_file___0_" xml:space="preserve">
+    <value>Fehler beim Speichern der LogEinstellungen: {0}</value>
+  </data>
+    <data name="Logger_Critical_Critical_error" xml:space="preserve">
+    <value>Kritischer Fehler</value>
+  </data>
+    <data name="BooleanFieldAttribute_ValidValues_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+    <data name="BooleanFieldAttribute_ValidValues_No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+    <data name="DateTimeFieldAttribute_ToSapData_ToSapData_should_not_be_used_on_DateTimeFieldAttribute__Use_the_specialized_handling_for_SAP_date_time_fields_"
+          xml:space="preserve">
+    <value>ToSapData sollte nicht auf DateTimeFieldAttributen verwendet werden. Verwenden Sie die spezialisierte Behandlung für SAP-Datums- und Zeitfelder.</value>
+  </data>
+    <data name="DateTimeFieldAttribute_ParseValue_ParseValue_should_not_be_used_on_DateTimeFieldAttribute__Use_the_specialized_handling_for_SAP_date_time_fields_"
+          xml:space="preserve">
+    <value>ParseValue sollte nicht auf DateTimeFieldAttributen verwendet werden. Verwenden Sie die spezialisierte Behandlung für SAP-Datums- und Zeitfelder.</value>
+  </data>
+    <data name="UserTableAttribute_UserTableAttribute_Table_Name_cannot_exceed_19_characters__Provided_length___0__"
+          xml:space="preserve">
+    <value>Tabellenname darf 19 Zeichen nicht überschreiten. Die angegebene Länge: {0}.</value>
+  </data>
+    <data name="UserTableAttribute_UserTableAttribute_Table_Description_cannot_exceed_30_characters__Provided_length___0__"
+          xml:space="preserve">
+    <value>Tabellenbeschreibung darf 30 Zeichen nicht überschreiten. Angegebene Länge: {0}.</value>
+  </data>
+    <data name="UserTableFieldAttributeBase_Name_Name_cannot_exceed_50_characters__Provided_length___0__"
+          xml:space="preserve">
+    <value>Der Name darf 50 Zeichen nicht überschreiten. Die angegebene Länge: {0}.</value>
+  </data>
+    <data name="UserTableFieldAttributeBase_Description_Description_cannot_exceed_80_characters__Provided_length___0__"
+          xml:space="preserve">
+    <value>Beschreibung kann 80 Zeichen nicht überschreiten. Bereitgestellte Länge: {0}.</value>
+  </data>
+    <data name="AddontNotInitializedException_AddontNotInitializedException_The_add_on_has_not_been_initialized_"
+          xml:space="preserve">
+    <value>Das Add-on wurde nicht initialisiert,</value>
+  </data>
+    <data name="CodeNotSetException_CodeNotSetException_No_Code_was_provided_for_new_data_in__0___but_PrimaryKeyStrategy_was_set_to_Manual_"
+          xml:space="preserve">
+    <value>Es wurde kein Code für neue Daten in {0}bereitgestellt, aber PrimaryKeyStrategy wurde auf Handbuch gesetzt.</value>
+  </data>
+    <data name="ItemAlreadyExistException_ItemAlreadyExistException_Item_with_code__0__already_exists_in_table__1__"
+          xml:space="preserve">
+    <value>Artikel mit Code {0} existiert bereits in Tabelle {1}.</value>
+  </data>
+    <data name="ItemDoNotExistException_ItemDoNotExistException__0__with_code__1__does_not_exist_in_table__2__"
+          xml:space="preserve">
+    <value>{0} mit Code {1} existiert nicht in der Tabelle {2}.</value>
+  </data>
+    <data name="UserTableAttributeNotFound_UserTableAttributeNotFound__0__is_not_decorated_with_UserTableAttribute_"
+          xml:space="preserve">
+    <value>{0} ist nicht mit UserTableAttribute verziert.</value>
+  </data>
+    <data name="ValidValuesExtension_AddRange_Could_not_add__0___1__to_ValidValues" xml:space="preserve">
+    <value>Konnte `{0} - {1}` nicht zu ValidValues hinzufügen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_PreloadDataAsync_Preloading_data___" xml:space="preserve">
+    <value>Daten werden vorgeladen...</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_PreloadDataAsync_PreloadData_Thread_Started" xml:space="preserve">
+    <value>Vorladedaten-Thread gestartet</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_PreloadDataAsync_PreloadData_Thread_Data_Loaded" xml:space="preserve">
+    <value>Vorladedaten Thread Daten geladen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_AddContextMenuItems_Add_row" xml:space="preserve">
+    <value>Zeile hinzufügen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_AddContextMenuItems_Restore_row" xml:space="preserve">
+    <value>Zeile wiederherstellen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_AddContextMenuItems_Delete_row" xml:space="preserve">
+    <value>Zeile löschen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_AddContextMenuItems_Error_adding_context_menu___0_" xml:space="preserve">
+    <value>Fehler beim Hinzufügen des Kontextmenüs: {0}</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_SaveChanges_Changes_could_not_be_saved_" xml:space="preserve">
+    <value>Änderungen konnten nicht gespeichert werden.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_SaveChanges__0__changes_have_been_saved___1__changes_have_failed_"
+          xml:space="preserve">
+    <value>{0} Änderungen wurden gespeichert. {1} Änderungen sind fehlgeschlagen.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_SaveChanges__0__changes_have_been_saved_" xml:space="preserve">
+    <value>{0} Änderungen wurden gespeichert.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_Application_MenuEvent_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_Application_MenuEvent_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_Application_MenuEvent_There_are_unsaved_changes__Do_you_want_to_reload_and_discard_the_changes_"
+          xml:space="preserve">
+    <value>Es gibt ungespeicherte Änderungen.
+Möchten Sie die Änderungen neu laden und verwerfen?</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_SaveButtonOnClickAfter_The_changes_will_be_saved__Do_you_want_to_continue_"
+          xml:space="preserve">
+    <value>Die Änderungen werden gespeichert.
+Möchten Sie fortfahren?</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_SaveButtonOnClickAfter_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_SaveButtonOnClickAfter_No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_OnFormCloseBefore_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_OnFormCloseBefore_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_OnFormCloseBefore_There_are_unsaved_changes__Do_you_want_to_save_before_closing_"
+          xml:space="preserve">
+    <value>Es gibt ungespeicherte Änderungen.
+Möchten Sie vor dem Schließen speichern?</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ExportToExcel_Export_completed___0_" xml:space="preserve">
+    <value>Export abgeschlossen: {0}</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ExportToExcel_OK" xml:space="preserve">
+    <value>Ok</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ExportToExcel_Open" xml:space="preserve">
+    <value>Öffnen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ExportToExcel_The_Excel_could_not_be_generated___0_" xml:space="preserve">
+    <value>Das Excel konnte nicht generiert werden: {0}</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ChooseSavePath_Save_Excel" xml:space="preserve">
+    <value>Excel speichern</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ChooseSavePath_Excel_files__0_" xml:space="preserve">
+    <value>Excel-Dateien {0}</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_The_number_of_decimal_places_must_be_between_0_and_6_"
+          xml:space="preserve">
+    <value>Die Anzahl der Dezimalstellen muss zwischen 0 und 6 liegen.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_Invalid_value" xml:space="preserve">
+    <value>Ungültiger Wert</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_Only_integers_are_allowed_" xml:space="preserve">
+    <value>Nur ganze Zahlen sind erlaubt.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_Only_decimal_numbers_are_allowed_" xml:space="preserve">
+    <value>Es sind nur Dezimalzahlen erlaubt.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_GenerateExcel_Only_dates_are_allowed_" xml:space="preserve">
+    <value>Nur Daten sind erlaubt.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ImportFromExcel_There_are_unsaved_changes__Do_you_want_to_discard_the_changes_"
+          xml:space="preserve">
+    <value>Es gibt ungespeicherte Änderungen. Möchten Sie die Änderungen verwerfen?</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ImportFromExcel_Continue" xml:space="preserve">
+    <value>Weiter</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ImportFromExcel_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ImportFromExcel_Could_not_read_Excel___0_" xml:space="preserve">
+    <value>Konnte Excel nicht lesen: {0}</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ChooseOpenPath_Import_Excel_file" xml:space="preserve">
+    <value>Excel-Datei importieren</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ChooseOpenPath_Excel_files__0_" xml:space="preserve">
+    <value>Excel-Dateien {0}</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ParseExcel_The_file_does_not_contain_the_sheet___0____Please_generate_the_Excel_file_using_the_export_button_"
+          xml:space="preserve">
+    <value>Die Datei enthält nicht das Blatt '{0}'. Bitte erzeugen Sie die Excel-Datei über den Export-Button.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ParseExcel_Invalid_Excel_file__Please_generate_the_Excel_file_using_the_export_button_"
+          xml:space="preserve">
+    <value>Ungültige Excel-Datei. Bitte erzeugen Sie die Excel-Datei mit dem Export-Button.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_ParseExcel_Invalid_Excel__Please_generate_the_Excel_file_using_the_export_button__"
+          xml:space="preserve">
+    <value>Ungültige Excel. Bitte erzeugen Sie die Excel-Datei mit dem Export-Button.</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_CustomInitializeComponent__State_" xml:space="preserve">
+    <value>[State]</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_CustomInitializeComponent_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+    <data name="ChangeTrackerMatrixForm_CustomInitializeComponent_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+    <data name="ObjectViewerForm_ObjectViewerForm_Add___New" xml:space="preserve">
+    <value>Neu</value>
+  </data>
+    <data name="ObjectViewerForm_ObjectViewerForm_Add___View" xml:space="preserve">
+    <value>Hinzufügen &amp; anzeigen</value>
+  </data>
+    <data name="ObjectViewerForm_ObjectViewerForm_Add___Close" xml:space="preserve">
+    <value>Hinzufügen &amp; schließen</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_Select_Object" xml:space="preserve">
+    <value>Objekt auswählen</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_Select" xml:space="preserve">
+    <value>Auswählen</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_You_must_select_a_row_" xml:space="preserve">
+    <value>Sie müssen eine Zeile auswählen.</value>
+  </data>
+    <data name="ObjectViewerForm_ShowObjectSelector_Error___0_" xml:space="preserve">
+    <value>Fehler: {0}</value>
+  </data>
+    <data name="ObjectViewerForm_AddButtonClickAfter_Yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+    <data name="ObjectViewerForm_AddButtonClickAfter_You_cannot_change_this_document_after_you_have_added_it__Continue_"
+          xml:space="preserve">
+    <value>Sie können dieses Dokument nicht ändern, nachdem Sie es hinzugefügt haben. Fortfahren?</value>
+  </data>
+    <data name="ObjectViewerForm_AddButtonClickAfter_No" xml:space="preserve">
+    <value>Nein</value>
+  </data>
+    <data name="UserForm_UserForm_Starting_the_construction_of_the_UserForm" xml:space="preserve">
+    <value>Mit dem Bau des Benutzerformulars beginnen</value>
+  </data>
+    <data name="UserForm_UserForm_UserForm_successfully_initialized" xml:space="preserve">
+    <value>UserForm erfolgreich initialisiert</value>
+  </data>
+    <data name="UserForm_UserForm_Error_during_UserForm_initialization_" xml:space="preserve">
+    <value>Fehler bei der Initialisierung des BenutzerFormulars:</value>
+  </data>
+    <data name="UserForm_LoadForm_Starting_form_loading" xml:space="preserve">
+    <value>Laden des Formulars starten</value>
+  </data>
+    <data name="UserForm_LoadForm_Loading_form_file_from___0_" xml:space="preserve">
+    <value>Formulardatei wird geladen von: {0}</value>
+  </data>
+    <data name="UserForm_LoadForm_Form_node_not_found_in_XML_file" xml:space="preserve">
+    <value>Formularknoten nicht in XML-Datei gefunden</value>
+  </data>
+    <data name="UserForm_LoadForm_Form_is_not_valid" xml:space="preserve">
+    <value>Formular ist ungültig</value>
+  </data>
+    <data name="UserForm_LoadForm_Form_node_has_no_attributes" xml:space="preserve">
+    <value>Formularknoten hat keine Attribute</value>
+  </data>
+    <data name="UserForm_LoadForm_Form_type_set_to___0_" xml:space="preserve">
+    <value>Formulartyp gesetzt auf: {0}</value>
+  </data>
+    <data name="UserForm_LoadForm_Closing_existing_form_with_UID___0_" xml:space="preserve">
+    <value>Bestehendes Formular mit UID schließen: {0}</value>
+  </data>
+    <data name="UserForm_LoadForm_Could_not_close_form__0_" xml:space="preserve">
+    <value>Formular {0} konnte nicht geschlossen werden</value>
+  </data>
+    <data name="UserForm_LoadForm_Loading_batch_actions_into_application" xml:space="preserve">
+    <value>Laden von Batch-Aktionen in die Anwendung</value>
+  </data>
+    <data name="UserForm_LoadForm_Form_loaded_successfully" xml:space="preserve">
+    <value>Formular erfolgreich geladen</value>
+  </data>
+    <data name="UserForm_LoadForm_Error_during_form_loading__" xml:space="preserve">
+    <value>Fehler beim Laden des Formulars: </value>
+  </data>
+    <data name="UserForm_Show_Attempting_to_show_form" xml:space="preserve">
+    <value>Versuch Formular anzuzeigen</value>
+  </data>
+    <data name="UserForm_Show_Cannot_show_form_because_it_is_not_alive" xml:space="preserve">
+    <value>Formular kann nicht angezeigt werden, da es nicht am Leben ist</value>
+  </data>
+    <data name="UserForm_Show_Form_displayed_successfully" xml:space="preserve">
+    <value>Formular erfolgreich angezeigt</value>
+  </data>
+    <data name="UserForm_ShowWaitCursor_Loading___" xml:space="preserve">
+    <value>Wird geladen...</value>
+  </data>
+    <data name="UserForm_Select_Selecting_form_with_UID___0_" xml:space="preserve">
+    <value>Formular mit UID auswählen: {0}</value>
+  </data>
+    <data name="UserForm_Close_Closing_form_with_UID___0_" xml:space="preserve">
+    <value>Formular mit UID schließen: {0}</value>
+  </data>
+    <data name="UserForm_Refresh_Refreshing_form_with_UID___0_" xml:space="preserve">
+    <value>Aktualisiere Formular mit UID: {0}</value>
+  </data>
+    <data name="UserForm_GetAsXML_Getting_XML_representation_of_form_with_UID___0_" xml:space="preserve">
+    <value>Abrufen der XML-Darstellung des Formulars mit UID: {0}</value>
+  </data>
+    <data name="UserForm_Update_Updating_form_with_UID___0_" xml:space="preserve">
+    <value>Aktualisiere Formular mit UID: {0}</value>
+  </data>
+    <data name="UserForm_Update_Form_updated_successfully" xml:space="preserve">
+    <value>Formular erfolgreich aktualisiert</value>
+  </data>
+    <data name="UserForm_Update_Error_updating_form___0_" xml:space="preserve">
+    <value>Fehler beim Aktualisieren des Formulars: {0}</value>
+  </data>
+    <data name="UserForm_Freeze_Setting_form_freeze_state_to__0__for_form_with_UID___1_" xml:space="preserve">
+    <value>Setze Formular Einfrierstatus auf {0} für Formular mit UID: {1}</value>
+  </data>
+    <data name="UserForm_EnableMenu_Setting_menu__0__enabled_state_to__1__for_form_with_UID___2_" xml:space="preserve">
+    <value>Setze Menü {0} aktivierten Status auf {1} für Formular mit UID: {2}</value>
+  </data>
+    <data name="UserForm_ResetMenuStatus_Resetting_menu_status_for_form_with_UID___0_" xml:space="preserve">
+    <value>Menüstatus für Formular mit UID zurücksetzen: {0}</value>
+  </data>
+    <data name="UserForm_Resize_Resizing_form_to_Width___0___Height___1_" xml:space="preserve">
+    <value>Größe des Formulars auf Breite: {0}, Höhe: {1}</value>
+  </data>
+    <data name="UserForm_EnableFormatSearch_Enabling_format_search_for_form_with_UID___0_" xml:space="preserve">
+    <value>Aktiviere Formatsuche für Formular mit UID: {0}</value>
+  </data>
+    <data name="UserTableObjectModel_GetAll_Fetching_All__0_" xml:space="preserve">
+    <value>Rufe alle {0} ab</value>
+  </data>
+    <data name="UserTableObjectModel_GetAll_UserTableAttribute_not_found_in__0_" xml:space="preserve">
+    <value>UserTableAttribut nicht gefunden in {0}</value>
+  </data>
+    <data name="UserTableObjectModel_GetAll_Fetching_all__0__from_table__1_" xml:space="preserve">
+    <value>Lade alle {0} aus Tabelle {1}</value>
+  </data>
+    <data name="UserTableObjectModel_GetAll_Executing_query___0_" xml:space="preserve">
+    <value>Abfrage wird ausgeführt: {0}</value>
+  </data>
+    <data name="UserTableObjectModel_PopulateFields_Processing_field___0___1_" xml:space="preserve">
+    <value>Verarbeite Feld: {0}.{1}</value>
+  </data>
+    <data name="UserTableObjectModel_PopulateFields_" xml:space="preserve">
+    <value>Verarbeite Feld: {0}.{1} = {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Get_Fetching__0__with_Code___1_" xml:space="preserve">
+    <value>Abrufen von {0} mit Code: {1}</value>
+  </data>
+    <data name="UserTableObjectModel_Get_UserTableAttribute_not_found_in__0_" xml:space="preserve">
+    <value>UserTableAttribut nicht gefunden in {0}</value>
+  </data>
+    <data name="UserTableObjectModel_Get_Fetching__0__from_table__1__with_Code___2_" xml:space="preserve">
+    <value>Abrufen von {0} aus Tabelle {1} mit Code: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Get__0__from_table__1__not_found_with_Code___2_" xml:space="preserve">
+    <value>{0} aus Tabelle {1} nicht gefunden mit Code: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Get__0__from_table__1__found_in__0___populating_properties___"
+          xml:space="preserve">
+    <value>{0} aus Tabelle {1} gefunden in {0}, füllte Eigenschaften...</value>
+  </data>
+    <data name="UserTableObjectModel_Get__0__successfully_populated_for_Code___1_" xml:space="preserve">
+    <value>{0} erfolgreich für Code: {1}</value>
+  </data>
+    <data name="UserTableObjectModel_UserTableObjectModel_Initializing_UserTableObjectModel___" xml:space="preserve">
+    <value>Initialisiere UserTableObjectModel...</value>
+  </data>
+    <data name="UserTableObjectModel_UserTableObjectModel_UserTableAttribute_initialized___0_" xml:space="preserve">
+    <value>UserTableAttribut initialisiert: {0}</value>
+  </data>
+    <data name="UserTableObjectModel_Add_Attempting_to_add__0__into_table__1__with_Code___2_" xml:space="preserve">
+    <value>Versuche {0} in Tabelle {1} mit Code hinzuzufügen: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Update_Attempting_to_update__0__in_table__1__with_Code___2_" xml:space="preserve">
+    <value>Versuch {0} in Tabelle {1} mit Code zu aktualisieren: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Update_Retrieving_SAP_User_Table___0_____" xml:space="preserve">
+    <value>SAP-Benutzertabelle '{0}'...</value>
+  </data>
+    <data name="UserTableObjectModel_Delete_Attempting_to_delete__0__from_table__1__with_Code___2_"
+          xml:space="preserve">
+    <value>Versuche {0} aus Tabelle {1} mit Code zu löschen: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Delete__0__from_table__1__with_Code__2__does_not_exist_" xml:space="preserve">
+    <value>{0} aus Tabelle {1} mit Code {2} existiert nicht.</value>
+  </data>
+    <data name="UserTableObjectModel_Delete__0__from_table__1__with_Code__3__deleted_successfully_"
+          xml:space="preserve">
+    <value>{0} aus Tabelle {1} mit Code {3} erfolgreich gelöscht.</value>
+  </data>
+    <data name="UserTableObjectModel_Delete_Failed_to_delete__0__from_table__1__with_Code__2___SAP_Error_Code___3___SAP_Error_Message___4_"
+          xml:space="preserve">
+    <value>Fehler beim Löschen von {0} aus der Tabelle {1} mit Code {2}. SAP-Fehlercode: {3}. SAP-Fehlermeldung: {4}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Validating__0__s_field__1_____2_" xml:space="preserve">
+    <value>Validierung des Feldes {0} {1} = {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Invalid_value_for_field__0____1_" xml:space="preserve">
+    <value>Ungültiger Wert für Feld {0}: {1}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Saving__0__into_table__1__with_Code___2_" xml:space="preserve">
+    <value>Speichere {0} in Tabelle {1} mit Code: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Updating_existing__0__in_table__1__with_Code___2_" xml:space="preserve">
+    <value>Aktualisiere vorhandene {0} in Tabelle {1} mit Code: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Inserting_new__0__into_table__1__with_Code___2_" xml:space="preserve">
+    <value>Füge neue {0} in Tabelle {1} mit Code ein: {2}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Failed_to_assign_value_to_field__0____1_" xml:space="preserve">
+    <value>Fehler beim Zuweisen des Wertes zu Feld {0}: {1}</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Processed_field__0_____1_" xml:space="preserve">
+    <value>Verarbeitetes Feld {0} = {1}</value>
+  </data>
+    <data name="UserTableObjectModel_Save__0__from_table__1__with_Code__2__saved_successfully_" xml:space="preserve">
+    <value>{0} aus der Tabelle {1} mit Code {2} erfolgreich gespeichert.</value>
+  </data>
+    <data name="UserTableObjectModel_Save_Failed_to_save__0__in_table__1__with_Code__2___SAP_Error_Code___3___SAP_Error_Message___4_"
+          xml:space="preserve">
+    <value>Fehler beim Speichern von {0} in Tabelle {1} mit Code {2}. SAP-Fehlercode: {3}. SAP-Fehlermeldung: {4}</value>
+  </data>
+    <data name="UserTableObjectModel_RestoreOriginalCode_Reverting__0__Code_to___1_" xml:space="preserve">
+    <value>{0} Code zurücksetzen: {1}</value>
+  </data>
+    <data name="FormUtils_ValidateTimeCell_Invalid_time_value__ODBC_1031___131_183_" xml:space="preserve">
+    <value>Ungültiger Zeitwert (ODBC-1031) [131-183]</value>
+  </data>
+    <data name="ColumnParser_FormatDtValue_Unknown_Parsing" xml:space="preserve">
+    <value>Unbekanntes Parsen</value>
+  </data>
+    <data name="SapUtils_GetPrimaryKey_Primary_key_not_known_for_table___0___" xml:space="preserve">
+    <value>Primärer Schlüssel nicht bekannt für Tabelle '{0}'.</value>
+  </data>
+    <data name="SapUtils_GetReadableColumn_Primary_key_not_known_for_table___0___" xml:space="preserve">
+    <value>Primärer Schlüssel nicht bekannt für Tabelle '{0}'.</value>
+  </data>
+    <data name="SapUtils_GetTableNameFromObjectType_Table_not_known_for_Object_Type____0___" xml:space="preserve">
+    <value>Tabelle nicht für Objekttyp bekannt: '{0}'.</value>
+  </data>
+    <data name="SapAddon_Instance_SapAddon_instance_not_found" xml:space="preserve">
+    <value>SapAddon-Instanz nicht gefunden</value>
+  </data>
+    <data name="ObjectViewerForm_AddButtonClickAfter_Invalid_option_" xml:space="preserve">
+    <value>Ungültige Option.</value>
+  </data>
+</root>

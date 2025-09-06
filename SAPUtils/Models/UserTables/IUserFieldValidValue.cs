@@ -4,6 +4,7 @@ namespace SAPUtils.Models.UserTables {
     /// <summary>
     /// Represents a valid value for a user-defined field, including both its internal value and a user-friendly description.
     /// </summary>
+    // ReSharper disable once PossibleInterfaceMemberAmbiguity
     public interface IUserFieldValidValue : IValidValue, SAPbouiCOM.IValidValue { }
 
     /// <summary>

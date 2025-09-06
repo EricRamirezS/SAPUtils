@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using SAPbobsCOM;
@@ -12,6 +13,7 @@ using SAPUtils.Attributes.UserTables;
 using SAPUtils.Database;
 using SAPUtils.Extensions;
 using SAPUtils.Forms;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 using SAPUtils.Utils;
 using ChooseFromList = SAPbouiCOM.ChooseFromList;
@@ -123,6 +125,7 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.Matrix"/>
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="DateTimeFieldAttribute"/>
+        [Localizable(false)]
         internal static (Column Date, Column Time) AddDateTimeColumnsFromUserTableField(
             this Matrix matrix,
             ref int index,
@@ -201,6 +204,7 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
         /// <seealso cref="SAPUtils.Forms.UserForm"/>
+        [Localizable(false)]
         private static Column AddComboBoxFromUdt(Matrix matrix, string uid, IUserTableField field, UserForm form) {
             try {
                 form.DataSources.UserDataSources.Item($"_DS{uid}");
@@ -219,7 +223,7 @@ namespace SAPUtils.__Internal.Extensions {
             if (type != null) {
                 MethodInfo method = UserTableMetadataCache.GetAllMethodInfo(type);
                 if (method != null) {
-                    object result = method.Invoke(null, new object[] { null, });
+                    object result = method.Invoke(null, new object[] { null });
                     IEnumerable enumerable = result as IEnumerable;
                     List<IUserTableObjectModel> data = new List<IUserTableObjectModel>();
 
@@ -239,7 +243,7 @@ namespace SAPUtils.__Internal.Extensions {
                         data.ForEach(e => vv.Add(new UserFieldValidValue(
                             e.Code, e.DisplayName
                         )));
-                        if (field.Mandatory == false) {
+                        if (!field.Mandatory) {
                             vv.Insert(0, new UserFieldValidValue("", ""));
                         }
                     }
@@ -316,7 +320,7 @@ namespace SAPUtils.__Internal.Extensions {
         private static Column AddComboBoxColumn(Matrix matrix, string uid, IUserTableField field) {
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_COMBO_BOX);
 
-            if (field.Mandatory == false) {
+            if (!field.Mandatory) {
                 column.ValidValues.Add("", "");
             }
 
@@ -341,6 +345,7 @@ namespace SAPUtils.__Internal.Extensions {
         /// </returns>
         /// <seealso cref="SAPbouiCOM.Matrix"/>
         /// <seealso cref="SAPbouiCOM.Column"/>
+        [Localizable(false)]
         private static Column AddCheckBoxColumn(Matrix matrix, string uid) {
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_CHECK_BOX);
             column.ValOn = "Y";
@@ -394,6 +399,7 @@ namespace SAPUtils.__Internal.Extensions {
         /// </returns>
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
         /// <seealso cref="SAPUtils.Models.UserTables.IUserFieldValidValue"/>
+        [Localizable(false)]
         private static bool IsBooleanField(IUserTableField field) {
             return field.Type == typeof(bool) ||
                    field.Type == typeof(bool?) ||
@@ -429,6 +435,7 @@ namespace SAPUtils.__Internal.Extensions {
         /// <seealso cref="SAPbouiCOM.Column"/>
         /// <seealso cref="SAPUtils.__Internal.Attributes.UserTables.IUserTableField"/>
         /// <seealso cref="SAPbouiCOM.LinkedButton"/>
+        [Localizable(false)]
         private static Column AddLinkedButtonColumn(Matrix matrix, string uid, IUserTableField field, UserForm form,
             Application application) {
             Column column = matrix.Columns.Add(uid, BoFormItemTypes.it_LINKED_BUTTON);
@@ -509,13 +516,14 @@ namespace SAPUtils.__Internal.Extensions {
                     Logger.Instance.Error(ex);
                 }
 
+                // ReSharper disable once LocalizableElement
                 if (pVal.ItemUID != "matrix") return;
                 {
                     try {
                         ((EditText)column.Cells.Item(pVal.Row).Specific).Value = val;
                     }
                     catch (Exception ex) {
-                        Logger.Instance.Error($"Error al aplicar CFL en matrix: {ex}");
+                        Logger.Instance.Error(string.Format(Texts.MatrixExtensions_CflSubscriber_Error_applying_CFL_on_matrix___0_, ex));
                     }
                 }
             }

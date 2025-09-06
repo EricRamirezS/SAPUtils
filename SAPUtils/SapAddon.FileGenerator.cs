@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using SAPUtils.I18N;
 
 namespace SAPUtils {
+    [SuppressMessage("ReSharper", "LocalizableElement")]
     public partial class SapAddon {
         /// <summary>
         /// Generates the necessary setup files for the specified SAP addon based on the provided addon information.
@@ -18,9 +21,7 @@ namespace SAPUtils {
                                     .FirstOrDefault()
                                 ?? SearchCsprojUpwards(baseDir);
             if (csprojPath == null)
-                throw new FileNotFoundException(
-                    "No se encontró ningún archivo .csproj en la ruta del ejecutable o carpetas superiores.");
-
+                throw new FileNotFoundException(Texts.SapAddon_GenerateSetupFiles_No__csproj_file_was_found_in_the_executable_path_or_parent_folders);
             string projectDir = Path.GetDirectoryName(csprojPath);
             string csprojFileName = Path.GetFileName(csprojPath);
 
@@ -351,7 +352,7 @@ end;
 
             File.WriteAllText(issPath, issContent.Trim(), new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
 
-            Console.WriteLine($"Archivos generados:\n{batPath}\n{issPath}");
+            Console.WriteLine(Texts.SapAddon_GenerateSetupFiles_Files_Generated, batPath, issPath);
         }
 
         private static string SearchCsprojUpwards(string startDir) {
@@ -475,6 +476,9 @@ end;
         /// </summary>
         public string Registry { get; set; }
 
+        /// <summary>
+        /// Gets or sets the copyright information associated with the add-on.
+        /// </summary>
         public string Copyright { get; set; }
     }
 
@@ -482,6 +486,7 @@ end;
     /// Specifies the platform architecture for which the MSBUILD is intended to run.
     /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum Platform {
         /// <summary>
         /// Represents a platform configuration that allows the output of a build to run on any CPU architecture.
@@ -506,12 +511,16 @@ end;
         /// Use this platform setting when building applications specifically for 64-bit environments, ensuring compatibility and taking full advantage of the 64-bit architecture's capabilities.
         /// </remarks>
         /// <seealso cref="Platform"/>
-        x64
+        x64,
     }
 
     /// <summary>
     /// Represents a directory entry for an Inno Setup script.
     /// </summary>
+    [Localizable(false)]
+    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Global")]
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class InnoDir {
         /// <summary>
         /// Represents a directory entry for an Inno Setup script.
@@ -682,7 +691,7 @@ end;
         /// <summary>
         /// Full access only for administrators.
         /// </summary>
-        AdministratorsReadExec
+        AdministratorsReadExec,
     }
 
     /// <summary>
@@ -690,6 +699,7 @@ end;
     /// Can be combined using bitwise OR since the enum has the <see cref="FlagsAttribute"/>.
     /// </summary>
     [Flags]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum DirFlags {
         /// <summary>
         /// No special behavior.
@@ -746,6 +756,7 @@ end;
     /// Can be combined using bitwise OR since the enum has the <see cref="FlagsAttribute"/>.
     /// </summary>
     [Flags]
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum DirAttribs {
         /// <summary>
         /// No attributes are set.
@@ -765,6 +776,6 @@ end;
         /// <summary>
         /// The directory has the system attribute.
         /// </summary>
-        System = 1 << 2
+        System = 1 << 2,
     }
 }

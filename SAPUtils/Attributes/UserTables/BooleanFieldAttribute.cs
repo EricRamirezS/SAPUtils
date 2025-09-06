@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.__Internal.Models;
+using SAPUtils.I18N;
 using IValidValue = SAPbouiCOM.IValidValue;
 
 // ReSharper disable UnusedType.Global
@@ -45,6 +47,7 @@ namespace SAPUtils.Attributes.UserTables {
         }
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override object ParseValue(object value) {
             switch (value) {
                 case null:
@@ -62,6 +65,7 @@ namespace SAPUtils.Attributes.UserTables {
 
 
         /// <inheritdoc />
+        [Localizable(false)]
         public override string ToSapData(object value) {
             if (value == null) return "N";
             return (bool)value ? "Y" : "N";
@@ -80,11 +84,11 @@ namespace SAPUtils.Attributes.UserTables {
         bool? IUserTableField<bool?>.ParseValue(object value) => (bool?)ParseValue(value);
 
         /// <inheritdoc />
-        public override sealed IList<IValidValue> ValidValues
+        public sealed override IList<IValidValue> ValidValues
         {
             get => new List<IValidValue>(2) {
-                new UserFieldValidValue("Y", "Sí"),
-                new UserFieldValidValue("N", "No"),
+                new UserFieldValidValue("Y", Texts.BooleanFieldAttribute_ValidValues_Yes),
+                new UserFieldValidValue("N", Texts.BooleanFieldAttribute_ValidValues_No),
             };
             internal set { }
         }

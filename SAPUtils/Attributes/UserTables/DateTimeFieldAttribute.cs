@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Utils;
 
 // ReSharper disable UnusedType.Global
@@ -45,6 +47,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// <br/>
         /// If not explicitly set, it falls back to <see cref="UserTableFieldAttributeBase.Description"/> or defaults to <c>{Name}Date</c>.
         /// </summary>
+        [Localizable(false)]
         public string DateDescription
         {
             get => _dateDescription ?? (Description ?? $"{Name}Date");
@@ -60,6 +63,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// <br/>
         /// If not explicitly set, it falls back to <see cref="UserTableFieldAttributeBase.Description"/> or defaults to <c>{Name}Time</c>.
         /// </summary>
+        [Localizable(false)]
         public string TimeDescription
         {
             get => _timeDescription ?? (Description ?? $"{Name}Time");
@@ -94,7 +98,7 @@ namespace SAPUtils.Attributes.UserTables {
         public override object ParseValue(object value) {
             NotSupportedException ex =
                 new NotSupportedException(
-                    "ParseValue     should not be used on DateTimeFieldAttribute. Use the specialized handling for SAP date/time fields.");
+                    Texts.DateTimeFieldAttribute_ParseValue_ParseValue_should_not_be_used_on_DateTimeFieldAttribute__Use_the_specialized_handling_for_SAP_date_time_fields_);
             SapAddon.Instance().Logger.Error(ex);
             return DateTime.MinValue;
         }
@@ -113,7 +117,7 @@ namespace SAPUtils.Attributes.UserTables {
         public override string ToSapData(object value) {
             NotSupportedException ex =
                 new NotSupportedException(
-                    "ToSapData should not be used on DateTimeFieldAttribute. Use the specialized handling for SAP date/time fields.");
+                    Texts.DateTimeFieldAttribute_ToSapData_ToSapData_should_not_be_used_on_DateTimeFieldAttribute__Use_the_specialized_handling_for_SAP_date_time_fields_);
             SapAddon.Instance().Logger.Error(ex);
             return "";
         }
@@ -175,6 +179,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// </remarks>
         /// <seealso cref="DateTimeFieldAttribute"/>
         /// <seealso cref="CultureInfo"/>
+        [Localizable(false)]
         public string DateToSapData(object value) {
             switch (value) {
                 case null:
@@ -198,6 +203,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// <param name="value">The <see cref="DateTime"/> object to be converted. If null, an empty string will be returned.</param>
         /// <returns>A string representation of the time in the "HHmm" format.</returns>
         /// <seealso cref="DateTimeFieldAttribute" />
+        [Localizable(false)]
         public string TimeToSapData(object value) {
             return value == null ? "" : ((DateTime)value).ToString("HHmm");
         }
@@ -220,6 +226,7 @@ namespace SAPUtils.Attributes.UserTables {
         /// A string formatted as "HH:mm" if the value is a valid DateTime object.
         /// If the value is null, "0000" is returned.
         /// </returns>
+        [Localizable(false)]
         public string TimeToColumnData(object value) {
             return value == null ? "0000" : ((DateTime)value).ToString("HH:mm");
         }

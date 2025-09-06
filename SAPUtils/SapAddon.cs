@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
+using SAPbobsCOM;
 using SAPbouiCOM;
 using SAPUtils.__Internal.Events;
+using SAPUtils.__Internal.I18N;
 using SAPUtils.__Internal.Utils;
+using SAPUtils.I18N;
 using SAPUtils.Utils;
 using Application = SAPbouiCOM.Framework.Application;
 using Company = SAPbobsCOM.Company;
@@ -61,25 +65,28 @@ namespace SAPUtils {
         /// </summary>
         private SapAddon(string[] args) {
             try {
+                // ReSharper disable LocalizableElement
                 ConsoleLogger.Info("SAPbouiCOM.Framework.Application");
                 MainApplication = args.Length > 0 ? new Application(args[0]) : new Application();
-                ConsoleLogger.Debug("Retrieving SboGuiApi");
+                ConsoleLogger.Debug("SAPbouiCOM.SboGuiApi");
                 SboGuiApi oSboGuiApi = new SboGuiApi();
-                ConsoleLogger.Info("Connecting SboGuiApi");
+                ConsoleLogger.Info("SAPbouiCOM.SboGuiApi.Connect()");
                 oSboGuiApi.Connect(SapConnectionString);
-                ConsoleLogger.Info("Retrieving SAPbouiCOM.Application");
+                ConsoleLogger.Info("Connect.GetApplication()");
                 __application = oSboGuiApi.GetApplication();
-                ConsoleLogger.Info("Retrieving SAPbobsCOM.Company");
-                __Company = Application.Company.GetDICompany() as Company;
-                ConsoleLogger.Debug("Initilizing Logger");
+                ConsoleLogger.Info("SAPbouiCOM.Application.Company.GetDICompany()");
+                __Company = __application.Company.GetDICompany() as Company;
+                ConsoleLogger.Debug("Utils.Logger.Instance");
+                // ReSharper restore LocalizableElement
+                Texts.Culture = L10N.GetCulture(__Company?.language ?? BoSuppLangs.ln_Null);
                 Logger = __Internal.Utils.Logger.Instance;
-                Logger.Info("Sap Addon started");
+                Logger.Info(Texts.SapAddon_SapAddon_SAP_Add_on_Initialized);
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
                 System.Windows.Forms.Application.ThreadException += ApplicationOnThreadException;
                 EventSubscriber.Subscribe();
             }
             catch (Exception ex) {
-                ConsoleLogger.Critical("Addon could not be initialized", ex);
+                ConsoleLogger.Critical(Texts.SapAddon_SapAddon_Add_on_could_not_be_initialized, ex);
             }
         }
 
@@ -138,7 +145,7 @@ namespace SAPUtils {
         /// </summary>
         /// <returns>An instance of the <see cref="SapAddon"/>.</returns>
         public static SapAddon Instance() {
-            return _instance ?? throw new InvalidOperationException("SapAddon instance not found");
+            return _instance ?? throw new InvalidOperationException(Texts.SapAddon_Instance_SapAddon_instance_not_found);
         }
 
         /// <summary>
@@ -150,10 +157,12 @@ namespace SAPUtils {
             return _instance ?? (_instance = new SapAddon(args));
         }
 
+        [SuppressMessage("ReSharper", "LocalizableElement")]
         private void ApplicationOnThreadException(object sender, ThreadExceptionEventArgs e) {
             Logger.Critical("Unhandled Exception", e.Exception);
         }
 
+        [SuppressMessage("ReSharper", "LocalizableElement")]
         private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e) {
             Logger.Critical("Unhandled Exception", e.ExceptionObject as Exception);
         }
@@ -166,16 +175,16 @@ namespace SAPUtils {
         /// and updating the SAP status bar during initialization. It then invokes the main application's run method.
         /// </remarks>
         public void Run() {
-            Logger.Info("Run SAP Addon");
-            Application.SetStatusBarMessage(
-                "Finalizando inicializacion add-on", BoMessageTime.bmt_Medium, false);
+            Logger.Info(Texts.SapAddon_Run_Running_SAP_Add_on);
+            Application.SetStatusBarMessage(Texts.SapAddon_Run_Finishing_add_on_initialization, BoMessageTime.bmt_Medium, false);
             System.Windows.Forms.Application.EnableVisualStyles();
             System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
             System.Windows.Forms.Application.Run(new FrmMain(() => MainApplication.Run(), Logger));
         }
     }
 
-    class FrmMain : Form {
+    [SuppressMessage("ReSharper", "LocalizableElement")]
+    internal class FrmMain : Form {
         private readonly ILogger _log;
 
         internal FrmMain(Action action, ILogger logger) {

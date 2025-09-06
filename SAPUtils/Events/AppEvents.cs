@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using SAPbouiCOM;
+using SAPUtils.__Internal.I18N;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Events {
 
@@ -110,6 +112,7 @@ namespace SAPUtils.Events {
                     break;
                 case BoAppEventTypes.aet_LanguageChanged:
                     OnLanguageChanged?.Invoke();
+                    Texts.Culture = L10N.GetCulture(SapAddon.Instance().Company.language);
                     break;
                 case BoAppEventTypes.aet_FontChanged:
                     OnFontChanged?.Invoke();

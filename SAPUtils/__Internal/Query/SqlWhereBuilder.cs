@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using SAPUtils.I18N;
 using SAPUtils.Query;
 
 namespace SAPUtils.__Internal.Query {
@@ -12,15 +14,18 @@ namespace SAPUtils.__Internal.Query {
             _rootGroup = rootGroup;
         }
 
+        [Localizable(false)]
         public string Build() {
             string clause = BuildGroup(_rootGroup);
             return string.IsNullOrWhiteSpace(clause) ? string.Empty : $"WHERE {clause}";
         }
 
+        [Localizable(false)]
         private static string Quote(string identifier) {
             return SapAddon.Instance().IsHana ? $"\"{identifier}\"" : $"[{identifier}]";
         }
 
+        [Localizable(false)]
         private static string BuildGroup(IWhere group) {
             List<string> expressions = new List<string>();
 
@@ -77,7 +82,7 @@ namespace SAPUtils.__Internal.Query {
                         clause = $"NOT EXISTS ({cond.SubQuery})";
                         break;
                     default:
-                        throw new NotSupportedException($"Unsupported comparison: {cond.Comparison}");
+                        throw new NotSupportedException(string.Format(Texts.SqlWhereBuilder_BuildGroup_Unsupported_comparison___0_, cond.Comparison));
                 }
 
                 expressions.Add(clause);
@@ -92,6 +97,7 @@ namespace SAPUtils.__Internal.Query {
             return string.Join(group.Operator == LogicalOperator.And ? " AND " : " OR ", expressions);
         }
 
+        [Localizable(false)]
         private static string FormatValue(object value) {
             switch (value) {
                 case null:

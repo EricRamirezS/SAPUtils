@@ -1,6 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using SAPUtils.Extensions;
+using SAPUtils.I18N;
 
 namespace SAPUtils.Utils {
     /// <summary>
@@ -23,6 +26,7 @@ namespace SAPUtils.Utils {
         /// format parsing and general parsing.
         /// </remarks>
         /// <seealso cref="DateTime"/>
+        [Localizable(false)]
         public static DateTime ParseDate(object value) {
             switch (value) {
                 case DateTime dt:
@@ -63,6 +67,7 @@ namespace SAPUtils.Utils {
         /// </remarks>
         /// <seealso cref="DateTime"/>
         /// <seealso cref="System.Globalization.DateTimeStyles"/>
+        [Localizable(false)]
         public static DateTime ParseTime(object value) {
             switch (value) {
                 case null:
@@ -155,12 +160,12 @@ namespace SAPUtils.Utils {
                 switch (value) {
                     case int i:
                         return i;
-                    case long l:
-                    case short s:
-                    case byte b:
-                    case double d:
-                    case float f:
-                    case decimal dec:
+                    case long _:
+                    case short _:
+                    case byte _:
+                    case double _:
+                    case float _:
+                    case decimal _:
                         return Convert.ToInt32(value, CultureInfo.InvariantCulture);
                     default:
                     {
@@ -177,28 +182,87 @@ namespace SAPUtils.Utils {
             }
         }
 
+        /// <summary>
+        /// Provides helper methods to safely format values for use in SAP Business One <c>DataTable</c> columns.
+        /// Ensures consistent conversion of common .NET types (dates, numbers, strings) into
+        /// the string formats expected by SAP, preventing parsing errors or invalid values.
+        /// </summary>
+        [Localizable(false)]
+        [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
         public static class ColumnParser {
+            /// <summary>
+            /// Formats a <see cref="DateTime"/> into the SAP-compatible "yyyyMMdd" format.
+            /// Returns an empty string if the year is less than 1900.
+            /// </summary>
+            /// <param name="date">The <see cref="DateTime"/> value to format.</param>
+            /// <returns>A string in "yyyyMMdd" format, or an empty string if invalid.</returns>
             public static string FormatDate(DateTime date) {
                 return date.Year < 1900 ? "" : date.ToString("yyyyMMdd");
             }
+            /// <summary>
+            /// Formats an <see cref="int"/> as a string.
+            /// Returns "0" if the number is zero.
+            /// </summary>
+            /// <param name="number">The integer value to format.</param>
+            /// <returns>The formatted number as a string.</returns>
             public static string FormatNumber(int number) {
                 return number == 0 ? "0" : number.ToString();
             }
+            /// <summary>
+            /// Formats a <see cref="long"/> as a string.
+            /// Returns "0" if the number is zero.
+            /// </summary>
+            /// <param name="number">The long value to format.</param>
+            /// <returns>The formatted number as a string.</returns>
             public static string FormatNumber(long number) {
                 return number == 0 ? "0" : number.ToString();
             }
+
+            /// <summary>
+            /// Formats a <see cref="double"/> into a culture-invariant string with up to 6 decimal places.
+            /// Returns "0" if the value is near zero (within 1e-6).
+            /// </summary>
+            /// <param name="number">The double value to format.</param>
+            /// <returns>The formatted number as a string.</returns>
             public static string FormatNumber(double number) {
                 return Math.Abs(number) < 0.000001 ? "0" : number.ToString("0.######", CultureInfo.InvariantCulture);
             }
+
+            /// <summary>
+            /// Formats a <see cref="float"/> into a culture-invariant string with up to 6 decimal places.
+            /// Returns "0" if the value is near zero (within 1e-6).
+            /// </summary>
+            /// <param name="number">The float value to format.</param>
+            /// <returns>The formatted number as a string.</returns>
             public static string FormatNumber(float number) {
                 return Math.Abs(number) < 0.000001 ? "0" : number.ToString("0.######", CultureInfo.InvariantCulture);
             }
+            /// <summary>
+            /// Formats a <see cref="decimal"/> into a culture-invariant string with up to 6 decimal places.
+            /// Returns "0" if the value is near zero (within 1e-6).
+            /// </summary>
+            /// <param name="number">The decimal value to format.</param>
+            /// <returns>The formatted number as a string.</returns>
             public static string FormatNumber(decimal number) {
                 return Math.Abs(number) < (decimal)0.000001 ? "0" : number.ToString("0.######", CultureInfo.InvariantCulture);
             }
+            /// <summary>
+            /// Ensures that a string is safe to use in a SAP <c>DataTable</c>.
+            /// Returns an empty string if the input is <c>null</c>.
+            /// </summary>
+            /// <param name="str">The string value to format.</param>
+            /// <returns>The original string, or an empty string if <c>null</c>.</returns>
             public static string FormatString(string str) {
                 return str ?? "";
             }
+            /// <summary>
+            /// Attempts to format any object into a SAP-compatible string representation.
+            /// Supports common types such as <see cref="string"/>, <see cref="decimal"/>, <see cref="double"/>, 
+            /// <see cref="float"/>, <see cref="long"/>, <see cref="int"/>, and <see cref="DateTime"/>.
+            /// Logs a warning if the type is not recognized, and returns an empty string in that case.
+            /// </summary>
+            /// <param name="val">The value to format.</param>
+            /// <returns>A string representation suitable for SAP <c>DataTable</c> columns.</returns>
             public static string FormatDtValue(object val) {
                 switch (val) {
                     case string str: return FormatString(str);
@@ -209,7 +273,7 @@ namespace SAPUtils.Utils {
                     case int i: return FormatNumber(i);
                     case DateTime dt: return FormatDate(dt);
                 }
-                SapAddon.Instance().Logger.Warning("Unkown Parsing");
+                SapAddon.Instance().Logger.Warning(Texts.ColumnParser_FormatDtValue_Unknown_Parsing);
                 return "";
             }
         }

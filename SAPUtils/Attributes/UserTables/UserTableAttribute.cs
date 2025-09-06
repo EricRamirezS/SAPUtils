@@ -1,6 +1,7 @@
 using System;
 using SAPbobsCOM;
 using SAPUtils.Exceptions;
+using SAPUtils.I18N;
 using IUserTable = SAPUtils.__Internal.Attributes.UserTables.IUserTable;
 
 // ReSharper disable UnusedType.Global
@@ -34,12 +35,12 @@ namespace SAPUtils.Attributes.UserTables {
         public UserTableAttribute(string name, string description) {
             if (name != null && name.Length > 19)
                 throw new NameTooLongException(
-                    $"Table Name cannot exceed 19 characters. Provided length: {name.Length}."
+                    string.Format(Texts.UserTableAttribute_UserTableAttribute_Table_Name_cannot_exceed_19_characters__Provided_length___0__, name.Length)
                 );
 
             if (description != null && description.Length > 30)
                 throw new DescriptionTooLongException(
-                    $"Table Description cannot exceed 30 characters. Provided length: {description.Length}."
+                    string.Format(Texts.UserTableAttribute_UserTableAttribute_Table_Description_cannot_exceed_30_characters__Provided_length___0__, description.Length)
                 );
 
             Name = name;

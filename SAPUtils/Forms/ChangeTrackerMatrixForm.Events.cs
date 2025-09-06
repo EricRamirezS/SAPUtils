@@ -8,6 +8,7 @@ using SAPUtils.__Internal.Enums;
 using SAPUtils.__Internal.Models;
 using SAPUtils.Attributes.UserTables;
 using SAPUtils.Extensions;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 
 namespace SAPUtils.Forms {
@@ -52,7 +53,9 @@ namespace SAPUtils.Forms {
             if (rowIndex < 0 || rowIndex >= _data.Count) return;
 
             (T item, Status status) = _data[rowIndex];
+            // ReSharper disable LocalizableElement
             if (coluid == "Code" || coluid == "Name") {
+                // ReSharper restore LocalizableElement
                 string value = "";
                 bool changed = false;
                 switch (coluid) {
@@ -73,11 +76,13 @@ namespace SAPUtils.Forms {
                 if (!changed) return;
                 _dataTable.SetValue(coluid, rowIndex, value);
                 if (status != Status.Normal) return;
-                _data[rowIndex] = (item, Status.Modified);
-                ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                _data[rowIndex] = (item, Status.Modify);
+                ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modify.GetReadableName();
                 UpdateMatrixColors(pVal.Row - 1);
             }
+            // ReSharper disable LocalizableElement
             else if (coluid.EndsWith("D") || coluid.EndsWith("T")) {
+                // ReSharper restore LocalizableElement
                 // DateTimeUserTableField Handler
                 KeyValuePair<string, (DataColumn DataTableColumn, Column MatrixColumn)> columnInfo =
                     ColumnInfo.FirstOrDefault(e => e.Value.MatrixColumn.UniqueID == coluid);
@@ -91,7 +96,9 @@ namespace SAPUtils.Forms {
                 object oldValue = propertyField.Property.GetValue(item);
                 DateTime oldDateTime = (DateTime)oldValue;
 
+                // ReSharper disable LocalizableElement
                 if (coluid.EndsWith("D")) {
+                    // ReSharper restore LocalizableElement
                     DateTime newDate = dtf.ParseDateValue(cellValue);
                     if (oldDateTime.Date == newDate.Date) return;
                     DateTime newFinalValue = new DateTime(
@@ -105,11 +112,13 @@ namespace SAPUtils.Forms {
                     propertyField.Property.SetValue(item, newFinalValue);
                     _dataTable.SetValue(coluid, rowIndex, dtf.DateToColumnData(newDate));
                     if (status != Status.Normal) return;
-                    _data[rowIndex] = (item, Status.Modified);
-                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                    _data[rowIndex] = (item, Status.Modify);
+                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modify.GetReadableName();
                     UpdateMatrixColors(pVal.Row - 1);
                 }
+                // ReSharper disable LocalizableElement
                 else if (coluid.EndsWith("T")) {
+                    // ReSharper restore LocalizableElement
                     DateTime newTime = dtf.ParseTimeValue(cellValue);
                     if (oldDateTime.Hour == newTime.Hour && oldDateTime.Minute == newTime.Minute) return;
                     DateTime newFinalValue = new DateTime(
@@ -123,8 +132,8 @@ namespace SAPUtils.Forms {
                     propertyField.Property.SetValue(item, newFinalValue);
                     _dataTable.SetValue(coluid, rowIndex, dtf.TimeToColumnData(newTime));
                     if (status != Status.Normal) return;
-                    _data[rowIndex] = (item, Status.Modified);
-                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                    _data[rowIndex] = (item, Status.Modify);
+                    ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modify.GetReadableName();
                     UpdateMatrixColors(pVal.Row - 1);
                 }
             }
@@ -145,8 +154,8 @@ namespace SAPUtils.Forms {
                 _dataTable.SetValue(coluid, rowIndex, propertyField.Field.ToColumnData(newValue));
 
                 if (status != Status.Normal) return;
-                _data[rowIndex] = (item, Status.Modified);
-                ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modified.GetReadableName();
+                _data[rowIndex] = (item, Status.Modify);
+                ((EditText)_stateColumn.Cells.Item(pVal.Row).Specific).Value = Status.Modify.GetReadableName();
                 UpdateMatrixColors(pVal.Row - 1);
             }
         }
@@ -158,7 +167,9 @@ namespace SAPUtils.Forms {
             if (Application.Forms.ActiveForm.UniqueID != UniqueID) return;
             try {
                 Freeze(true);
+                // ReSharper disable LocalizableElement
                 if (pVal.MenuUID == "1282" || pVal.MenuUID == _addRowMenuUid) {
+                    // ReSharper restore LocalizableElement
                     T it = new T();
                     if (it is ISoftDeletable itsd) itsd.Active = true;
                     _observableData.Add(it);
@@ -168,13 +179,14 @@ namespace SAPUtils.Forms {
                     if (rowIndex <= 0) return;
                     (T item, Status status) = _data[rowIndex - 1];
                     switch (item) {
+                        // ReSharper disable once RedundantBoolCompare
                         case ISoftDeletable sd when sd.Active == false && status == Status.Normal:
                             sd.Active = true;
-                            _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                            _data[rowIndex - 1] = (item, Status.Restore);
                             ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
-                                Status.ModifiedRestored.GetReadableName();
+                                Status.Restore.GetReadableName();
                             break;
-                        case ISoftDeletable sd when sd.Active && status == Status.ModifiedRestored:
+                        case ISoftDeletable sd when sd.Active && status == Status.Restore:
                             sd.Active = false;
                             _data[rowIndex - 1] = (item, Status.Delete);
                             ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
@@ -186,19 +198,21 @@ namespace SAPUtils.Forms {
                             ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
                                 Status.Discard.GetReadableName();
                             break;
+                        // ReSharper disable once RedundantBoolCompare
                         case ISoftDeletable sd when sd.Active == false && status == Status.Discard:
                             sd.Active = false;
                             _data[rowIndex - 1] = (item, Status.New);
                             ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value = Status.New.GetReadableName();
                             break;
                         case ISoftDeletable sd
+                            // ReSharper disable once RedundantBoolCompare
                             when sd.Active == false && item is UserTableObjectModel utom &&
                                  utom.OriginalActive == false &&
                                  status == Status.Delete:
                             sd.Active = false;
-                            _data[rowIndex - 1] = (item, Status.ModifiedRestored);
+                            _data[rowIndex - 1] = (item, Status.Restore);
                             ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
-                                Status.ModifiedRestored.GetReadableName();
+                                Status.Restore.GetReadableName();
                             break;
                         default:
                             if (status == Status.New || status == Status.Discard) {
@@ -208,7 +222,7 @@ namespace SAPUtils.Forms {
                                     updated.GetReadableName();
                             }
                             else {
-                                Status updated = status == Status.Delete ? Status.Modified : Status.Delete;
+                                Status updated = status == Status.Delete ? Status.Modify : Status.Delete;
                                 _data[rowIndex - 1] = (item, updated);
                                 ((EditText)_stateColumn.Cells.Item(rowIndex).Specific).Value =
                                     updated.GetReadableName();
@@ -220,12 +234,14 @@ namespace SAPUtils.Forms {
                     UpdateMatrixColors(rowIndex - 1);
                     _matrix.SelectRow(rowIndex, false, false);
                 }
+                // ReSharper disable LocalizableElement
                 else if (pVal.MenuUID == "1304") {
+                    // ReSharper restore LocalizableElement
                     if (UnsavedChanges()) {
                         int messageBox = Application.MessageBox(
-                            "Hay cambios sin guardar.\n¿Desea recargar y descartar los cambios?", 2,
-                            "Sí",
-                            "Cancelar");
+                            Texts.ChangeTrackerMatrixForm_Application_MenuEvent_There_are_unsaved_changes__Do_you_want_to_reload_and_discard_the_changes_, 2,
+                            Texts.ChangeTrackerMatrixForm_Application_MenuEvent_Yes,
+                            Texts.ChangeTrackerMatrixForm_Application_MenuEvent_Cancel);
 
                         if (messageBox == 2) return;
                     }
@@ -244,7 +260,8 @@ namespace SAPUtils.Forms {
             if (eventInfo.FormUID != UniqueID) return;
             // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
             switch (eventInfo.EventType) {
-                case BoEventTypes.et_RIGHT_CLICK when eventInfo.BeforeAction: {
+                case BoEventTypes.et_RIGHT_CLICK when eventInfo.BeforeAction:
+                {
                     if (eventInfo.ItemUID == _matrix.Item.UniqueID) {
                         AddContextMenuItems();
                     }
@@ -259,8 +276,8 @@ namespace SAPUtils.Forms {
 
         private void SaveButtonOnClickAfter(object sboObject, SBOItemEventArg pVal) {
             int messageBox = Application.MessageBox(
-                "Los cambios serán guardados\n¿Desea continuar?", 2,
-                "Sí", "No");
+                Texts.ChangeTrackerMatrixForm_SaveButtonOnClickAfter_The_changes_will_be_saved__Do_you_want_to_continue_, 2,
+                Texts.ChangeTrackerMatrixForm_SaveButtonOnClickAfter_Yes, Texts.ChangeTrackerMatrixForm_SaveButtonOnClickAfter_No);
             if (messageBox == 2) return;
 
             SaveChanges();
@@ -270,16 +287,16 @@ namespace SAPUtils.Forms {
         }
 
         /// <inheritdoc />
-        override protected void OnFormCloseBefore(SBOItemEventArg pVal, out bool bubbleEvent) {
+        protected override void OnFormCloseBefore(SBOItemEventArg pVal, out bool bubbleEvent) {
             base.OnFormCloseBefore(pVal, out bubbleEvent);
             bubbleEvent = true;
             if (!UnsavedChanges()) return;
 
             int messageBox = Application.MessageBox(
-                "Hay cambios sin guardar.\n¿Desea guardar antes de cerrar?", 3,
-                "Sí",
-                "No",
-                "Cancelar");
+                Texts.ChangeTrackerMatrixForm_OnFormCloseBefore_There_are_unsaved_changes__Do_you_want_to_save_before_closing_, 3,
+                Texts.ChangeTrackerMatrixForm_OnFormCloseBefore_Yes,
+                Texts.ChangeTrackerMatrixForm_SaveButtonOnClickAfter_No,
+                Texts.ChangeTrackerMatrixForm_OnFormCloseBefore_Cancel);
 
             switch (messageBox) {
                 case 1:
@@ -294,7 +311,7 @@ namespace SAPUtils.Forms {
         }
 
         /// <inheritdoc />
-        override protected void OnFormCloseAfter(SBOItemEventArg pVal) {
+        protected override void OnFormCloseAfter(SBOItemEventArg pVal) {
             base.OnFormCloseAfter(pVal);
             RemoveContextMenuItems();
             EventUnsubscriber();

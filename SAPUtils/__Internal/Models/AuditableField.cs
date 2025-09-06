@@ -5,6 +5,7 @@ using System.Reflection;
 using SAPbobsCOM;
 using SAPUtils.__Internal.Attributes.UserTables;
 using SAPUtils.Attributes.UserTables;
+using SAPUtils.I18N;
 using SAPUtils.Models.UserTables;
 using IValidValue = SAPbouiCOM.IValidValue;
 
@@ -21,7 +22,7 @@ namespace SAPUtils.__Internal.Models {
             AuditableInterfaces
                 .SelectMany(t => t.GetProperties().Select(p => new {
                     p.Name,
-                    DeclaringInterface = t
+                    DeclaringInterface = t,
                 }))
                 .GroupBy(x => x.Name)
                 .ToDictionary(g => g.Key, g => g.First().DeclaringInterface);
@@ -41,43 +42,43 @@ namespace SAPUtils.__Internal.Models {
                         DefaultValue = true,
                         Mandatory = true,
                         ValidValues = new List<IValidValue> {
-                            new UserFieldValidValue("Y", "Activo"),
-                            new UserFieldValidValue("N", "Inactivo"),
+                            new UserFieldValidValue("Y", Texts.AuditableField_GetUserTableField_Active),
+                            new UserFieldValidValue("N", Texts.AuditableField_GetUserTableField_Inactive),
                         },
-                        Description = "Activo",
+                        Description = Texts.AuditableField_GetUserTableField_Active,
                     };
                 case "CreatedAt" when Implements<IAuditableDate>():
                     return new DateTimeFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = DateTime.Now,
                         Mandatory = true,
-                        DateDescription = "Fecha de creación",
-                        TimeDescription = "Hora de creación",
+                        DateDescription = Texts.AuditableField_GetUserTableField_Created_at_date,
+                        TimeDescription = Texts.AuditableField_GetUserTableField_Created_at_time,
                     };
                 case "UpdatedAt" when Implements<IAuditableDate>():
                     return new DateTimeFieldAttribute {
                         Name = propertyInfo.Name,
                         DefaultValue = DateTime.Now,
                         Mandatory = true,
-                        DateDescription = "Fecha de actualización",
-                        TimeDescription = "Hora de actualización",
+                        DateDescription = Texts.AuditableField_GetUserTableField_Updated_at_date,
+                        TimeDescription = Texts.AuditableField_GetUserTableField_Updated_at_time,
                     };
                 case "CreatedBy" when Implements<IAuditableUser>():
                     return new NumericFieldAttribute {
                         Name = propertyInfo.Name,
-                        Description = "Creado por",
+                        Description = Texts.AuditableField_GetUserTableField_Created_by,
                         Mandatory = true,
                         LinkedSystemObject = UDFLinkedSystemObjectTypesEnum.ulUsers,
                     };
                 case "UpdatedBy" when Implements<IAuditableUser>():
                     return new NumericFieldAttribute {
                         Name = propertyInfo.Name,
-                        Description = "Actualizado por",
+                        Description = Texts.AuditableField_GetUserTableField_Updated_by,
                         Mandatory = true,
                         LinkedSystemObject = UDFLinkedSystemObjectTypesEnum.ulUsers,
                     };
                 default:
-                    throw new NotSupportedException(propertyInfo.Name + " is not supported in IAuditable");
+                    throw new NotSupportedException(string.Format(Texts.AuditableField_GetUserTableField__0__is_not_supported_in_IAuditable, propertyInfo.Name));
             }
         }
     }
