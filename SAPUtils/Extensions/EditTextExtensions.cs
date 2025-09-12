@@ -149,5 +149,23 @@ namespace SAPUtils.Extensions {
         public static void SetValue(this EditText self, int value) {
             self.Value = value.ToString(CultureInfo.InvariantCulture);
         }
+
+        /// <summary>
+        /// Attaches a simple handler for the <see cref="SAPbouiCOM.EditText"/> ChooseFromList event to populate its value.
+        /// </summary>
+        /// <remarks>
+        /// The handler listens for the ChooseFromList event and sets the value of the EditText to the first column of the selected object in the data table.
+        /// </remarks>
+        /// <seealso cref="SAPbouiCOM.EditText"/>
+        public static void SetSimpleChooseFromListHandler(this EditText self) {
+            if (string.IsNullOrWhiteSpace(self.ChooseFromListUID)) return;
+
+            self.ChooseFromListAfter += (s, pVal) => {
+                if (!(pVal is ISBOChooseFromListEventArg cflEvent)) return;
+                DataTable cflDataTable = cflEvent.SelectedObjects;
+                if (cflDataTable == null) return;
+                self.Value = Convert.ToString(cflDataTable.GetValue(0, 0));
+            };
+        }
     }
 }
