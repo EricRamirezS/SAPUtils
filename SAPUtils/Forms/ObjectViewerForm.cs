@@ -316,13 +316,14 @@ namespace SAPUtils.Forms {
                 if (IsEditable(item)) {
                     _addButtonCombo.Item.Visible = false;
                     _searchButton.Item.Visible = false;
-                    _updateButton.Item.Visible = false;
-                    UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
+                    _okButton.Item.Enabled = false;
+                    _okButton.Item.Visible = false;
                     UIAPIRawForm.Mode = BoFormMode.fm_UPDATE_MODE;
                     ChangeFormMode(BoFormMode.fm_UPDATE_MODE);
+                    UIAPIRawForm.DefButton = _updateButton.Item.UniqueID;
                     _cancelButton.Item.Enabled = true;
-                    _okButton.Item.Enabled = true;
-                    _okButton.Item.Visible = true;
+                    _updateButton.Item.Enabled = true;
+                    _updateButton.Item.Visible = true;
                     _cancelButton.Item.Visible = true;
                     OnEditMode();
                 }
@@ -330,9 +331,9 @@ namespace SAPUtils.Forms {
                     _addButtonCombo.Item.Visible = false;
                     _searchButton.Item.Visible = false;
                     _updateButton.Item.Visible = false;
-                    UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
                     UIAPIRawForm.Mode = BoFormMode.fm_VIEW_MODE;
                     ChangeFormMode(BoFormMode.fm_VIEW_MODE);
+                    UIAPIRawForm.DefButton = _okButton.Item.UniqueID;
                     _cancelButton.Item.Visible = true;
                     _cancelButton.Item.Enabled = true;
                     _okButton.Item.Visible = true;
@@ -354,9 +355,9 @@ namespace SAPUtils.Forms {
                 _searchButton.Item.Visible = false;
                 _okButton.Item.Visible = false;
                 _updateButton.Item.Visible = false;
-                UIAPIRawForm.DefButton = _addButton.Item.UniqueID;
                 UIAPIRawForm.Mode = BoFormMode.fm_ADD_MODE;
                 ChangeFormMode(BoFormMode.fm_ADD_MODE);
+                UIAPIRawForm.DefButton = _addButton.Item.UniqueID;
                 _addButtonCombo.Item.Visible = true;
                 _cancelButton.Item.Visible = true;
                 _addButtonCombo.Item.Enabled = true;
