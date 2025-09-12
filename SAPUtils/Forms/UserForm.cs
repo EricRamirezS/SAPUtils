@@ -168,6 +168,61 @@ namespace SAPUtils.Forms {
         }
 
         /// <summary>
+        /// Displays an informational message in the SAP Business One status bar.
+        /// </summary>
+        /// <param name="text">The message text to display in the status bar.</param>
+        /// <param name="seconds">The duration (in enumeration format) for which the message will appear on the screen.</param>
+        protected void SetStatusBarInformationMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium) {
+            SetStatusBarMessage(text, seconds, type: BoStatusBarMessageType.smt_None);
+        }
+
+        /// <summary>
+        /// Displays an error message in the SAP Business One status bar.
+        /// </summary>
+        /// <param name="text">The message text to display in the status bar.</param>
+        /// <param name="seconds">The duration (in enumeration format) for which the message will appear on the screen.</param>
+        protected void SetStatusBarErrorMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium) {
+            SetStatusBarMessage(text, seconds, BoStatusBarMessageType.smt_Error);
+        }
+
+        /// <summary>
+        /// Displays a success/confirmation message in the SAP Business One status bar.
+        /// </summary>
+        /// <param name="text">The message text to display in the status bar.</param>
+        /// <param name="seconds">The duration (in enumeration format) for which the message will appear on the screen.</param>
+        protected void SetStatusBarSuccessMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium) {
+            SetStatusBarMessage(text, seconds, BoStatusBarMessageType.smt_Success);
+        }
+
+        /// <summary>
+        /// Displays a warning message in the SAP Business One status bar.
+        /// </summary>
+        /// <param name="text">The message text to display in the status bar.</param>
+        /// <param name="seconds">The duration (in enumeration format) for which the message will appear on the screen.</param>
+        protected void SetStatusBarWarningMessage(string text, BoMessageTime seconds = BoMessageTime.bmt_Medium) {
+            SetStatusBarMessage(text, seconds, BoStatusBarMessageType.smt_Warning);
+        }
+
+
+        /// <summary>
+        /// Toggles between the wait cursor and the default arrow cursor depending on the operation state.
+        /// </summary>
+        /// <param name="loading">
+        /// <c>true</c> to display the wait cursor (start showing progress);
+        /// <c>false</c> to restore the default arrow cursor (stop showing progress).
+        /// </param>
+        /// <remarks>
+        /// This method calls <see cref="ShowWaitCursor"/> when a long-running operation starts
+        /// and <see cref="ShowArrowCursor"/> when the operation ends.
+        /// Use it to wrap code that might take time to execute.
+        /// </remarks>
+        /// <seealso cref="ShowWaitCursor"/>
+        /// <seealso cref="ShowArrowCursor"/>
+        protected void Loading(bool loading) {
+            if (loading) ShowWaitCursor();
+            else ShowArrowCursor();
+        }
+        /// <summary>
         /// Displays the wait cursor while a long-running operation is in progress.
         /// </summary>
         /// <remarks>
