@@ -9,8 +9,22 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SAPUtils</RootNamespace>
     <AssemblyName>SAPUtils</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <Title>SAPUtils</Title>
+    <PackageLicenseUrl>https://github.com/EricRamirezS/SAPUtils/blob/main/LICENSE</PackageLicenseUrl>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+      <PackageId>EricRamirezS.SAPUtils</PackageId>
+      <Version>0.1.0</Version>
+      <Authors>Eric Ramirez</Authors>
+      <Company>EricRamirezS</Company>
+      <Description>SAPUtils is a C# utility library designed to simplify and accelerate building SAP Business One add-ons. It abstracts the SAP Business One SDK and provides attribute-based models, type-safe field and form handling, built-in validation, auditing support, and helpers for menus, events, and UI forms.</Description>
+      <PackageTags>SAP;SAP Business One;AddOn;C#;SDK;Validation;Auditing;UDF;UDT;Forms;Events</PackageTags>
+      <RepositoryUrl>https://github.com/EricRamirezS/SAPUtils</RepositoryUrl>
+      <PackageLicenseExpression></PackageLicenseExpression>
+      <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+      <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,72 +50,77 @@
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="mscorlib" />
-      <Reference Include="SAPBusinessOneSDK">
-          <HintPath>..\..\..\Dlls\SAPBusinessOneSDK.dll</HintPath>
-      </Reference>
+    <Reference Include="SAPBusinessOneSDK">
+      <HintPath>..\..\..\..\..\Program Files\SAP\SAP Business One\SAPBusinessOneSDK.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-  </ItemGroup>  
-  
-  <ItemGroup>
-    <Compile Include="Attributes\UserTables\AddressFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\AlphaFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\BooleanFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\DateTimeFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\DateFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\DoubleUserTableFieldAttribute.cs"/>
-      <Compile Include="Attributes\UserTables\IUserField.cs"/>
-    <Compile Include="Attributes\UserTables\MeasurementFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\MemoFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\NumericFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\PercentageFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\PhoneFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\PriceFieldAttribute.cs"/>
-      <Compile Include="Attributes\UserTables\PrimaryKeyStrategy.cs"/>
-    <Compile Include="Attributes\UserTables\QuantityFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\RateFieldAttribute.cs"/>
-      <Compile Include="Attributes\UserTables\StringFieldAttribute.cs"/>
-    <Compile Include="Attributes\UserTables\TimeFieldAttribute.cs"/>
-      <Compile Include="Attributes\UserTables\UserTableAttribute.cs"/>
-      <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs"/>
-      <Compile Include="Database\Repository.cs"/>
-      <Compile Include="Enums\FormTypes.cs"/>
-      <Compile Include="Events\AppEvents.cs"/>
-      <Compile Include="Events\FormDataEvents.cs"/>
-      <Compile Include="Events\InvalidFieldEvent.cs"/>
-      <Compile Include="Events\ItemEvents.cs"/>
-      <Compile Include="Events\LayoutKeyEvents.cs"/>
-      <Compile Include="Events\MenuEvents.cs"/>
-      <Compile Include="Events\PrintEvents.cs"/>
-      <Compile Include="Events\ProgressBarEvents.cs"/>
-      <Compile Include="Events\ReportDataEvents.cs"/>
-      <Compile Include="Events\RightClickEvents.cs"/>
-      <Compile Include="Events\ServerInvokeCompletedEvents.cs"/>
-      <Compile Include="Events\StatusBarEvents.cs"/>
-      <Compile Include="Events\UDOEvents.cs"/>
-      <Compile Include="Events\WidgetEvents.cs"/>
-      <Compile Include="Exceptions\AddontNotInitializedException.cs"/>
-      <Compile Include="Exceptions\CodeNotSetException.cs"/>
-      <Compile Include="Exceptions\DescriptionTooLongException.cs"/>
-      <Compile Include="Exceptions\ItemAlreadyExistException.cs"/>
-      <Compile Include="Exceptions\ItemDoNotExistException.cs"/>
-      <Compile Include="Exceptions\NameTooLongException.cs"/>
-      <Compile Include="Exceptions\UserTableAttributeNotFound.cs"/>
-      <Compile Include="Extensions\BusinessObjectInfoExtensions.cs"/>
-      <Compile Include="Extensions\CellExtension.cs"/>
-      <Compile Include="Extensions\DataTableExtension.cs"/>
-      <Compile Include="Extensions\EditTextExtensions.cs"/>
-      <Compile Include="Extensions\StringExtension.cs"/>
-      <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs"/>
-      <Compile Include="Extensions\ValidValuesExtension.cs"/>
+    <Reference Include="SAPBusinessOneSDK">
+      <HintPath>..\..\..\Dlls\SAPBusinessOneSDK.dll</HintPath>
+      <Private>false</Private>
+      <Pack>false</Pack>
+    </Reference>
+  </ItemGroup>
+
+    <ItemGroup>
+    <Compile Include="Attributes\UserTables\AddressFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\AlphaFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\BooleanFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\DateTimeFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\DateFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\DoubleUserTableFieldAttribute.cs" />
+      <Compile Include="Attributes\UserTables\IUserField.cs" />
+    <Compile Include="Attributes\UserTables\MeasurementFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\MemoFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\NumericFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\PercentageFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\PhoneFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\PriceFieldAttribute.cs" />
+      <Compile Include="Attributes\UserTables\PrimaryKeyStrategy.cs" />
+    <Compile Include="Attributes\UserTables\QuantityFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\RateFieldAttribute.cs" />
+      <Compile Include="Attributes\UserTables\StringFieldAttribute.cs" />
+    <Compile Include="Attributes\UserTables\TimeFieldAttribute.cs" />
+      <Compile Include="Attributes\UserTables\UserTableAttribute.cs" />
+      <Compile Include="Attributes\UserTables\UserTableFieldUserAttribute.cs" />
+      <Compile Include="Database\Repository.cs" />
+      <Compile Include="Enums\FormTypes.cs" />
+      <Compile Include="Events\AppEvents.cs" />
+      <Compile Include="Events\FormDataEvents.cs" />
+      <Compile Include="Events\InvalidFieldEvent.cs" />
+      <Compile Include="Events\ItemEvents.cs" />
+      <Compile Include="Events\LayoutKeyEvents.cs" />
+      <Compile Include="Events\MenuEvents.cs" />
+      <Compile Include="Events\PrintEvents.cs" />
+      <Compile Include="Events\ProgressBarEvents.cs" />
+      <Compile Include="Events\ReportDataEvents.cs" />
+      <Compile Include="Events\RightClickEvents.cs" />
+      <Compile Include="Events\ServerInvokeCompletedEvents.cs" />
+      <Compile Include="Events\StatusBarEvents.cs" />
+      <Compile Include="Events\UDOEvents.cs" />
+      <Compile Include="Events\WidgetEvents.cs" />
+      <Compile Include="Exceptions\AddontNotInitializedException.cs" />
+      <Compile Include="Exceptions\CodeNotSetException.cs" />
+      <Compile Include="Exceptions\DescriptionTooLongException.cs" />
+      <Compile Include="Exceptions\ItemAlreadyExistException.cs" />
+      <Compile Include="Exceptions\ItemDoNotExistException.cs" />
+      <Compile Include="Exceptions\NameTooLongException.cs" />
+      <Compile Include="Exceptions\UserTableAttributeNotFound.cs" />
+      <Compile Include="Extensions\BusinessObjectInfoExtensions.cs" />
+      <Compile Include="Extensions\CellExtension.cs" />
+      <Compile Include="Extensions\DataTableExtension.cs" />
+      <Compile Include="Extensions\EditTextExtensions.cs" />
+      <Compile Include="Extensions\StringExtension.cs" />
+      <Compile Include="Extensions\UDFLinkedSystemObjectTypesEnumExtension.cs" />
+      <Compile Include="Extensions\ValidValuesExtension.cs" />
       <Compile Include="Forms\ChangeTrackerMatrixForm.ContextMenu.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-      <Compile Include="Forms\ChangeTrackerMatrixForm.cs"/>
+      <Compile Include="Forms\ChangeTrackerMatrixForm.cs" />
       <Compile Include="Forms\ChangeTrackerMatrixForm.DataHandling.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
@@ -114,62 +133,62 @@
       <Compile Include="Forms\ChangeTrackerMatrixForm.Initialize.cs">
       <DependentUpon>ChangeTrackerMatrixForm.cs</DependentUpon>
     </Compile>
-      <Compile Include="Forms\ObjectViewerForm.cs"/>
-      <Compile Include="Forms\UserForm.cs"/>
+      <Compile Include="Forms\ObjectViewerForm.cs" />
+      <Compile Include="Forms\UserForm.cs" />
       <Compile Include="Forms\UserForm.IForm.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
       <Compile Include="Forms\UserForm.Reflections.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
-      <Compile Include="Models\Menu\MenuItem.cs"/>
-      <Compile Include="Models\UserTables\IAuditable.cs"/>
-      <Compile Include="Models\UserTables\IAuditableDate.cs"/>
-      <Compile Include="Models\UserTables\IAuditableUser.cs"/>
-      <Compile Include="Models\UserTables\ISoftDeletable.cs"/>
-      <Compile Include="Models\UserTables\IUserFieldValidValue.cs"/>
-      <Compile Include="Models\UserTables\IUserTableObjectModel.cs"/>
+      <Compile Include="Models\Menu\MenuItem.cs" />
+      <Compile Include="Models\UserTables\IAuditable.cs" />
+      <Compile Include="Models\UserTables\IAuditableDate.cs" />
+      <Compile Include="Models\UserTables\IAuditableUser.cs" />
+      <Compile Include="Models\UserTables\ISoftDeletable.cs" />
+      <Compile Include="Models\UserTables\IUserFieldValidValue.cs" />
+      <Compile Include="Models\UserTables\IUserTableObjectModel.cs" />
       <Compile Include="Models\UserTables\UserTableObjectModel.cs">
       <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
     </Compile>
       <Compile Include="Models\UserTables\UserTableObjectModel.typed.cs">
           <DependentUpon>IUserTableObjectModel.cs</DependentUpon>
       </Compile>
-      <Compile Include="Query\IWhere.cs"/>
-      <Compile Include="Query\IWhereBuilder.cs"/>
-      <Compile Include="Query\IWhereCondition.cs"/>
-      <Compile Include="Query\LogicalOperator.cs"/>
-      <Compile Include="Query\SqlComparison.cs"/>
-      <Compile Include="Query\Where.cs"/>
-      <Compile Include="Utils\DisplayInfo.cs"/>
-      <Compile Include="Utils\FormUtils.cs"/>
-      <Compile Include="Utils\ILogger.cs"/>
-      <Compile Include="Utils\Parsers.cs"/>
-      <Compile Include="Utils\SapClass.cs"/>
-      <Compile Include="Utils\SapColors.cs"/>
-      <Compile Include="Utils\SapUtils.cs"/>
-      <Compile Include="Utils\TopMostDialog.cs"/>
-      <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs"/>
-      <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs"/>
+      <Compile Include="Query\IWhere.cs" />
+      <Compile Include="Query\IWhereBuilder.cs" />
+      <Compile Include="Query\IWhereCondition.cs" />
+      <Compile Include="Query\LogicalOperator.cs" />
+      <Compile Include="Query\SqlComparison.cs" />
+      <Compile Include="Query\Where.cs" />
+      <Compile Include="Utils\DisplayInfo.cs" />
+      <Compile Include="Utils\FormUtils.cs" />
+      <Compile Include="Utils\ILogger.cs" />
+      <Compile Include="Utils\Parsers.cs" />
+      <Compile Include="Utils\SapClass.cs" />
+      <Compile Include="Utils\SapColors.cs" />
+      <Compile Include="Utils\SapUtils.cs" />
+      <Compile Include="Utils\TopMostDialog.cs" />
+      <Compile Include="__Internal\Attributes\UserTables\IUserTable.cs" />
+      <Compile Include="__Internal\Attributes\UserTables\IUserTableField.cs" />
       <Compile Include="__Internal\Attributes\UserTables\UserTableFieldTyped.cs">
           <DependentUpon>IUserTableField.cs</DependentUpon>
       </Compile>
-      <Compile Include="__Internal\Enums\LogLevel.cs"/>
-      <Compile Include="__Internal\Enums\Status.cs"/>
-      <Compile Include="__Internal\Events\EventSubscriber.cs"/>
-      <Compile Include="__Internal\Extensions\MatrixExtensions.cs"/>
-      <Compile Include="__Internal\I18N\I18N.cs"/>
+      <Compile Include="__Internal\Enums\LogLevel.cs" />
+      <Compile Include="__Internal\Enums\Status.cs" />
+      <Compile Include="__Internal\Events\EventSubscriber.cs" />
+      <Compile Include="__Internal\Extensions\MatrixExtensions.cs" />
+      <Compile Include="__Internal\I18N\I18N.cs" />
       <Compile Include="__Internal\I18N\Texts.Designer.cs">
           <DependentUpon>Texts.resx</DependentUpon>
       </Compile>
-      <Compile Include="__Internal\Models\AuditableField.cs"/>
-      <Compile Include="__Internal\Models\FormatInfo.cs"/>
-      <Compile Include="__Internal\Models\UserFieldValidValue.cs"/>
-      <Compile Include="__Internal\Models\UserTableMetadataCache.cs"/>
-      <Compile Include="__Internal\Query\SqlWhereBuilder.cs"/>
-      <Compile Include="__Internal\Query\WhereBuilder.cs"/>
-      <Compile Include="__Internal\Query\WhereCondition.cs"/>
-      <Compile Include="__Internal\Query\WhereGroup.cs"/>
+      <Compile Include="__Internal\Models\AuditableField.cs" />
+      <Compile Include="__Internal\Models\FormatInfo.cs" />
+      <Compile Include="__Internal\Models\UserFieldValidValue.cs" />
+      <Compile Include="__Internal\Models\UserTableMetadataCache.cs" />
+      <Compile Include="__Internal\Query\SqlWhereBuilder.cs" />
+      <Compile Include="__Internal\Query\WhereBuilder.cs" />
+      <Compile Include="__Internal\Query\WhereCondition.cs" />
+      <Compile Include="__Internal\Query\WhereGroup.cs" />
       <Compile Include="__Internal\SQL\CommonQueries.Abstract.cs">
           <DependentUpon>CommonQueries.cs</DependentUpon>
       </Compile>
@@ -179,15 +198,15 @@
       <Compile Include="__Internal\SQL\HanaQueries.cs">
           <DependentUpon>IQueries.cs</DependentUpon>
       </Compile>
-      <Compile Include="__Internal\SQL\IQueries.cs"/>
+      <Compile Include="__Internal\SQL\IQueries.cs" />
       <Compile Include="__Internal\SQL\MSSQLQueries.cs">
           <DependentUpon>IQueries.cs</DependentUpon>
       </Compile>
-      <Compile Include="__Internal\Utils\ConsoleLogger.cs"/>
-      <Compile Include="__Internal\Utils\DummyForm.cs"/>
-      <Compile Include="__Internal\Utils\Logger.cs"/>
-      <Compile Include="__Internal\Utils\LoggerImpl.cs"/>
-      <Compile Include="__Internal\Utils\LogSettings.cs"/>
+      <Compile Include="__Internal\Utils\ConsoleLogger.cs" />
+      <Compile Include="__Internal\Utils\DummyForm.cs" />
+      <Compile Include="__Internal\Utils\Logger.cs" />
+      <Compile Include="__Internal\Utils\LoggerImpl.cs" />
+      <Compile Include="__Internal\Utils\LogSettings.cs" />
     <Compile Include="SapAddon.cs" />
     <Compile Include="SapAddon.FileGenerator.cs">
       <DependentUpon>SapAddon.cs</DependentUpon>
@@ -223,7 +242,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.24.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.24.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-      <PackageReference Include="NPOI" Version="2.7.4"/>
+      <PackageReference Include="NPOI" Version="2.7.4" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
@@ -280,6 +299,16 @@
             <DependentUpon>Texts.resx</DependentUpon>
         </EmbeddedResource>
   </ItemGroup>
+    <ItemGroup>
+      <None Include="..\LICENSE">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include="nuget.exe" />
+      <Content Include="SAPUtils.nuspec" />
+    </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

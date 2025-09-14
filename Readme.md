@@ -1,3 +1,5 @@
+![NuGet Version](https://img.shields.io/nuget/v/EricRamirezS.SAPUtils)
+
 # SAPUtils
 
 **SAPUtils** — A C# utility library to accelerate SAP Business One add-on development.
@@ -7,6 +9,7 @@ Built for .NET Framework 4.8.1, SAPUtils provides attribute-based UDT/UDF defini
 
 ## Table of contents
 
+- [Installation](#Installation)
 - [Overview](#overview)
 - [Key features](#key-features)
 - [Requirements](#requirements)
@@ -22,6 +25,22 @@ Built for .NET Framework 4.8.1, SAPUtils provides attribute-based UDT/UDF defini
 - [Roadmap & ideas](#roadmap--ideas)
 
 ---
+
+## Installation
+
+You can install the library from NuGet:
+
+### Using NuGet Package Manager (Visual Studio)
+
+```powershell
+Install-Package EricRamirezS.SAPUtils -Version 0.1.0
+```
+
+### Using .NET CLI
+
+```bash
+dotnet add package EricRamirezS.SAPUtils --version 0.1.0
+```
 
 ## Overview
 
@@ -50,6 +69,7 @@ SAPUtils is intended to be a lightweight, pragmatic toolkit for developers build
 - .NET Framework **4.8.1** (project target).
 - Visual Studio 2019/2022 (or similar) for development.
 - References to `SAPbobsCOM` and `SAPbouiCOM` assemblies must be present in the consuming project.
+- This library depends on **SAP Business One SDK**. Users must download and reference `SAPBusinessOneSDK.dll` in their projects. It is **not included** in this NuGet package due to licensing restrictions.
 
 ---
 
