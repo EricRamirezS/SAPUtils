@@ -3,10 +3,10 @@ using System.Windows.Forms;
 
 namespace SAPUtils.__Internal.Utils {
     internal class DummyForm : Form {
-        public DummyForm() {
+        public DummyForm(Icon icon = null) {
             TopMost = true;
             TopLevel = true;
-            Icon = new Icon(HitchIconClass.HitchIcon);
+            if (icon != null) Icon = icon;
             Opacity = 0;
             AllowTransparency = true;
             ShowIcon = true;

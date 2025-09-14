@@ -185,7 +185,6 @@
       </Compile>
       <Compile Include="__Internal\Utils\ConsoleLogger.cs"/>
       <Compile Include="__Internal\Utils\DummyForm.cs"/>
-      <Compile Include="__Internal\Utils\HitchIconClass.cs"/>
       <Compile Include="__Internal\Utils\Logger.cs"/>
       <Compile Include="__Internal\Utils\LoggerImpl.cs"/>
       <Compile Include="__Internal\Utils\LogSettings.cs"/>
